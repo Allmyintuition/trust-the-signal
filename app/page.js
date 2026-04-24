@@ -4,12 +4,10 @@ import React from "react";
 import { motion } from "framer-motion";
 import {
   Eye,
-  Radio,
   ShieldCheck,
   Activity,
   Lock,
   ArrowRight,
-  Sparkles,
   Search,
   Users,
   BookOpen,
@@ -19,18 +17,22 @@ import {
   TerminalSquare,
   Signal,
   Wallet,
-  BarChart3,
   Cpu,
   Store,
   ChevronRight,
   Radar,
   Crown,
-  Flame,
-  Orbit,
-  Network,
   ScanLine,
-  Gem,
   RadioTower,
+  Flame,
+  Gem,
+  Twitch,
+  Send,
+  MessageCircle,
+  KeyRound,
+  Satellite,
+  AlertTriangle,
+  TrendingUp,
 } from "lucide-react";
 
 const fadeUp = {
@@ -63,6 +65,14 @@ const Card = ({ children, className = "" }) => (
     {children}
   </div>
 );
+
+const tickerItems = [
+  "👁️ SIGNAL.DETECTED() — early token structure forming",
+  "📡 WALLET.CLUSTER — developing smart wallet behavior",
+  "⚠️ RISK.FLAG — liquidity-to-MC imbalance detected",
+  "🟢 ACCESS.ROUTE — protected channel opening soon",
+  "📈 VOLUME.PULSE — buy pressure strengthening",
+];
 
 const tools = [
   {
@@ -115,6 +125,35 @@ const transmissions = [
   ["02", "Wallet cluster forming", "WATCH"],
   ["03", "Volume impulse detected", "ACTIVE"],
   ["04", "Risk flags reduced", "IMPROVING"],
+];
+
+const terminalFeed = [
+  ["06:42:01", "DEX_STREAM", "new pair detected / liquidity seeded"],
+  ["06:42:14", "RUG_FILTER", "caution: low_liq_to_mc"],
+  ["06:42:39", "WALLET_TRACE", "candidate wallet recurrence detected"],
+  ["06:43:08", "SIGNAL_ENGINE", "setup classified: early_potential"],
+  ["06:43:21", "ALERT_ROUTE", "telegram preview queued"],
+];
+
+const products = [
+  {
+    title: "Signal Operator Guide",
+    price: "$19",
+    desc: "A premium beginner-to-operator guide for reading market structure, risk, and signal flow.",
+    icon: BookOpen,
+  },
+  {
+    title: "Wallet Intelligence Notes",
+    price: "$29",
+    desc: "Frameworks for understanding smart wallet behavior, rotation patterns, and recurrence.",
+    icon: Wallet,
+  },
+  {
+    title: "Private Signal Framework",
+    price: "Soon",
+    desc: "Protected channel principles, alert logic, and disciplined execution maps.",
+    icon: KeyRound,
+  },
 ];
 
 const roadmap = [
@@ -235,6 +274,20 @@ export default function Home() {
           </motion.div>
         </section>
 
+        <section className="pt-10">
+          <div className="overflow-hidden rounded-3xl border border-emerald-400/20 bg-emerald-400/10 py-3 shadow-2xl shadow-emerald-500/10">
+            <motion.div
+              className="flex min-w-max gap-10 whitespace-nowrap px-6 text-sm text-emerald-100/90"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, duration: 22, ease: "linear" }}
+            >
+              {[...tickerItems, ...tickerItems].map((item, i) => (
+                <span key={i}>{item}</span>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
         <section className="pt-14">
           <div className="grid gap-4 md:grid-cols-4">
             {liveStats.map(([label, value]) => (
@@ -255,7 +308,7 @@ export default function Home() {
               <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
                 A dashboard that feels alive before the tools are even connected.
               </h2>
-              <p className="mt-4 text-white/60 leading-8">
+              <p className="mt-4 leading-8 text-white/60">
                 The platform should feel like a command center: part scanner, part observatory,
                 part protected community gateway.
               </p>
@@ -283,6 +336,26 @@ export default function Home() {
               </div>
             </Card>
           </div>
+        </section>
+
+        <section className="pt-20">
+          <Card className="overflow-hidden">
+            <div className="border-b border-white/10 bg-black/40 px-6 py-4">
+              <div className="flex items-center gap-3 text-emerald-300">
+                <TerminalSquare className="h-5 w-5" />
+                <span className="text-sm uppercase tracking-[0.24em]">Scanner Terminal</span>
+              </div>
+            </div>
+            <div className="space-y-3 p-6 font-mono text-sm">
+              {terminalFeed.map(([time, source, text]) => (
+                <div key={time + source} className="grid gap-2 rounded-2xl border border-white/10 bg-black/40 p-4 md:grid-cols-[100px_160px_1fr]">
+                  <span className="text-white/35">{time}</span>
+                  <span className="text-emerald-300">{source}</span>
+                  <span className="text-white/70">{text}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
         </section>
 
         <section className="pt-20">
@@ -316,24 +389,74 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="pt-20 grid gap-6 lg:grid-cols-3">
-          {[
-            [Cpu, "Scanner Intelligence", "Future AI scanner integration, market logic, and signal classification."],
-            [Store, "Premium Products", "Monetized educational products, guides, and operator frameworks."],
-            [Users, "Protected Community", "Funnels into Telegram, Discord, Twitch, and private premium channels."],
-          ].map(([Icon, title, text]) => (
-            <Card key={title}>
-              <div className="p-7">
-                <Icon className="h-6 w-6 text-emerald-300" />
-                <h3 className="mt-5 text-2xl font-semibold">{title}</h3>
-                <p className="mt-4 text-sm leading-7 text-white/65">{text}</p>
-                <div className="mt-5 flex items-center gap-2 text-emerald-300">
-                  <span className="text-sm">Expand Layer</span>
-                  <ChevronRight className="h-4 w-4" />
+        <section className="pt-20">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Digital Product Layer</p>
+              <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Monetize the intelligence.</h2>
+            </div>
+            <p className="max-w-xl text-white/60">
+              Products should feel like protected artifacts: useful, premium, and aligned with the signal system.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {products.map((product) => {
+              const Icon = product.icon;
+              return (
+                <Card key={product.title} className="relative overflow-hidden">
+                  <div className="absolute right-0 top-0 h-24 w-24 bg-emerald-400/10 blur-2xl" />
+                  <div className="relative p-7">
+                    <Icon className="h-6 w-6 text-emerald-300" />
+                    <h3 className="mt-5 text-2xl font-semibold">{product.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
+                    <div className="mt-6 flex items-center justify-between">
+                      <span className="text-2xl font-semibold text-emerald-300">{product.price}</span>
+                      <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
+                        View
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="pt-20">
+          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
+            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                  <Lock className="h-5 w-5" />
+                  <span className="text-sm uppercase tracking-[0.24em]">Protected Access</span>
+                </div>
+                <h2 className="text-3xl font-semibold md:text-5xl">Access is earned. Trust is protected.</h2>
+                <p className="mt-4 leading-8 text-white/65">
+                  This section becomes the entry point for Telegram, Discord, private signal rooms,
+                  premium guides, and future membership access.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-4">
+                  <Button>Request Access</Button>
+                  <Button variant="outline">Observe First</Button>
                 </div>
               </div>
-            </Card>
-          ))}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {[
+                  [Send, "Telegram Signal Feed"],
+                  [MessageCircle, "Discord Community"],
+                  [Twitch, "Live Stream Hub"],
+                  [RadioTower, "Protected Alerts"],
+                ].map(([Icon, label]) => (
+                  <div key={label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                    <Icon className="h-5 w-5 text-emerald-300" />
+                    <p className="mt-4 font-medium">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
         </section>
 
         <section className="pt-20">
@@ -411,6 +534,13 @@ export default function Home() {
         </section>
 
         <footer className="pb-10 pt-16 text-center text-sm text-white/40">
+          <div className="mb-6 flex flex-wrap justify-center gap-3">
+            {["Telegram", "Discord", "Twitch", "Guides", "Signal Check"].map((item) => (
+              <span key={item} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55">
+                {item}
+              </span>
+            ))}
+          </div>
           <div className="flex justify-center gap-2 text-emerald-300">
             <Signal className="h-4 w-4" />
             <span>Signal Over Noise.</span>
