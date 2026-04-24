@@ -10,7 +10,6 @@ import {
   Lock,
   ArrowRight,
   Sparkles,
-  BarChart3,
   Search,
   Users,
   BookOpen,
@@ -20,7 +19,10 @@ import {
   TerminalSquare,
   Signal,
   Wallet,
+  BarChart3,
+  Cpu,
   Store,
+  ChevronRight,
 } from "lucide-react";
 
 const fadeUp = {
@@ -69,33 +71,40 @@ const tools = [
   },
   {
     title: "Token Pages",
-    desc: "Create searchable token pages that can become traffic magnets over time.",
+    desc: "Searchable token intelligence pages that build indexed traffic.",
     icon: Search,
     tag: "SEO",
   },
   {
     title: "Wallet Intelligence",
-    desc: "Future layer for smart wallets, learned wallets, and recurring wallet behavior.",
+    desc: "Smart wallet clusters, learned wallets, and recurring behavior.",
     icon: Wallet,
     tag: "Intel",
   },
   {
     title: "Guides & Products",
-    desc: "Sell digital guides, frameworks, trading notes, and premium education.",
+    desc: "Premium educational assets, frameworks, and monetized downloads.",
     icon: BookOpen,
     tag: "Revenue",
   },
   {
     title: "Community Funnel",
-    desc: "Send users into Telegram, Discord, Twitch, and private signal channels.",
+    desc: "Telegram, Discord, Twitch, and private premium signal flow.",
     icon: Users,
     tag: "Growth",
   },
 ];
 
+const liveStats = [
+  ["Tracked Tokens", "18,420+"],
+  ["Wallet Signals", "4,900+"],
+  ["Daily Checks", "1,200+"],
+  ["Protected Members", "2,100+"],
+];
+
 const roadmap = [
-  ["Phase 1", "Brand Site + Signal Check", ["Homepage", "Signal Check", "Community CTAs", "Digital guide section"]],
-  ["Phase 2", "Traffic Utility", ["Trending tokens", "Recently checked", "Token pages", "Watchlists"]],
+  ["Phase 1", "Brand Site + Signal Check", ["Homepage", "Signal Check", "Community CTAs", "Digital guides"]],
+  ["Phase 2", "Traffic Utility", ["Trending tokens", "Token pages", "Watchlists", "Daily utility"]],
   ["Phase 3", "Platform Layer", ["Accounts", "Premium dashboard", "Wallet intelligence", "Scanner integration"]],
 ];
 
@@ -112,12 +121,8 @@ export default function Home() {
               <Eye className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-                ALL MY INTUITION
-              </p>
-              <h1 className="text-lg font-semibold tracking-[0.18em]">
-                TRUST THE SIGNAL
-              </h1>
+              <p className="text-xs uppercase tracking-[0.3em] text-white/50">ALL MY INTUITION</p>
+              <h1 className="text-lg font-semibold tracking-[0.18em]">TRUST THE SIGNAL</h1>
             </div>
           </div>
 
@@ -141,29 +146,23 @@ export default function Home() {
             </h2>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 md:text-xl">
-              Trust The Signal is not a generic crypto website. It is a premium intelligence system with tools,
-              data, education, products, and community flow built into one evolving brand experience.
+              Trust The Signal is a premium intelligence system with tools, data, education,
+              monetization, and community flow built into one evolving digital brand.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button>
-                Build Core Experience <ArrowRight className="ml-2 inline h-4 w-4" />
-              </Button>
+              <Button>Build Core Experience <ArrowRight className="ml-2 inline h-4 w-4" /></Button>
               <Button variant="outline">View Tool Structure</Button>
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7, delay: 0.1 }}>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7 }}>
             <Card>
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/45">
-                      Signal Check
-                    </p>
-                    <h3 className="mt-1 text-xl font-semibold">
-                      Contract Intelligence Layer
-                    </h3>
+                    <p className="text-sm uppercase tracking-[0.24em] text-white/45">SIGNAL CHECK</p>
+                    <h3 className="mt-1 text-xl font-semibold">Contract Intelligence Layer</h3>
                   </div>
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200">
                     Live Tool Concept
@@ -171,16 +170,13 @@ export default function Home() {
                 </div>
 
                 <div className="rounded-3xl border border-white/10 bg-black/40 p-4">
-                  <label className="mb-3 block text-sm text-white/60">
-                    Paste Solana token address
-                  </label>
-
+                  <label className="mb-3 block text-sm text-white/60">Paste Solana token address</label>
                   <div className="flex flex-col gap-3 md:flex-row">
                     <input
                       defaultValue="7xKXtg2X...sampleContract"
                       className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
                     />
-                    <button className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300">
+                    <button className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black">
                       Run Check
                     </button>
                   </div>
@@ -193,17 +189,10 @@ export default function Home() {
                       ["Signal Strength", "76 / 100"],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                          {label}
-                        </p>
+                        <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
                         <p className="mt-2 text-lg font-medium">{value}</p>
                       </div>
                     ))}
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-                    This result area will eventually combine token security, market context, liquidity structure,
-                    wallet intelligence, and your final AMI / TTS verdict into one branded signal card.
                   </div>
                 </div>
               </div>
@@ -211,37 +200,13 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="pt-20">
-          <div className="max-w-3xl">
-            <div className="mb-3 flex items-center gap-2 text-emerald-300">
-              <Sparkles className="h-4 w-4" />
-              <span className="text-sm uppercase tracking-[0.24em]">
-                Foundation Pillars
-              </span>
-            </div>
-            <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">
-              The site has to do more than look good.
-            </h2>
-            <p className="mt-4 text-lg leading-8 text-white/65">
-              It should create authority, daily utility, repeat traffic, and a premium standard that makes the brand
-              feel bigger than a single page.
-            </p>
-          </div>
-
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              [Eye, "Signal First", "The site should feel like a system that sees what others miss."],
-              [Radio, "Useful Daily", "Tools, checks, watch pages, and live utility bring people back."],
-              [Lock, "Premium Positioning", "The experience should feel protected, deliberate, and high-value."],
-              [Globe, "Platform Ready", "The structure should grow into a real platform later."],
-            ].map(([Icon, title, text]) => (
-              <Card key={title}>
-                <div className="p-6">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10">
-                    <Icon className="h-5 w-5 text-emerald-300" />
-                  </div>
-                  <h3 className="text-xl font-semibold">{title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/65">{text}</p>
+        <section className="pt-14">
+          <div className="grid gap-4 md:grid-cols-4">
+            {liveStats.map(([label, value]) => (
+              <Card key={label}>
+                <div className="p-5 text-center">
+                  <p className="text-3xl font-semibold text-emerald-300">{value}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/45">{label}</p>
                 </div>
               </Card>
             ))}
@@ -249,21 +214,12 @@ export default function Home() {
         </section>
 
         <section className="pt-20">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-                Site Utility Map
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">
-                What keeps people coming back.
-              </h2>
-            </div>
-            <p className="max-w-2xl text-white/60">
-              The right combination is visual identity, useful data, repeatable tools, and monetization that feels earned.
-            </p>
+          <div className="mb-6">
+            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Core Utility Layer</p>
+            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Platform sections that create return traffic.</h2>
           </div>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {tools.map((tool) => {
               const Icon = tool.icon;
               return (
@@ -286,24 +242,39 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="pt-20 grid gap-6 lg:grid-cols-3">
+          {[
+            [Cpu, "Scanner Intelligence", "Future AI scanner integration, market logic, and signal classification."],
+            [Store, "Premium Products", "Monetized educational products, guides, and operator frameworks."],
+            [Users, "Protected Community", "Funnels into Telegram, Discord, and private premium channels."],
+          ].map(([Icon, title, text]) => (
+            <Card key={title}>
+              <div className="p-7">
+                <Icon className="h-6 w-6 text-emerald-300" />
+                <h3 className="mt-5 text-2xl font-semibold">{title}</h3>
+                <p className="mt-4 text-sm leading-7 text-white/65">{text}</p>
+                <div className="mt-5 flex items-center gap-2 text-emerald-300">
+                  <span className="text-sm">Expand Layer</span>
+                  <ChevronRight className="h-4 w-4" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </section>
+
         <section className="pt-20">
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <Card>
               <div className="p-8">
-                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">
-                  Monetization System
-                </p>
-                <h2 className="text-3xl font-semibold tracking-tight">
-                  Build value before you ask for money.
-                </h2>
-
+                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">Monetization System</p>
+                <h2 className="text-3xl font-semibold">Build value before asking for money.</h2>
                 <div className="mt-6 space-y-4 text-white/70">
                   {[
-                    "Free tools pull people in.",
-                    "Signal education and digital guides deepen trust.",
-                    "Premium memberships unlock higher-value layers.",
-                    "Community channels become retention engines.",
-                    "The site can eventually carry subscriptions, products, and platform access.",
+                    "Free utility tools pull users in.",
+                    "Premium education deepens trust.",
+                    "Private memberships unlock exclusivity.",
+                    "Community increases retention.",
+                    "Products + subscriptions become scalable revenue.",
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/25 p-4">
                       <Zap className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
@@ -316,23 +287,16 @@ export default function Home() {
 
             <Card>
               <div className="p-8">
-                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">
-                  Architecture Path
-                </p>
-                <h2 className="text-3xl font-semibold tracking-tight">
-                  Start lean. Grow like a platform.
-                </h2>
+                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">Architecture Path</p>
+                <h2 className="text-3xl font-semibold">Start lean. Grow into platform.</h2>
 
                 <div className="mt-6 space-y-4">
                   {roadmap.map(([phase, title, items]) => (
                     <div key={phase} className="rounded-3xl border border-white/10 bg-black/25 p-5">
                       <div className="flex flex-wrap items-center gap-3">
-                        <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-200">
-                          {phase}
-                        </span>
+                        <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-200">{phase}</span>
                         <h3 className="text-lg font-medium">{title}</h3>
                       </div>
-
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
                         {items.map((item) => (
                           <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
@@ -351,23 +315,17 @@ export default function Home() {
 
         <section className="pt-20">
           <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-white/[0.02]">
-            <div className="p-8 md:p-10">
+            <div className="p-10">
               <div className="mb-3 flex items-center gap-2 text-emerald-300">
                 <TerminalSquare className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.24em]">
-                  Brand Standard
-                </span>
+                <span className="text-sm uppercase tracking-[0.24em]">Brand Standard</span>
               </div>
-
-              <h2 className="max-w-3xl text-3xl font-semibold tracking-tight md:text-5xl">
-                Make the site feel like a signal artifact, not a template.
+              <h2 className="max-w-3xl text-3xl font-semibold md:text-5xl">
+                Make it feel like a signal artifact — not a template.
               </h2>
-
               <p className="mt-4 max-w-3xl text-lg leading-8 text-white/70">
-                The first version should look elevated enough to earn trust, useful enough to create return visits,
-                and structured enough to evolve into a product ecosystem.
+                Every section should create authority, utility, retention, and premium perception.
               </p>
-
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button>Launch Foundation</Button>
                 <Button variant="outline">Map Platform</Button>
