@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Eye,
@@ -12,27 +12,21 @@ import {
   Users,
   BookOpen,
   Zap,
-  Globe,
   Layers,
   TerminalSquare,
   Signal,
   Wallet,
-  Cpu,
   Store,
   ChevronRight,
   Radar,
   Crown,
   ScanLine,
   RadioTower,
-  Flame,
-  Gem,
   Twitch,
   Send,
   MessageCircle,
   KeyRound,
-  Satellite,
-  AlertTriangle,
-  TrendingUp,
+  X,
 } from "lucide-react";
 
 const fadeUp = {
@@ -40,8 +34,9 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
-const Button = ({ children, variant = "solid" }) => (
+const Button = ({ children, variant = "solid", onClick }) => (
   <button
+    onClick={onClick}
     className={
       variant === "outline"
         ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
@@ -58,13 +53,74 @@ const Badge = ({ children }) => (
   </span>
 );
 
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "", onClick }) => (
   <div
+    onClick={onClick}
     className={`rounded-[30px] border border-white/10 bg-white/[0.055] shadow-2xl shadow-emerald-500/10 backdrop-blur-xl ${className}`}
   >
     {children}
   </div>
 );
+
+const Modal = ({ modal, closeModal }) => {
+  if (!modal) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6 backdrop-blur-xl">
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="relative w-full max-w-2xl rounded-[32px] border border-emerald-400/20 bg-black p-7 shadow-2xl shadow-emerald-500/20"
+      >
+        <button
+          onClick={closeModal}
+          className="absolute right-5 top-5 rounded-full border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="mb-4 flex items-center gap-3 text-emerald-300">
+          {modal.icon}
+          <span className="text-sm uppercase tracking-[0.24em]">
+            {modal.label}
+          </span>
+        </div>
+
+        <h3 className="text-3xl font-semibold">{modal.title}</h3>
+        <p className="mt-4 leading-8 text-white/65">{modal.body}</p>
+
+        {modal.type === "signal" && (
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            {[
+              ["Risk Status", "CAUTION"],
+              ["Liquidity", "Stable"],
+              ["Wallet Signal", "Developing"],
+              ["Verdict", "Observe + Confirm"],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-white/10 bg-white/5 p-4"
+              >
+                <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+                  {label}
+                </p>
+                <p className="mt-2 text-lg font-medium text-emerald-200">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-7 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
+          This is currently an interactive preview layer. The next build can
+          connect this to real token data, risk checks, products, and access
+          forms.
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const tickerItems = [
   "👁️ SIGNAL.DETECTED() — early token structure forming",
@@ -163,28 +219,63 @@ const roadmap = [
 ];
 
 export default function Home() {
+  const [modal, setModal] = useState(null);
+
+  const closeModal = () => setModal(null);
+
+  const openSignalModal = () =>
+    setModal({
+      type: "signal",
+      label: "Signal Check Preview",
+      title: "Contract Intelligence Result",
+      body: "The entered token is being interpreted through a branded risk and structure lens. In the real version, this will pull live contract, liquidity, holder, risk, wallet, and pair data.",
+      icon: <Radar className="h-5 w-5" />,
+    });
+
+  const openAccessModal = () =>
+    setModal({
+      label: "Protected Access",
+      title: "Access Route Opening Soon",
+      body: "This portal will become the gateway into Telegram, Discord, private signal channels, premium guides, and future membership access.",
+      icon: <Lock className="h-5 w-5" />,
+    });
+
+  const openProductModal = (product) =>
+    setModal({
+      label: "Digital Product",
+      title: product.title,
+      body: product.desc,
+      icon: <BookOpen className="h-5 w-5" />,
+    });
+
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
+      <Modal modal={modal} closeModal={closeModal} />
+
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
       <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
       <div className="fixed inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-6 py-8">
-        <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/40 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
+        <header className="sticky top-4 z-40 flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
               <div className="absolute inset-0 rounded-2xl bg-emerald-400/20 blur-xl" />
               <Eye className="relative h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-white/45">ALL MY INTUITION</p>
-              <h1 className="text-lg font-semibold tracking-[0.2em]">TRUST THE SIGNAL</h1>
+              <p className="text-xs uppercase tracking-[0.35em] text-white/45">
+                ALL MY INTUITION
+              </p>
+              <h1 className="text-lg font-semibold tracking-[0.2em]">
+                TRUST THE SIGNAL
+              </h1>
             </div>
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
             <Badge>Signal.Observed()</Badge>
-            <Button>Enter System</Button>
+            <Button onClick={openAccessModal}>Enter System</Button>
           </div>
         </header>
 
@@ -209,10 +300,12 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button>
+              <Button onClick={openSignalModal}>
                 Activate Signal Layer <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button variant="outline">View Intelligence Map</Button>
+              <Button variant="outline" onClick={openAccessModal}>
+                View Intelligence Map
+              </Button>
             </div>
 
             <div className="mt-8 grid max-w-2xl gap-3 md:grid-cols-3">
@@ -230,8 +323,12 @@ export default function Home() {
               <div className="relative p-6">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/45">Signal Check</p>
-                    <h3 className="mt-1 text-2xl font-semibold">Contract Intelligence Layer</h3>
+                    <p className="text-sm uppercase tracking-[0.24em] text-white/45">
+                      Signal Check
+                    </p>
+                    <h3 className="mt-1 text-2xl font-semibold">
+                      Contract Intelligence Layer
+                    </h3>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10">
                     <Radar className="h-5 w-5 text-emerald-300" />
@@ -239,13 +336,18 @@ export default function Home() {
                 </div>
 
                 <div className="rounded-3xl border border-white/10 bg-black/45 p-4">
-                  <label className="mb-3 block text-sm text-white/60">Paste Solana token address</label>
+                  <label className="mb-3 block text-sm text-white/60">
+                    Paste Solana token address
+                  </label>
                   <div className="flex flex-col gap-3 md:flex-row">
                     <input
                       defaultValue="7xKXtg2X...sampleContract"
                       className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
                     />
-                    <button className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300">
+                    <button
+                      onClick={openSignalModal}
+                      className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
+                    >
                       Run Check
                     </button>
                   </div>
@@ -291,7 +393,7 @@ export default function Home() {
         <section className="pt-14">
           <div className="grid gap-4 md:grid-cols-4">
             {liveStats.map(([label, value]) => (
-              <Card key={label}>
+              <Card key={label} className="transition hover:border-emerald-300/30">
                 <div className="p-5 text-center">
                   <p className="text-3xl font-semibold text-emerald-300">{value}</p>
                   <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/45">{label}</p>
@@ -304,7 +406,9 @@ export default function Home() {
         <section className="pt-20">
           <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Live Transmission</p>
+              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+                Live Transmission
+              </p>
               <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
                 A dashboard that feels alive before the tools are even connected.
               </h2>
@@ -318,7 +422,9 @@ export default function Home() {
               <div className="p-6">
                 <div className="mb-4 flex items-center gap-3 text-emerald-300">
                   <ScanLine className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">Transmission Feed</span>
+                  <span className="text-sm uppercase tracking-[0.24em]">
+                    Transmission Feed
+                  </span>
                 </div>
                 <div className="space-y-3">
                   {transmissions.map(([num, text, status]) => (
@@ -343,7 +449,9 @@ export default function Home() {
             <div className="border-b border-white/10 bg-black/40 px-6 py-4">
               <div className="flex items-center gap-3 text-emerald-300">
                 <TerminalSquare className="h-5 w-5" />
-                <span className="text-sm uppercase tracking-[0.24em]">Scanner Terminal</span>
+                <span className="text-sm uppercase tracking-[0.24em]">
+                  Scanner Terminal
+                </span>
               </div>
             </div>
             <div className="space-y-3 p-6 font-mono text-sm">
@@ -360,7 +468,9 @@ export default function Home() {
 
         <section className="pt-20">
           <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Core Utility Layer</p>
+            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+              Core Utility Layer
+            </p>
             <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
               Tools that make people return.
             </h2>
@@ -370,7 +480,18 @@ export default function Home() {
             {tools.map((tool) => {
               const Icon = tool.icon;
               return (
-                <Card key={tool.title} className="transition hover:-translate-y-1 hover:border-emerald-300/25">
+                <Card
+                  key={tool.title}
+                  onClick={() =>
+                    setModal({
+                      label: tool.tag,
+                      title: tool.title,
+                      body: tool.desc,
+                      icon: <Icon className="h-5 w-5" />,
+                    })
+                  }
+                  className="cursor-pointer transition hover:-translate-y-1 hover:border-emerald-300/25"
+                >
                   <div className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/30">
@@ -392,8 +513,12 @@ export default function Home() {
         <section className="pt-20">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Digital Product Layer</p>
-              <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Monetize the intelligence.</h2>
+              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+                Digital Product Layer
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
+                Monetize the intelligence.
+              </h2>
             </div>
             <p className="max-w-xl text-white/60">
               Products should feel like protected artifacts: useful, premium, and aligned with the signal system.
@@ -404,14 +529,20 @@ export default function Home() {
             {products.map((product) => {
               const Icon = product.icon;
               return (
-                <Card key={product.title} className="relative overflow-hidden">
+                <Card
+                  key={product.title}
+                  onClick={() => openProductModal(product)}
+                  className="relative cursor-pointer overflow-hidden transition hover:-translate-y-1 hover:border-emerald-300/25"
+                >
                   <div className="absolute right-0 top-0 h-24 w-24 bg-emerald-400/10 blur-2xl" />
                   <div className="relative p-7">
                     <Icon className="h-6 w-6 text-emerald-300" />
                     <h3 className="mt-5 text-2xl font-semibold">{product.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
                     <div className="mt-6 flex items-center justify-between">
-                      <span className="text-2xl font-semibold text-emerald-300">{product.price}</span>
+                      <span className="text-2xl font-semibold text-emerald-300">
+                        {product.price}
+                      </span>
                       <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
                         View
                       </button>
@@ -429,16 +560,20 @@ export default function Home() {
               <div>
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Lock className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">Protected Access</span>
+                  <span className="text-sm uppercase tracking-[0.24em]">
+                    Protected Access
+                  </span>
                 </div>
-                <h2 className="text-3xl font-semibold md:text-5xl">Access is earned. Trust is protected.</h2>
+                <h2 className="text-3xl font-semibold md:text-5xl">
+                  Access is earned. Trust is protected.
+                </h2>
                 <p className="mt-4 leading-8 text-white/65">
                   This section becomes the entry point for Telegram, Discord, private signal rooms,
                   premium guides, and future membership access.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
-                  <Button>Request Access</Button>
-                  <Button variant="outline">Observe First</Button>
+                  <Button onClick={openAccessModal}>Request Access</Button>
+                  <Button variant="outline" onClick={openAccessModal}>Observe First</Button>
                 </div>
               </div>
 
@@ -446,10 +581,13 @@ export default function Home() {
                 {[
                   [Send, "Telegram Signal Feed"],
                   [MessageCircle, "Discord Community"],
-                  [Twitch, "Live Stream Hub"],
                   [RadioTower, "Protected Alerts"],
                 ].map(([Icon, label]) => (
-                  <div key={label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                  <div
+                    key={label}
+                    onClick={openAccessModal}
+                    className="cursor-pointer rounded-2xl border border-white/10 bg-black/30 p-5 transition hover:border-emerald-300/25 hover:bg-white/10"
+                  >
                     <Icon className="h-5 w-5 text-emerald-300" />
                     <p className="mt-4 font-medium">{label}</p>
                   </div>
@@ -463,8 +601,12 @@ export default function Home() {
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <Card>
               <div className="p-8">
-                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">Monetization System</p>
-                <h2 className="text-3xl font-semibold">Build value before asking for money.</h2>
+                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">
+                  Monetization System
+                </p>
+                <h2 className="text-3xl font-semibold">
+                  Build value before asking for money.
+                </h2>
                 <div className="mt-6 space-y-4 text-white/70">
                   {[
                     "Free utility tools pull users in.",
@@ -484,8 +626,12 @@ export default function Home() {
 
             <Card>
               <div className="p-8">
-                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">Architecture Path</p>
-                <h2 className="text-3xl font-semibold">Start lean. Grow into platform.</h2>
+                <p className="mb-3 text-sm uppercase tracking-[0.24em] text-emerald-300">
+                  Architecture Path
+                </p>
+                <h2 className="text-3xl font-semibold">
+                  Start lean. Grow into platform.
+                </h2>
 
                 <div className="mt-6 space-y-4">
                   {roadmap.map(([phase, title, items]) => (
@@ -517,7 +663,9 @@ export default function Home() {
             <div className="p-10">
               <div className="mb-3 flex items-center gap-2 text-emerald-300">
                 <Crown className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.24em]">Brand Standard</span>
+                <span className="text-sm uppercase tracking-[0.24em]">
+                  Brand Standard
+                </span>
               </div>
               <h2 className="max-w-3xl text-3xl font-semibold md:text-5xl">
                 Make it feel like a signal artifact — not a template.
@@ -526,8 +674,8 @@ export default function Home() {
                 Every section should create authority, utility, retention, and premium perception.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Button>Launch Foundation</Button>
-                <Button variant="outline">Map Platform</Button>
+                <Button onClick={openSignalModal}>Launch Foundation</Button>
+                <Button variant="outline" onClick={openAccessModal}>Map Platform</Button>
               </div>
             </div>
           </Card>
