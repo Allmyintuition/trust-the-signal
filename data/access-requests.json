@@ -1,0 +1,20 @@
+[
+  {
+    "id": "AR-1777151083655",
+    "contact": "Allmyintuition@gmail.com",
+    "source": "token_page_access_capture",
+    "contract": "8aUxz6VWtJiM8XeFnXkyvRD3XgdQTCGxo7mYAGBzsViP",
+    "createdAt": "2026-04-25T21:04:43.655Z",
+    "brand": "Trust The Signal",
+    "status": "new_access_request"
+  },
+  {
+    "id": "AR-1777151016946",
+    "contact": "Allmyintuition@gmail.com",
+    "source": "homepage_access_capture",
+    "contract": null,
+    "createdAt": "2026-04-25T21:03:36.946Z",
+    "brand": "Trust The Signal",
+    "status": "new_access_request"
+  }
+]

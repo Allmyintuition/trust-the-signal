@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 const isValidContact = (value) => {
     if (!value || typeof value !== "string") return false;
@@ -9,6 +11,25 @@ const isValidContact = (value) => {
     if (trimmed.length > 160) return false;
 
     return true;
+};
+
+const dataFilePath = path.join(process.cwd(), "data", "access-requests.json");
+
+const readStoredRequests = () => {
+    try {
+        if (!fs.existsSync(dataFilePath)) {
+            fs.writeFileSync(dataFilePath, "[]", "utf8");
+        }
+
+        const raw = fs.readFileSync(dataFilePath, "utf8");
+        return JSON.parse(raw || "[]");
+    } catch {
+        return [];
+    }
+};
+
+const saveStoredRequests = (requests) => {
+    fs.writeFileSync(dataFilePath, JSON.stringify(requests, null, 2), "utf8");
 };
 
 export async function POST(req) {
@@ -31,6 +52,7 @@ export async function POST(req) {
         }
 
         const payload = {
+            id: `AR-${Date.now()}`,
             contact,
             source,
             contract,
@@ -38,6 +60,11 @@ export async function POST(req) {
             brand: "Trust The Signal",
             status: "new_access_request",
         };
+
+        const existing = readStoredRequests();
+        const updated = [payload, ...existing].slice(0, 500);
+
+        saveStoredRequests(updated);
 
         const webhookUrl = process.env.ACCESS_REQUEST_WEBHOOK_URL;
 
@@ -51,7 +78,7 @@ export async function POST(req) {
             });
         }
 
-        console.log("[ACCESS REQUEST]", payload);
+        console.log("[ACCESS REQUEST SAVED]", payload);
 
         return NextResponse.json({
             success: true,
@@ -67,4 +94,3 @@ export async function POST(req) {
         );
     }
 }
-
