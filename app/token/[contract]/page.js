@@ -9,6 +9,13 @@ import {
   AlertTriangle,
   ExternalLink,
   ArrowLeft,
+  ShieldCheck,
+  TrendingUp,
+  Lock,
+  BookOpen,
+  Send,
+  MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -17,6 +24,14 @@ const formatNum = (num) => {
 };
 
 const clampBar = (num) => Math.max(0, Math.min(100, Number(num || 0)));
+
+const Card = ({ children, className = "" }) => (
+  <div
+    className={`rounded-[28px] border border-white/10 bg-white/[0.055] shadow-2xl shadow-emerald-500/10 backdrop-blur-xl ${className}`}
+  >
+    {children}
+  </div>
+);
 
 const ScoreBar = ({ label, value }) => (
   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -37,6 +52,21 @@ const ScoreBar = ({ label, value }) => (
   </div>
 );
 
+const ActionLink = ({ href, children, variant = "solid" }) => (
+  <a
+    href={href}
+    target={href?.startsWith("http") ? "_blank" : undefined}
+    rel={href?.startsWith("http") ? "noreferrer" : undefined}
+    className={
+      variant === "outline"
+        ? "inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
+        : "inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 font-semibold text-black transition hover:bg-emerald-300"
+    }
+  >
+    {children}
+  </a>
+);
+
 export default function TokenPage() {
   const params = useParams();
   const contract = params?.contract ? decodeURIComponent(params.contract) : "";
@@ -44,6 +74,8 @@ export default function TokenPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [accessEmail, setAccessEmail] = useState("");
+  const [accessSubmitted, setAccessSubmitted] = useState(false);
 
   useEffect(() => {
     const runCheck = async () => {
@@ -78,12 +110,40 @@ export default function TokenPage() {
     runCheck();
   }, [contract]);
 
+  const submitAccessRequest = () => {
+    if (!accessEmail.trim()) {
+      setError("Enter an email or preferred contact before requesting access.");
+      return;
+    }
+
+    const savedRequests = JSON.parse(
+      window.localStorage.getItem("tts_token_page_access_requests") || "[]"
+    );
+
+    const nextRequests = [
+      {
+        email: accessEmail.trim(),
+        contract,
+        createdAt: new Date().toISOString(),
+      },
+      ...savedRequests,
+    ].slice(0, 25);
+
+    window.localStorage.setItem(
+      "tts_token_page_access_requests",
+      JSON.stringify(nextRequests)
+    );
+
+    setAccessSubmitted(true);
+    setError("");
+  };
+
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
       <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-8">
+      <div className="relative mx-auto max-w-7xl px-6 py-8">
         <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
@@ -110,13 +170,60 @@ export default function TokenPage() {
           </a>
         </header>
 
-        <section className="pt-16">
-          <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-            Contract Route
-          </p>
-          <h2 className="mt-2 break-all text-3xl font-semibold md:text-5xl">
-            {contract || "Loading contract..."}
-          </h2>
+        <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+          <div>
+            <div className="mb-5 flex flex-wrap gap-3">
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
+                👁️ Token.Page.Live
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
+                📡 Signal.Engine
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
+                🔒 Access.Route
+              </span>
+            </div>
+
+            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+              Contract Intelligence Route
+            </p>
+            <h2 className="mt-2 break-all text-3xl font-semibold md:text-5xl">
+              {contract || "Loading contract..."}
+            </h2>
+
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-white/65">
+              A dedicated live intelligence page for token structure, score,
+              source quality, risk flags, and next-step routing.
+            </p>
+          </div>
+
+          <Card className="p-6">
+            <div className="mb-3 flex items-center gap-2 text-emerald-300">
+              <Radar className="h-5 w-5" />
+              <p className="text-sm uppercase tracking-[0.24em]">
+                Next Actions
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              <ActionLink href={`/?contract=${encodeURIComponent(contract)}`}>
+                <ShieldCheck className="h-4 w-4" />
+                Run On Homepage
+              </ActionLink>
+
+              <ActionLink href="/trending" variant="outline">
+                <TrendingUp className="h-4 w-4" />
+                Back To Trending
+              </ActionLink>
+
+              {data?.pairUrl && (
+                <ActionLink href={data.pairUrl} variant="outline">
+                  <ExternalLink className="h-4 w-4" />
+                  Open DexScreener
+                </ActionLink>
+              )}
+            </div>
+          </Card>
         </section>
 
         {loading && (
@@ -171,15 +278,21 @@ export default function TokenPage() {
             <section className="grid gap-4 pt-10 md:grid-cols-2">
               <ScoreBar label="Liquidity" value={data.breakdown?.liquidity} />
               <ScoreBar label="Volume" value={data.breakdown?.volume} />
-              <ScoreBar label="Balance" value={data.breakdown?.liquidityBalance} />
+              <ScoreBar
+                label="Balance"
+                value={data.breakdown?.liquidityBalance}
+              />
               <ScoreBar label="Momentum" value={data.breakdown?.momentum} />
               <ScoreBar label="Age" value={data.breakdown?.age} />
-              <ScoreBar label="Transactions" value={data.breakdown?.transactions} />
+              <ScoreBar
+                label="Transactions"
+                value={data.breakdown?.transactions}
+              />
               <ScoreBar label="Metadata" value={data.breakdown?.metadata} />
             </section>
 
-            <section className="pt-10">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <section className="grid gap-6 pt-10 lg:grid-cols-[1fr_0.9fr]">
+              <Card className="p-6">
                 <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
                   Risk Flags
                 </p>
@@ -200,11 +313,40 @@ export default function TokenPage() {
                     No major automated risk flags detected.
                   </p>
                 )}
-              </div>
+              </Card>
+
+              <Card className="p-6">
+                <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
+                  Source Presence
+                </p>
+
+                <div className="grid gap-3">
+                  {[
+                    [
+                      "Website",
+                      data.socialPresence?.hasWebsite ? "Detected" : "Not Detected",
+                    ],
+                    ["Socials", `${data.socialPresence?.socialCount ?? 0}`],
+                    ["Source Health", data.sourceHealth || "limited_presence"],
+                  ].map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="rounded-2xl border border-white/10 bg-black/25 p-4"
+                    >
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                        {label}
+                      </p>
+                      <p className="mt-2 font-medium text-emerald-200">
+                        {value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </section>
 
             <section className="pt-10">
-              <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-6">
+              <Card className="border-emerald-400/20 bg-emerald-400/10 p-6">
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Radar className="h-5 w-5" />
                   <p className="text-sm uppercase tracking-[0.24em]">
@@ -212,36 +354,143 @@ export default function TokenPage() {
                   </p>
                 </div>
 
-                <p className="text-lg leading-8 text-white/75">
+                <p className="max-w-4xl text-lg leading-8 text-white/75">
                   This token has been processed through the live Trust The Signal
                   authority engine using weighted liquidity, volume, age,
-                  transaction, metadata, and structure interpretation.
+                  transaction, metadata, and structure interpretation. This page
+                  is designed to become a shareable intelligence route for every
+                  contract analyzed through the ecosystem.
                 </p>
+              </Card>
+            </section>
 
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {data.pairUrl && (
-                    <a
-                      href={data.pairUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 font-semibold text-black"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Open DexScreener Pair
-                    </a>
-                  )}
+            <section className="grid gap-6 pt-10 lg:grid-cols-3">
+              {[
+                {
+                  icon: ShieldCheck,
+                  title: "Confirm Structure",
+                  desc: "Route the contract back into Signal Check Pro for fast repeat analysis.",
+                  href: `/?contract=${encodeURIComponent(contract)}`,
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Discover More",
+                  desc: "Return to trending tokens and compare liquidity, volume, and momentum.",
+                  href: "/trending",
+                },
+                {
+                  icon: BookOpen,
+                  title: "Operator Education",
+                  desc: "Premium guides will connect here for users who want deeper execution rules.",
+                  href: "/",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
 
+                return (
                   <a
-                    href={`/?contract=${encodeURIComponent(contract)}`}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white/75 hover:border-emerald-300/30 hover:text-white"
+                    key={item.title}
+                    href={item.href}
+                    className="rounded-[28px] border border-white/10 bg-white/[0.055] p-6 shadow-2xl shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-300/25"
                   >
-                    Run On Homepage
+                    <Icon className="h-6 w-6 text-emerald-300" />
+                    <h3 className="mt-5 text-xl font-semibold">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-white/65">
+                      {item.desc}
+                    </p>
                   </a>
+                );
+              })}
+            </section>
+
+            <section className="pt-10">
+              <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black p-6">
+                <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+                  <div>
+                    <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                      <Lock className="h-5 w-5" />
+                      <p className="text-sm uppercase tracking-[0.24em]">
+                        Protected Access
+                      </p>
+                    </div>
+
+                    <h2 className="text-3xl font-semibold">
+                      Want this token intelligence connected to private alerts?
+                    </h2>
+
+                    <p className="mt-4 leading-8 text-white/65">
+                      Request protected access for future private signal routes,
+                      product drops, Discord/Telegram rooms, and scanner updates.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex flex-col gap-3 md:flex-row">
+                      <input
+                        value={accessEmail}
+                        onChange={(e) => setAccessEmail(e.target.value)}
+                        placeholder="Email or preferred contact..."
+                        className="h-12 flex-1 rounded-2xl border border-white/10 bg-black/30 px-4 text-white outline-none"
+                      />
+
+                      <button
+                        onClick={submitAccessRequest}
+                        className="h-12 rounded-2xl bg-emerald-400 px-6 font-semibold text-black hover:bg-emerald-300"
+                      >
+                        {accessSubmitted ? "Request Captured" : "Request Access"}
+                      </button>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      {[
+                        [Send, "Telegram Alerts"],
+                        [MessageCircle, "Discord Access"],
+                        [Lock, "Protected Rooms"],
+                        [BookOpen, "Premium Guides"],
+                      ].map(([Icon, label]) => (
+                        <div
+                          key={label}
+                          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-3"
+                        >
+                          <Icon className="h-4 w-4 text-emerald-300" />
+                          <p className="text-sm text-white/70">{label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Card>
             </section>
           </>
         )}
+
+        <footer className="pb-10 pt-16 text-center text-sm text-white/40">
+          <div className="mb-6 flex flex-wrap justify-center gap-3">
+            {[
+              "Token Intelligence",
+              "Signal Check",
+              "Trending",
+              "Access",
+              "Guides",
+            ].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-2 text-emerald-300">
+            <CheckCircle2 className="h-4 w-4" />
+            <span>Signal Over Noise.</span>
+          </div>
+
+          <p className="mt-3">© Trust The Signal. Built by ALL MY INTUITION.</p>
+        </footer>
       </div>
     </main>
   );
