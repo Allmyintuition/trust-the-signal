@@ -12,21 +12,15 @@ import {
   Users,
   BookOpen,
   Zap,
-  Layers,
   TerminalSquare,
   Signal,
   Wallet,
-  Crown,
-  ScanLine,
-  RadioTower,
-  Send,
-  MessageCircle,
   KeyRound,
   X,
   Radar,
   Loader2,
   TrendingUp,
-  ExternalLink,
+  History,
 } from "lucide-react";
 
 const fadeUp = {
@@ -36,35 +30,27 @@ const fadeUp = {
 
 const clampBar = (num) => Math.max(0, Math.min(100, Number(num || 0)));
 
-const Button = ({ children, variant = "solid", onClick, href }) => {
-  if (href) {
-    return (
-      <a
-        href={href}
-        className={
-          variant === "outline"
-            ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
-            : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300"
-        }
-      >
-        <span className="inline-flex items-center gap-2">{children}</span>
-      </a>
-    );
-  }
+const Button = ({ children, variant = "solid", onClick }) => (
+  <button
+    onClick={onClick}
+    className={
+      variant === "outline"
+        ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+        : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300"
+    }
+  >
+    <span className="inline-flex items-center gap-2">{children}</span>
+  </button>
+);
 
-  return (
-    <button
-      onClick={onClick}
-      className={
-        variant === "outline"
-          ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
-          : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300"
-      }
-    >
-      <span className="inline-flex items-center gap-2">{children}</span>
-    </button>
-  );
-};
+const NavLink = ({ href, children }) => (
+  <a
+    href={href}
+    className="rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-sm text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+  >
+    {children}
+  </a>
+);
 
 const Badge = ({ children }) => (
   <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75 shadow-lg shadow-black/20 backdrop-blur-xl">
@@ -173,7 +159,9 @@ const Modal = ({ modal, closeModal }) => {
               <SignalScoreBar label="Age" value={modal.live.breakdown?.age} />
               <SignalScoreBar label="Transactions" value={modal.live.breakdown?.transactions} />
               <SignalScoreBar label="Metadata" value={modal.live.breakdown?.metadata} />
-            </div>            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
                 Source + Social Presence
               </p>
@@ -203,54 +191,14 @@ const Modal = ({ modal, closeModal }) => {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <ExternalLinkButton href={modal.live.pairUrl}>Open DexScreener Pair</ExternalLinkButton>
-
-                {modal.live.socialPresence?.websites?.map((site, index) => (
-                  <ExternalLinkButton key={`site-${index}`} href={site.url}>
-                    {site.label || "Website"}
-                  </ExternalLinkButton>
-                ))}
-
-                {modal.live.socialPresence?.socials?.map((social, index) => (
-                  <ExternalLinkButton key={`social-${index}`} href={social.url}>
-                    {social.type || "Social"}
-                  </ExternalLinkButton>
-                ))}
               </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
-                Risk Flags
-              </p>
-
-              {modal.live.riskFlags?.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {modal.live.riskFlags.map((flag) => (
-                    <span
-                      key={flag}
-                      className="rounded-full border border-yellow-400/25 bg-yellow-400/10 px-3 py-1 text-xs text-yellow-100"
-                    >
-                      {flag}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-emerald-200">
-                  No major automated risk flags detected.
-                </p>
-              )}
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-              Live contract intelligence now scores liquidity, volume, balance, momentum,
-              age, transactions, metadata, source health, socials, and risk flags.
             </div>
           </>
         )}
 
         {modal.type !== "signal" && (
           <div className="mt-7 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-            This layer continues expanding into products, access systems, and future premium intelligence routes.
+            This layer continues expanding into products, access systems, and premium intelligence routes.
           </div>
         )}
       </motion.div>
@@ -264,6 +212,10 @@ const tickerItems = [
   "⚠️ RISK.FLAG — liquidity-to-MC imbalance detected",
   "🟢 ACCESS.ROUTE — protected channel opening soon",
   "📈 VOLUME.PULSE — buy pressure strengthening",
+];
+
+const recentFallback = [
+  "So11111111111111111111111111111111111111112",
 ];
 
 const tools = [
@@ -312,13 +264,6 @@ const liveStats = [
   ["Protected Members", "2,100+"],
 ];
 
-const transmissions = [
-  ["01", "Liquidity structure stabilized", "CAUTION"],
-  ["02", "Wallet cluster forming", "WATCH"],
-  ["03", "Volume impulse detected", "ACTIVE"],
-  ["04", "Risk flags reduced", "IMPROVING"],
-];
-
 const terminalFeed = [
   ["06:42:01", "DEX_STREAM", "new pair detected / liquidity seeded"],
   ["06:42:14", "RUG_FILTER", "caution: low_liq_to_mc"],
@@ -327,46 +272,43 @@ const terminalFeed = [
   ["06:43:21", "ALERT_ROUTE", "telegram preview queued"],
 ];
 
-const products = [
-  {
-    title: "Signal Operator Guide",
-    price: "$19",
-    desc: "A premium beginner-to-operator guide for reading market structure, risk, and signal flow.",
-    icon: BookOpen,
-  },
-  {
-    title: "Wallet Intelligence Notes",
-    price: "$29",
-    desc: "Frameworks for understanding smart wallet behavior, rotation patterns, and recurrence.",
-    icon: Wallet,
-  },
-  {
-    title: "Private Signal Framework",
-    price: "Soon",
-    desc: "Protected channel principles, alert logic, and disciplined execution maps.",
-    icon: KeyRound,
-  },
-];
-
-const roadmap = [
-  ["Phase 1", "Brand Site + Signal Check", ["Homepage", "Signal Check Pro", "Community CTAs", "Digital guides"]],
-  ["Phase 2", "Traffic Utility", ["Trending tokens", "Token pages", "Watchlists", "Daily utility"]],
-  ["Phase 3", "Platform Layer", ["Accounts", "Premium dashboard", "Wallet intelligence", "Scanner integration"]],
-];
-
 export default function Home() {
   const [modal, setModal] = useState(null);
   const [contract, setContract] = useState("");
   const [checking, setChecking] = useState(false);
+  const [recentChecks, setRecentChecks] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const contractFromUrl = params.get("contract");
 
     if (contractFromUrl) {
-      setContract(contractFromUrl);
+      setContract(decodeURIComponent(contractFromUrl));
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, []); const closeModal = () => setModal(null);
+
+    const stored = window.localStorage.getItem("tts_recent_checks");
+
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setRecentChecks(Array.isArray(parsed) ? parsed.slice(0, 6) : []);
+      } catch {
+        setRecentChecks([]);
+      }
+    }
+  }, []);
+
+  const closeModal = () => setModal(null);
+
+  const saveRecentCheck = (address) => {
+    if (!address) return;
+
+    const next = [address, ...recentChecks.filter((item) => item !== address)].slice(0, 6);
+
+    setRecentChecks(next);
+    window.localStorage.setItem("tts_recent_checks", JSON.stringify(next));
+  };
 
   const openSignalModal = () =>
     setModal({
@@ -385,16 +327,10 @@ export default function Home() {
       icon: <Lock className="h-5 w-5" />,
     });
 
-  const openProductModal = (product) =>
-    setModal({
-      label: "Digital Product",
-      title: product.title,
-      body: product.desc,
-      icon: <BookOpen className="h-5 w-5" />,
-    });
-
   const runLiveSignalCheck = async () => {
-    if (!contract.trim()) {
+    const trimmedContract = contract.trim();
+
+    if (!trimmedContract) {
       setModal({
         type: "signal",
         label: "Signal Error",
@@ -413,7 +349,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ contract }),
+        body: JSON.stringify({ contract: trimmedContract }),
       });
 
       const data = await response.json();
@@ -427,6 +363,8 @@ export default function Home() {
           icon: <Radar className="h-5 w-5" />,
         });
       } else {
+        saveRecentCheck(trimmedContract);
+
         setModal({
           type: "signal",
           label: "Live Signal Result",
@@ -470,7 +408,8 @@ export default function Home() {
 
           <div className="hidden items-center gap-3 md:flex">
             <Badge>Signal.Observed()</Badge>
-            <Button href="/trending" variant="outline">Trending</Button>
+            <NavLink href="/">Home</NavLink>
+            <NavLink href="/trending">Trending</NavLink>
             <Button onClick={openAccessModal}>Enter System</Button>
           </div>
         </header>
@@ -499,104 +438,95 @@ export default function Home() {
               <Button onClick={openSignalModal}>
                 Activate Signal Layer <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button variant="outline" href="/trending">
-                View Trending Intelligence
-              </Button>
-            </div>
-
-            <div className="mt-8 grid max-w-2xl gap-3 md:grid-cols-3">
-              {["Survival First", "Structure Over Noise", "Access Earned"].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/65">
-                  <span className="text-emerald-300">⌁</span> {item}
-                </div>
-              ))}
+              <NavLink href="/trending">View Trending Intelligence</NavLink>
             </div>
           </motion.div>
 
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.7, delay: 0.1 }}>
-            <Card className="relative overflow-hidden">
-              <div className="relative p-6">
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/45">Signal Check Pro</p>
-                    <h3 className="mt-1 text-2xl font-semibold">Contract Intelligence Layer</h3>
-                  </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10">
-                    <Radar className="h-5 w-5 text-emerald-300" />
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/10 bg-black/45 p-4">
-                  <label className="mb-3 block text-sm text-white/60">Paste Solana token address</label>
-
-                  <div className="flex flex-col gap-3 md:flex-row">
-                    <input
-                      value={contract}
-                      onChange={(e) => setContract(e.target.value)}
-                      placeholder="Enter live Solana contract..."
-                      className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
-                    />
-
-                    <button
-                      onClick={runLiveSignalCheck}
-                      className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
-                    >
-                      {checking ? (
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Checking
-                        </span>
-                      ) : (
-                        "Run Check"
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 md:grid-cols-2">
-                    {[
-                      ["Backend Route", "Connected"],
-                      ["DexScreener API", "Live"],
-                      ["Signal Layer", "Operational"],
-                      ["Authority Mode", "Phase 10"],
-                    ].map(([label, value]) => (
-                      <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
-                        <p className="mt-2 text-lg font-medium">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-                    Trending intelligence now routes directly back into Signal Check Pro ecosystem.
-                  </div>
-                </div>
+          <Card className="p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.24em] text-white/45">Signal Check Pro</p>
+                <h3 className="mt-1 text-2xl font-semibold">Contract Intelligence Layer</h3>
               </div>
-            </Card>
-          </motion.div>
-        </section>        <section className="pt-10">
-          <div className="overflow-hidden rounded-3xl border border-emerald-400/20 bg-emerald-400/10 py-3 shadow-2xl shadow-emerald-500/10">
-            <motion.div
-              className="flex min-w-max gap-10 whitespace-nowrap px-6 text-sm text-emerald-100/90"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ repeat: Infinity, duration: 22, ease: "linear" }}
-            >
-              {[...tickerItems, ...tickerItems].map((item, i) => (
-                <span key={i}>{item}</span>
+              <Radar className="h-5 w-5 text-emerald-300" />
+            </div>
+
+            <label className="mb-3 block text-sm text-white/60">Paste Solana token address</label>
+
+            <div className="flex flex-col gap-3 md:flex-row">
+              <input
+                value={contract}
+                onChange={(e) => setContract(e.target.value)}
+                placeholder="Enter live Solana contract..."
+                className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
+              />
+
+              <button
+                onClick={runLiveSignalCheck}
+                className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
+              >
+                {checking ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Checking
+                  </span>
+                ) : (
+                  "Run Check"
+                )}
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {[
+                ["Backend Route", "Connected"],
+                ["DexScreener API", "Live"],
+                ["Signal Layer", "Operational"],
+                ["Authority Mode", "Phase 11"],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+                  <p className="mt-2 text-lg font-medium">{value}</p>
+                </div>
               ))}
-            </motion.div>
-          </div>
+            </div>
+          </Card>
         </section>
 
-        <section className="pt-14">
-          <div className="grid gap-4 md:grid-cols-4">
-            {liveStats.map(([label, value]) => (
-              <Card key={label}>
-                <div className="p-5 text-center">
-                  <p className="text-3xl font-semibold text-emerald-300">{value}</p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/45">{label}</p>
-                </div>
-              </Card>
-            ))}
+        <section className="pt-12">
+          <Card className="p-6">
+            <div className="mb-4 flex items-center gap-2 text-emerald-300">
+              <History className="h-5 w-5" />
+              <p className="text-sm uppercase tracking-[0.24em]">Recent Checked Tokens</p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {(recentChecks.length ? recentChecks : recentFallback).map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setContract(item)}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left font-mono text-xs text-white/70 transition hover:border-emerald-300/30"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </Card>
+        </section>
+
+        <section className="pt-20">
+          <div className="grid gap-5 md:grid-cols-3">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <Card key={tool.title}>
+                  <div className="p-6">
+                    <Icon className="h-5 w-5 text-emerald-300" />
+                    <h3 className="mt-4 text-xl font-semibold">{tool.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/65">{tool.desc}</p>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -620,93 +550,9 @@ export default function Home() {
           </Card>
         </section>
 
-        <section className="pt-20">
-          <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Core Utility Layer</p>
-            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Tools that make people return.</h2>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {tools.map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <Card
-                  key={tool.title}
-                  onClick={() =>
-                    setModal({
-                      label: tool.tag,
-                      title: tool.title,
-                      body: tool.desc,
-                      icon: <Icon className="h-5 w-5" />,
-                    })
-                  }
-                  className="cursor-pointer transition hover:-translate-y-1 hover:border-emerald-300/25"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-black/30">
-                        <Icon className="h-5 w-5 text-emerald-300" />
-                      </div>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60">
-                        {tool.tag}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 text-xl font-semibold">{tool.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-white/65">{tool.desc}</p>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="pt-20">
-          <div className="grid gap-5 md:grid-cols-3">
-            {products.map((product) => {
-              const Icon = product.icon;
-              return (
-                <Card key={product.title} onClick={() => openProductModal(product)}>
-                  <div className="p-7">
-                    <Icon className="h-6 w-6 text-emerald-300" />
-                    <h3 className="mt-5 text-2xl font-semibold">{product.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
-                    <div className="mt-6 flex items-center justify-between">
-                      <span className="text-2xl font-semibold text-emerald-300">{product.price}</span>
-                      <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-                        View
-                      </button>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="pt-20">
-          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
-            <div className="p-10">
-              <div className="mb-3 flex items-center gap-2 text-emerald-300">
-                <Crown className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.24em]">Brand Standard</span>
-              </div>
-              <h2 className="max-w-3xl text-3xl font-semibold md:text-5xl">
-                Make it feel like a signal artifact — not a template.
-              </h2>
-              <p className="mt-4 max-w-3xl text-lg leading-8 text-white/70">
-                Every section should create authority, utility, retention, and premium perception.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button onClick={openSignalModal}>Launch Foundation</Button>
-                <Button variant="outline" onClick={openAccessModal}>Map Platform</Button>
-              </div>
-            </div>
-          </Card>
-        </section>
-
         <footer className="pb-10 pt-16 text-center text-sm text-white/40">
           <div className="mb-6 flex flex-wrap justify-center gap-3">
-            {["Telegram", "Discord", "Twitch", "Guides", "Signal Check", "Trending"].map((item) => (
+            {["Home", "Trending", "Signal Check", "Telegram", "Discord", "Guides"].map((item) => (
               <span key={item} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55">
                 {item}
               </span>

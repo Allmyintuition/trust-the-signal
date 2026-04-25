@@ -12,6 +12,9 @@ import {
     Loader2,
     AlertTriangle,
     ArrowLeft,
+    Copy,
+    Check,
+    ShieldCheck,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -27,74 +30,122 @@ const Card = ({ children, className = "" }) => (
     </div>
 );
 
-const TokenCard = ({ token }) => (
-    <Card className="transition hover:-translate-y-1 hover:border-emerald-300/30">
-        <div className="p-5">
-            <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                        {token.dex}
-                    </p>
-                    <h3 className="mt-2 text-xl font-semibold text-white">
-                        {token.name}
-                    </h3>
-                    <p className="text-sm text-emerald-300">{token.symbol}</p>
+const TokenCard = ({ token }) => {
+    const [copied, setCopied] = useState(false);
+
+    const copyContract = async () => {
+        if (!token.address) return;
+
+        try {
+            await navigator.clipboard.writeText(token.address);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1400);
+        } catch {
+            const textArea = document.createElement("textarea");
+            textArea.value = token.address;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1400);
+        }
+    };
+
+    return (
+        <Card className="transition hover:-translate-y-1 hover:border-emerald-300/30">
+            <div className="p-5">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+                            {token.dex}
+                        </p>
+                        <h3 className="mt-2 text-xl font-semibold text-white">
+                            {token.name}
+                        </h3>
+                        <p className="text-sm text-emerald-300">{token.symbol}</p>
+                    </div>
+
+                    {token.pairUrl && (
+                        <a
+                            href={token.pairUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-2 text-emerald-200 hover:bg-emerald-400/20"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                        </a>
+                    )}
                 </div>
 
-                {token.pairUrl && (
-                    <a
-                        href={token.pairUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-2 text-emerald-200 hover:bg-emerald-400/20"
-                    >
-                        <ExternalLink className="h-4 w-4" />
-                    </a>
+                <div className="grid gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                            Liquidity
+                        </p>
+                        <p className="mt-1 text-lg font-medium text-emerald-200">
+                            ${formatNum(token.liquidity)}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                            24H Volume
+                        </p>
+                        <p className="mt-1 text-lg font-medium text-emerald-200">
+                            ${formatNum(token.volume24h)}
+                        </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                            24H Change
+                        </p>
+                        <p className="mt-1 text-lg font-medium text-emerald-200">
+                            {Number(token.priceChange24h || 0).toFixed(2)}%
+                        </p>
+                    </div>
+                </div>
+
+                {token.address && (
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        <a
+                            href={`/?contract=${encodeURIComponent(token.address)}`}
+                            className="rounded-2xl bg-emerald-400 px-4 py-3 text-center text-sm font-semibold text-black transition hover:bg-emerald-300"
+                        >
+                            <span className="inline-flex items-center justify-center gap-2">
+                                <ShieldCheck className="h-4 w-4" />
+                                Run Signal Check
+                            </span>
+                        </a>
+
+                        <button
+                            onClick={copyContract}
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
+                        >
+                            <span className="inline-flex items-center justify-center gap-2">
+                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                {copied ? "Copied" : "Copy CA"}
+                            </span>
+                        </button>
+                    </div>
+                )}
+
+                {token.address && (
+                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
+                        <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                            Contract
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-white/55">
+                            {token.address}
+                        </p>
+                    </div>
                 )}
             </div>
-
-            <div className="grid gap-3">
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                        Liquidity
-                    </p>
-                    <p className="mt-1 text-lg font-medium text-emerald-200">
-                        ${formatNum(token.liquidity)}
-                    </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                        24H Volume
-                    </p>
-                    <p className="mt-1 text-lg font-medium text-emerald-200">
-                        ${formatNum(token.volume24h)}
-                    </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                        24H Change
-                    </p>
-                    <p className="mt-1 text-lg font-medium text-emerald-200">
-                        {Number(token.priceChange24h || 0).toFixed(2)}%
-                    </p>
-                </div>
-            </div>
-
-            {token.address && (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                        Contract
-                    </p>
-                    <p className="mt-1 break-all font-mono text-xs text-white/55">
-                        {token.address}
-                    </p>
-                </div>
-            )}
-        </div>
-    </Card>
-);
+        </Card>
+    );
+};
 
 const Section = ({ title, subtitle, icon: Icon, tokens }) => (
     <section className="pt-14">
@@ -192,7 +243,7 @@ export default function TrendingPage() {
                             👁️ Solana Discovery
                         </span>
                         <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            ⚡ Phase 9
+                            🧠 Signal Check Connected
                         </span>
                     </div>
 
@@ -256,16 +307,15 @@ export default function TrendingPage() {
                                     <div className="mb-3 flex items-center gap-2 text-emerald-300">
                                         <Radar className="h-5 w-5" />
                                         <p className="text-sm uppercase tracking-[0.24em]">
-                                            Next Connection
+                                            Ecosystem Loop Active
                                         </p>
                                     </div>
                                     <h2 className="text-3xl font-semibold">
-                                        Trending discovery now feeds the Signal Check ecosystem.
+                                        Discovery now routes directly into Signal Check Pro.
                                     </h2>
                                     <p className="mt-4 max-w-3xl leading-8 text-white/65">
-                                        Next upgrade: click any token contract and route it directly
-                                        into Signal Check Pro for a full SAFE / CAUTION / DANGER
-                                        intelligence result.
+                                        Click Run Signal Check on any trending token to send its contract
+                                        directly into the homepage intelligence engine.
                                     </p>
                                 </div>
                             </Card>
