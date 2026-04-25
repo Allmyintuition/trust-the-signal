@@ -110,32 +110,40 @@ export default function TokenPage() {
     runCheck();
   }, [contract]);
 
-  const submitAccessRequest = () => {
-    if (!accessEmail.trim()) {
-      setError("Enter an email or preferred contact before requesting access.");
+  const submitAccessRequest = async () => {
+    const contact = accessEmail.trim();
+
+    if (!contact) {
+      setError(
+        "Enter an email, Telegram handle, Discord name, or preferred contact before requesting access."
+      );
       return;
     }
 
-    const savedRequests = JSON.parse(
-      window.localStorage.getItem("tts_token_page_access_requests") || "[]"
-    );
+    try {
+      const response = await fetch("/api/access-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contact,
+          source: "token_page_access_capture",
+          contract,
+        }),
+      });
 
-    const nextRequests = [
-      {
-        email: accessEmail.trim(),
-        contract,
-        createdAt: new Date().toISOString(),
-      },
-      ...savedRequests,
-    ].slice(0, 25);
+      const result = await response.json();
 
-    window.localStorage.setItem(
-      "tts_token_page_access_requests",
-      JSON.stringify(nextRequests)
-    );
+      if (!result.success) {
+        throw new Error(result.error || "Access request failed.");
+      }
 
-    setAccessSubmitted(true);
-    setError("");
+      setAccessSubmitted(true);
+      setError("");
+    } catch (error) {
+      setError("The access route could not capture this request. Try again.");
+    }
   };
 
   return (
@@ -168,9 +176,7 @@ export default function TokenPage() {
               Trending
             </span>
           </a>
-        </header>
-
-        <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+        </header>        <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <div className="mb-5 flex flex-wrap gap-3">
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
@@ -289,9 +295,7 @@ export default function TokenPage() {
                 value={data.breakdown?.transactions}
               />
               <ScoreBar label="Metadata" value={data.breakdown?.metadata} />
-            </section>
-
-            <section className="grid gap-6 pt-10 lg:grid-cols-[1fr_0.9fr]">
+            </section>            <section className="grid gap-6 pt-10 lg:grid-cols-[1fr_0.9fr]">
               <Card className="p-6">
                 <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
                   Risk Flags
@@ -343,66 +347,6 @@ export default function TokenPage() {
                   ))}
                 </div>
               </Card>
-            </section>
-
-            <section className="pt-10">
-              <Card className="border-emerald-400/20 bg-emerald-400/10 p-6">
-                <div className="mb-3 flex items-center gap-2 text-emerald-300">
-                  <Radar className="h-5 w-5" />
-                  <p className="text-sm uppercase tracking-[0.24em]">
-                    Token Intelligence Verdict
-                  </p>
-                </div>
-
-                <p className="max-w-4xl text-lg leading-8 text-white/75">
-                  This token has been processed through the live Trust The Signal
-                  authority engine using weighted liquidity, volume, age,
-                  transaction, metadata, and structure interpretation. This page
-                  is designed to become a shareable intelligence route for every
-                  contract analyzed through the ecosystem.
-                </p>
-              </Card>
-            </section>
-
-            <section className="grid gap-6 pt-10 lg:grid-cols-3">
-              {[
-                {
-                  icon: ShieldCheck,
-                  title: "Confirm Structure",
-                  desc: "Route the contract back into Signal Check Pro for fast repeat analysis.",
-                  href: `/?contract=${encodeURIComponent(contract)}`,
-                },
-                {
-                  icon: TrendingUp,
-                  title: "Discover More",
-                  desc: "Return to trending tokens and compare liquidity, volume, and momentum.",
-                  href: "/trending",
-                },
-                {
-                  icon: BookOpen,
-                  title: "Operator Education",
-                  desc: "Premium guides will connect here for users who want deeper execution rules.",
-                  href: "/",
-                },
-              ].map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <a
-                    key={item.title}
-                    href={item.href}
-                    className="rounded-[28px] border border-white/10 bg-white/[0.055] p-6 shadow-2xl shadow-emerald-500/10 transition hover:-translate-y-1 hover:border-emerald-300/25"
-                  >
-                    <Icon className="h-6 w-6 text-emerald-300" />
-                    <h3 className="mt-5 text-xl font-semibold">
-                      {item.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-white/65">
-                      {item.desc}
-                    </p>
-                  </a>
-                );
-              })}
             </section>
 
             <section className="pt-10">
@@ -465,32 +409,6 @@ export default function TokenPage() {
             </section>
           </>
         )}
-
-        <footer className="pb-10 pt-16 text-center text-sm text-white/40">
-          <div className="mb-6 flex flex-wrap justify-center gap-3">
-            {[
-              "Token Intelligence",
-              "Signal Check",
-              "Trending",
-              "Access",
-              "Guides",
-            ].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex justify-center gap-2 text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Signal Over Noise.</span>
-          </div>
-
-          <p className="mt-3">© Trust The Signal. Built by ALL MY INTUITION.</p>
-        </footer>
       </div>
     </main>
   );

@@ -179,35 +179,16 @@ const Modal = ({ modal, closeModal }) => {
                   </p>
                 </div>
               ))}
-            </div>            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              <SignalScoreBar
-                label="Liquidity"
-                value={modal.live.breakdown?.liquidity}
-              />
-              <SignalScoreBar
-                label="Volume"
-                value={modal.live.breakdown?.volume}
-              />
-              <SignalScoreBar
-                label="Balance"
-                value={modal.live.breakdown?.liquidityBalance}
-              />
-              <SignalScoreBar
-                label="Momentum"
-                value={modal.live.breakdown?.momentum}
-              />
-              <SignalScoreBar
-                label="Age"
-                value={modal.live.breakdown?.age}
-              />
-              <SignalScoreBar
-                label="Transactions"
-                value={modal.live.breakdown?.transactions}
-              />
-              <SignalScoreBar
-                label="Metadata"
-                value={modal.live.breakdown?.metadata}
-              />
+            </div>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              <SignalScoreBar label="Liquidity" value={modal.live.breakdown?.liquidity} />
+              <SignalScoreBar label="Volume" value={modal.live.breakdown?.volume} />
+              <SignalScoreBar label="Balance" value={modal.live.breakdown?.liquidityBalance} />
+              <SignalScoreBar label="Momentum" value={modal.live.breakdown?.momentum} />
+              <SignalScoreBar label="Age" value={modal.live.breakdown?.age} />
+              <SignalScoreBar label="Transactions" value={modal.live.breakdown?.transactions} />
+              <SignalScoreBar label="Metadata" value={modal.live.breakdown?.metadata} />
             </div>
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -221,9 +202,7 @@ const Modal = ({ modal, closeModal }) => {
                     Website
                   </p>
                   <p className="mt-2 text-lg font-medium text-emerald-200">
-                    {modal.live.socialPresence?.hasWebsite
-                      ? "Detected"
-                      : "Not Detected"}
+                    {modal.live.socialPresence?.hasWebsite ? "Detected" : "Not Detected"}
                   </p>
                 </div>
 
@@ -364,15 +343,14 @@ export default function Home() {
         setRecentChecks([]);
       }
     }
-  }, []); const closeModal = () => setModal(null);
+  }, []);
+
+  const closeModal = () => setModal(null);
 
   const saveRecentCheck = (address) => {
     if (!address) return;
 
-    const next = [
-      address,
-      ...recentChecks.filter((item) => item !== address),
-    ].slice(0, 6);
+    const next = [address, ...recentChecks.filter((item) => item !== address)].slice(0, 6);
 
     setRecentChecks(next);
     window.localStorage.setItem("tts_recent_checks", JSON.stringify(next));
@@ -390,7 +368,7 @@ export default function Home() {
   const openAccessModal = () =>
     setModal({
       label: "Protected Access",
-      title: "Access Request Captured",
+      title: "Access Route Opening Soon",
       body: "This access layer is being prepared for Telegram, Discord, premium product drops, private signal rooms, and future membership routes.",
       icon: <Lock className="h-5 w-5" />,
     });
@@ -403,42 +381,53 @@ export default function Home() {
       icon: <BookOpen className="h-5 w-5" />,
     });
 
-  const submitAccessRequest = () => {
-    if (!accessEmail.trim()) {
+  const submitAccessRequest = async () => {
+    const contact = accessEmail.trim();
+
+    if (!contact) {
       setModal({
         label: "Access Request",
-        title: "Email Required",
-        body: "Enter an email or preferred contact before requesting protected access.",
+        title: "Contact Required",
+        body: "Enter an email, Telegram handle, Discord name, or preferred contact before requesting access.",
         icon: <Mail className="h-5 w-5" />,
       });
       return;
     }
 
-    const savedRequests = JSON.parse(
-      window.localStorage.getItem("tts_access_requests") || "[]"
-    );
+    try {
+      const response = await fetch("/api/access-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contact,
+          source: "homepage_access_capture",
+        }),
+      });
 
-    const nextRequests = [
-      {
-        email: accessEmail.trim(),
-        createdAt: new Date().toISOString(),
-      },
-      ...savedRequests,
-    ].slice(0, 25);
+      const data = await response.json();
 
-    window.localStorage.setItem(
-      "tts_access_requests",
-      JSON.stringify(nextRequests)
-    );
+      if (!data.success) {
+        throw new Error(data.error || "Access request failed.");
+      }
 
-    setAccessSubmitted(true);
+      setAccessSubmitted(true);
 
-    setModal({
-      label: "Access Request",
-      title: "Request Captured",
-      body: "Your access request has been captured locally for now. The next upgrade can connect this to a real email list, CRM, or database.",
-      icon: <CheckCircle2 className="h-5 w-5" />,
-    });
+      setModal({
+        label: "Access Request",
+        title: "Request Captured",
+        body: "Your access request has been captured. The protected route is being prepared.",
+        icon: <CheckCircle2 className="h-5 w-5" />,
+      });
+    } catch (error) {
+      setModal({
+        label: "Access Request",
+        title: "Request Failed",
+        body: "The access route could not capture this request. Try again.",
+        icon: <Mail className="h-5 w-5" />,
+      });
+    }
   };
 
   const runLiveSignalCheck = async () => {
@@ -638,8 +627,8 @@ export default function Home() {
               {[
                 ["Signal Engine", "Operational"],
                 ["Token Pages", "Live"],
-                ["Access Capture", "Prepared"],
-                ["Authority Mode", "Phase 16"],
+                ["Access Capture", "Backend Ready"],
+                ["Authority Mode", "Phase 18"],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -653,7 +642,9 @@ export default function Home() {
               ))}
             </div>
           </Card>
-        </section>        <section className="pt-12">
+        </section>
+
+        <section className="pt-12">
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2 text-emerald-300">
               <History className="h-5 w-5" />
@@ -711,9 +702,9 @@ export default function Home() {
                 </h2>
 
                 <p className="mt-4 leading-8 text-white/65">
-                  This capture layer prepares the site for Telegram, Discord,
-                  premium guide drops, private alerts, and future membership
-                  routes.
+                  This capture layer sends requests through the backend route,
+                  preparing the site for Telegram, Discord, premium guide drops,
+                  private alerts, and future membership routes.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 md:flex-row">
@@ -733,8 +724,8 @@ export default function Home() {
                 </div>
 
                 <p className="mt-3 text-xs text-white/40">
-                  Local capture active now. Database/email integration can be
-                  connected in the next backend phase.
+                  Backend route active now. Add ACCESS_REQUEST_WEBHOOK_URL in Vercel
+                  later to forward requests externally.
                 </p>
               </div>
 
@@ -789,59 +780,6 @@ export default function Home() {
               );
             })}
           </div>
-        </section>
-
-        <section className="pt-20">
-          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
-            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-              <div>
-                <div className="mb-3 flex items-center gap-2 text-emerald-300">
-                  <FileSearch className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">
-                    Token Intelligence Pages
-                  </span>
-                </div>
-
-                <h2 className="text-3xl font-semibold md:text-5xl">
-                  Every contract can become a shareable intelligence route.
-                </h2>
-
-                <p className="mt-4 leading-8 text-white/65">
-                  Dedicated token pages create a stronger platform feeling:
-                  shareable analysis, cleaner discovery flow, and future SEO
-                  potential for token-specific intelligence.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-4">
-                  <Button href="/trending">
-                    Explore Token Pages <ArrowRight className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" onClick={openSignalModal}>
-                    Run Signal Check
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                {[
-                  ["Discovery", "Find movement through Trending Intelligence."],
-                  ["Analysis", "Open dedicated token pages with live scoring."],
-                  ["Conversion", "Request access after using the live utility."],
-                  ["Retention", "Recent checks keep users returning."],
-                ].map(([title, desc]) => (
-                  <div
-                    key={title}
-                    className="rounded-2xl border border-white/10 bg-black/30 p-5"
-                  >
-                    <p className="font-semibold text-emerald-200">{title}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/60">
-                      {desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
         </section>
 
         <section className="pt-20">
@@ -919,85 +857,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="pt-20">
-          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
-            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-              <div>
-                <div className="mb-3 flex items-center gap-2 text-emerald-300">
-                  <Lock className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">
-                    Protected Access
-                  </span>
-                </div>
-
-                <h2 className="text-3xl font-semibold md:text-5xl">
-                  Access is earned. Trust is protected.
-                </h2>
-
-                <p className="mt-4 leading-8 text-white/65">
-                  This section becomes the entry point for Telegram, Discord,
-                  private signal rooms, premium guides, and future membership
-                  access.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-4">
-                  <Button onClick={openAccessModal}>Request Access</Button>
-                  <Button variant="outline" onClick={openAccessModal}>
-                    Observe First
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                {[
-                  [Send, "Telegram Signal Feed"],
-                  [MessageCircle, "Discord Community"],
-                  [RadioTower, "Protected Alerts"],
-                  [Layers, "Platform Expansion"],
-                ].map(([Icon, label]) => (
-                  <div
-                    key={label}
-                    onClick={openAccessModal}
-                    className="cursor-pointer rounded-2xl border border-white/10 bg-black/30 p-5 transition hover:border-emerald-300/25 hover:bg-white/10"
-                  >
-                    <Icon className="h-5 w-5 text-emerald-300" />
-                    <p className="mt-4 font-medium">{label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </section>
-
-        <section className="pt-20">
-          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-white/[0.02]">
-            <div className="p-10">
-              <div className="mb-3 flex items-center gap-2 text-emerald-300">
-                <Crown className="h-4 w-4" />
-                <span className="text-sm uppercase tracking-[0.24em]">
-                  Brand Standard
-                </span>
-              </div>
-
-              <h2 className="max-w-3xl text-3xl font-semibold md:text-5xl">
-                Make it feel like a signal artifact — not a template.
-              </h2>
-
-              <p className="mt-4 max-w-3xl text-lg leading-8 text-white/70">
-                Every section should create authority, utility, retention, and
-                premium perception.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button onClick={openSignalModal}>Launch Foundation</Button>
-                <Button href="/trending" variant="outline">
-                  Explore Trending
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </section>
-
         <footer className="pb-10 pt-16 text-center text-sm text-white/40">
           <div className="mb-6 flex flex-wrap justify-center gap-3">
             {[
@@ -1030,3 +889,4 @@ export default function Home() {
     </main>
   );
 }
+
