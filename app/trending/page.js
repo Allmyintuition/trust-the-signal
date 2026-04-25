@@ -15,6 +15,7 @@ import {
     Copy,
     Check,
     ShieldCheck,
+    FileSearch,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -32,6 +33,8 @@ const Card = ({ children, className = "" }) => (
 
 const TokenCard = ({ token }) => {
     const [copied, setCopied] = useState(false);
+
+    const encodedAddress = token.address ? encodeURIComponent(token.address) : "";
 
     const copyContract = async () => {
         if (!token.address) return;
@@ -73,6 +76,7 @@ const TokenCard = ({ token }) => {
                             target="_blank"
                             rel="noreferrer"
                             className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-2 text-emerald-200 hover:bg-emerald-400/20"
+                            title="Open DexScreener"
                         >
                             <ExternalLink className="h-4 w-4" />
                         </a>
@@ -109,26 +113,42 @@ const TokenCard = ({ token }) => {
                 </div>
 
                 {token.address && (
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="mt-4 grid gap-3">
                         <a
-                            href={`/?contract=${encodeURIComponent(token.address)}`}
+                            href={`/token/${encodedAddress}`}
                             className="rounded-2xl bg-emerald-400 px-4 py-3 text-center text-sm font-semibold text-black transition hover:bg-emerald-300"
                         >
                             <span className="inline-flex items-center justify-center gap-2">
-                                <ShieldCheck className="h-4 w-4" />
-                                Run Signal Check
+                                <FileSearch className="h-4 w-4" />
+                                Analyze Token
                             </span>
                         </a>
 
-                        <button
-                            onClick={copyContract}
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
-                        >
-                            <span className="inline-flex items-center justify-center gap-2">
-                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                {copied ? "Copied" : "Copy CA"}
-                            </span>
-                        </button>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <a
+                                href={`/?contract=${encodedAddress}`}
+                                className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-center text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
+                            >
+                                <span className="inline-flex items-center justify-center gap-2">
+                                    <ShieldCheck className="h-4 w-4" />
+                                    Quick Check
+                                </span>
+                            </a>
+
+                            <button
+                                onClick={copyContract}
+                                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
+                            >
+                                <span className="inline-flex items-center justify-center gap-2">
+                                    {copied ? (
+                                        <Check className="h-4 w-4" />
+                                    ) : (
+                                        <Copy className="h-4 w-4" />
+                                    )}
+                                    {copied ? "Copied" : "Copy CA"}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -243,14 +263,14 @@ export default function TrendingPage() {
                             👁️ Solana Discovery
                         </span>
                         <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            🧠 Signal Check Connected
+                            🧠 Token Pages Connected
                         </span>
                     </div>
 
                     <h2 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
                         Live token discovery.
                         <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                            Signals moving now.
+                            Analyze what is moving now.
                         </span>
                     </h2>
 
@@ -259,6 +279,26 @@ export default function TrendingPage() {
                         volume, and momentum before deeper Signal Check confirmation.
                     </p>
                 </motion.section>
+
+                <section className="pt-10">
+                    <Card className="border-emerald-400/20 bg-emerald-400/10">
+                        <div className="grid gap-4 p-5 md:grid-cols-3">
+                            {[
+                                ["Analyze Token", "Open a dedicated token intelligence page."],
+                                ["Quick Check", "Send the contract directly to the homepage checker."],
+                                ["Copy CA", "Copy the contract address for external tools."],
+                            ].map(([title, desc]) => (
+                                <div
+                                    key={title}
+                                    className="rounded-2xl border border-white/10 bg-black/25 p-4"
+                                >
+                                    <p className="font-semibold text-emerald-200">{title}</p>
+                                    <p className="mt-2 text-sm leading-6 text-white/60">{desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </section>
 
                 {loading && (
                     <div className="flex min-h-[320px] items-center justify-center">
@@ -311,11 +351,11 @@ export default function TrendingPage() {
                                         </p>
                                     </div>
                                     <h2 className="text-3xl font-semibold">
-                                        Discovery now routes directly into Signal Check Pro.
+                                        Discovery now routes into token pages and Signal Check Pro.
                                     </h2>
                                     <p className="mt-4 max-w-3xl leading-8 text-white/65">
-                                        Click Run Signal Check on any trending token to send its contract
-                                        directly into the homepage intelligence engine.
+                                        Use Analyze Token for a dedicated intelligence URL, or Quick
+                                        Check to route directly into the homepage Signal Check engine.
                                     </p>
                                 </div>
                             </Card>

@@ -1,7 +1,7 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import {
   Eye,
   Radar,
@@ -37,8 +37,9 @@ const ScoreBar = ({ label, value }) => (
   </div>
 );
 
-export default function TokenPage({ params }) {
-  const contract = params.contract;
+export default function TokenPage() {
+  const params = useParams();
+  const contract = params?.contract ? decodeURIComponent(params.contract) : "";
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
@@ -46,6 +47,11 @@ export default function TokenPage({ params }) {
 
   useEffect(() => {
     const runCheck = async () => {
+      if (!contract) return;
+
+      setLoading(true);
+      setError("");
+
       try {
         const response = await fetch("/api/signal-check", {
           method: "POST",
@@ -69,9 +75,7 @@ export default function TokenPage({ params }) {
       setLoading(false);
     };
 
-    if (contract) {
-      runCheck();
-    }
+    runCheck();
   }, [contract]);
 
   return (
@@ -96,12 +100,12 @@ export default function TokenPage({ params }) {
           </div>
 
           <a
-            href="/"
+            href="/trending"
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
           >
             <span className="inline-flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Home
+              Trending
             </span>
           </a>
         </header>
@@ -111,7 +115,7 @@ export default function TokenPage({ params }) {
             Contract Route
           </p>
           <h2 className="mt-2 break-all text-3xl font-semibold md:text-5xl">
-            {contract}
+            {contract || "Loading contract..."}
           </h2>
         </section>
 
@@ -167,16 +171,10 @@ export default function TokenPage({ params }) {
             <section className="grid gap-4 pt-10 md:grid-cols-2">
               <ScoreBar label="Liquidity" value={data.breakdown?.liquidity} />
               <ScoreBar label="Volume" value={data.breakdown?.volume} />
-              <ScoreBar
-                label="Balance"
-                value={data.breakdown?.liquidityBalance}
-              />
+              <ScoreBar label="Balance" value={data.breakdown?.liquidityBalance} />
               <ScoreBar label="Momentum" value={data.breakdown?.momentum} />
               <ScoreBar label="Age" value={data.breakdown?.age} />
-              <ScoreBar
-                label="Transactions"
-                value={data.breakdown?.transactions}
-              />
+              <ScoreBar label="Transactions" value={data.breakdown?.transactions} />
               <ScoreBar label="Metadata" value={data.breakdown?.metadata} />
             </section>
 
@@ -238,13 +236,6 @@ export default function TokenPage({ params }) {
                     className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white/75 hover:border-emerald-300/30 hover:text-white"
                   >
                     Run On Homepage
-                  </a>
-
-                  <a
-                    href="/trending"
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white/75 hover:border-emerald-300/30 hover:text-white"
-                  >
-                    Back To Trending
                   </a>
                 </div>
               </div>
