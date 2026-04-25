@@ -16,17 +16,15 @@ import {
   TerminalSquare,
   Signal,
   Wallet,
-  Store,
-  ChevronRight,
-  Radar,
   Crown,
   ScanLine,
   RadioTower,
-  Twitch,
   Send,
   MessageCircle,
   KeyRound,
   X,
+  Radar,
+  Loader2,
 } from "lucide-react";
 
 const fadeUp = {
@@ -62,6 +60,11 @@ const Card = ({ children, className = "", onClick }) => (
   </div>
 );
 
+const formatNum = (num) => {
+  if (!num && num !== 0) return "--";
+  return Number(num).toLocaleString();
+};
+
 const Modal = ({ modal, closeModal }) => {
   if (!modal) return null;
 
@@ -89,7 +92,41 @@ const Modal = ({ modal, closeModal }) => {
         <h3 className="text-3xl font-semibold">{modal.title}</h3>
         <p className="mt-4 leading-8 text-white/65">{modal.body}</p>
 
-        {modal.type === "signal" && (
+        {modal.type === "signal" && modal.live && (
+          <>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {[
+                ["Token", `${modal.live.name} (${modal.live.symbol})`],
+                ["Signal Verdict", modal.live.signal],
+                ["Risk Status", modal.live.risk],
+                ["Liquidity", `$${formatNum(modal.live.liquidity)}`],
+                ["24H Volume", `$${formatNum(modal.live.volume24h)}`],
+                ["Market Cap", `$${formatNum(modal.live.marketCap)}`],
+                ["24H Change", `${modal.live.priceChange24h}%`],
+                ["DEX", modal.live.dex],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                >
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-lg font-medium text-emerald-200">
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
+              Live DexScreener intelligence successfully routed through Trust The
+              Signal signal layer.
+            </div>
+          </>
+        )}
+
+        {modal.type === "signal" && !modal.live && (
           <div className="mt-6 grid gap-3 md:grid-cols-2">
             {[
               ["Risk Status", "CAUTION"],
@@ -112,11 +149,12 @@ const Modal = ({ modal, closeModal }) => {
           </div>
         )}
 
-        <div className="mt-7 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-          This is currently an interactive preview layer. The next build can
-          connect this to real token data, risk checks, products, and access
-          forms.
-        </div>
+        {modal.type !== "signal" && (
+          <div className="mt-7 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
+            This layer continues expanding into products, access systems, and
+            future premium intelligence routes.
+          </div>
+        )}
       </motion.div>
     </div>
   );
@@ -220,15 +258,15 @@ const roadmap = [
 
 export default function Home() {
   const [modal, setModal] = useState(null);
-
-  const closeModal = () => setModal(null);
+  const [contract, setContract] = useState("");
+  const [checking, setChecking] = useState(false); const closeModal = () => setModal(null);
 
   const openSignalModal = () =>
     setModal({
       type: "signal",
       label: "Signal Check Preview",
       title: "Contract Intelligence Result",
-      body: "The entered token is being interpreted through a branded risk and structure lens. In the real version, this will pull live contract, liquidity, holder, risk, wallet, and pair data.",
+      body: "The entered token is being interpreted through a branded risk and structure lens.",
       icon: <Radar className="h-5 w-5" />,
     });
 
@@ -247,6 +285,62 @@ export default function Home() {
       body: product.desc,
       icon: <BookOpen className="h-5 w-5" />,
     });
+
+  const runLiveSignalCheck = async () => {
+    if (!contract.trim()) {
+      setModal({
+        type: "signal",
+        label: "Signal Error",
+        title: "No Contract Entered",
+        body: "Paste a valid Solana token contract address to run the live intelligence layer.",
+        icon: <Radar className="h-5 w-5" />,
+      });
+      return;
+    }
+
+    setChecking(true);
+
+    try {
+      const response = await fetch("/api/signal-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contract }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        setModal({
+          type: "signal",
+          label: "Signal Error",
+          title: "Live Check Failed",
+          body: data.error || "No signal data found.",
+          icon: <Radar className="h-5 w-5" />,
+        });
+      } else {
+        setModal({
+          type: "signal",
+          label: "Live Signal Result",
+          title: "Contract Intelligence Result",
+          body: "Live token data has been processed through the Trust The Signal authority layer.",
+          icon: <Radar className="h-5 w-5" />,
+          live: data.result,
+        });
+      }
+    } catch (err) {
+      setModal({
+        type: "signal",
+        label: "Signal Error",
+        title: "System Route Failure",
+        body: "Unable to complete live DexScreener request.",
+        icon: <Radar className="h-5 w-5" />,
+      });
+    }
+
+    setChecking(false);
+  };
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -341,23 +435,32 @@ export default function Home() {
                   </label>
                   <div className="flex flex-col gap-3 md:flex-row">
                     <input
-                      defaultValue="7xKXtg2X...sampleContract"
+                      value={contract}
+                      onChange={(e) => setContract(e.target.value)}
+                      placeholder="Enter live Solana contract..."
                       className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
                     />
                     <button
-                      onClick={openSignalModal}
+                      onClick={runLiveSignalCheck}
                       className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
                     >
-                      Run Check
+                      {checking ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Checking
+                        </span>
+                      ) : (
+                        "Run Check"
+                      )}
                     </button>
                   </div>
 
                   <div className="mt-5 grid gap-3 md:grid-cols-2">
                     {[
-                      ["Risk Status", "CAUTION"],
-                      ["Liquidity", "Stable"],
-                      ["Wallet Signal", "Developing"],
-                      ["Strength", "76 / 100"],
+                      ["Backend Route", "Connected"],
+                      ["DexScreener API", "Live"],
+                      ["Signal Layer", "Operational"],
+                      ["Authority Mode", "Phase 6"],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                         <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
@@ -367,16 +470,13 @@ export default function Home() {
                   </div>
 
                   <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-                    Future output: token security, liquidity structure, wallet intelligence, risk flags,
-                    and a final AMI / TTS signal verdict.
+                    Live contract intelligence is now routed through real DexScreener data.
                   </div>
                 </div>
               </div>
             </Card>
           </motion.div>
-        </section>
-
-        <section className="pt-10">
+        </section>        <section className="pt-10">
           <div className="overflow-hidden rounded-3xl border border-emerald-400/20 bg-emerald-400/10 py-3 shadow-2xl shadow-emerald-500/10">
             <motion.div
               className="flex min-w-max gap-10 whitespace-nowrap px-6 text-sm text-emerald-100/90"
