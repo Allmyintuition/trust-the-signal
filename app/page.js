@@ -28,6 +28,8 @@ import {
   Layers,
   Sparkles,
   FileSearch,
+  Mail,
+  CheckCircle2,
 } from "lucide-react";
 
 const fadeUp = {
@@ -310,19 +312,29 @@ const products = [
     price: "$19",
     desc: "A premium beginner-to-operator guide for understanding token structure and execution.",
     icon: BookOpen,
+    action: "Preview Guide",
   },
   {
     title: "Wallet Intelligence Notes",
     price: "$29",
     desc: "Smart wallet pattern recognition, recurrence logic, and movement interpretation.",
     icon: Wallet,
+    action: "View Notes",
   },
   {
     title: "Protected Signal Framework",
     price: "Soon",
     desc: "Private ecosystem access, alert routing, and disciplined execution architecture.",
     icon: KeyRound,
+    action: "Request Access",
   },
+];
+
+const accessBenefits = [
+  "Early access to private signal intelligence",
+  "Priority updates as the scanner ecosystem expands",
+  "Premium product and guide release notifications",
+  "Protected community and alert route preparation",
 ];
 
 export default function Home() {
@@ -330,6 +342,8 @@ export default function Home() {
   const [contract, setContract] = useState("");
   const [checking, setChecking] = useState(false);
   const [recentChecks, setRecentChecks] = useState([]);
+  const [accessEmail, setAccessEmail] = useState("");
+  const [accessSubmitted, setAccessSubmitted] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -376,8 +390,8 @@ export default function Home() {
   const openAccessModal = () =>
     setModal({
       label: "Protected Access",
-      title: "Access Route Opening Soon",
-      body: "This portal becomes the gateway into Telegram, Discord, private signal channels, premium guides, and future membership access.",
+      title: "Access Request Captured",
+      body: "This access layer is being prepared for Telegram, Discord, premium product drops, private signal rooms, and future membership routes.",
       icon: <Lock className="h-5 w-5" />,
     });
 
@@ -385,9 +399,47 @@ export default function Home() {
     setModal({
       label: "Digital Product",
       title: product.title,
-      body: product.desc,
+      body: `${product.desc} This product layer is being prepared for checkout, previews, and premium guide delivery.`,
       icon: <BookOpen className="h-5 w-5" />,
     });
+
+  const submitAccessRequest = () => {
+    if (!accessEmail.trim()) {
+      setModal({
+        label: "Access Request",
+        title: "Email Required",
+        body: "Enter an email or preferred contact before requesting protected access.",
+        icon: <Mail className="h-5 w-5" />,
+      });
+      return;
+    }
+
+    const savedRequests = JSON.parse(
+      window.localStorage.getItem("tts_access_requests") || "[]"
+    );
+
+    const nextRequests = [
+      {
+        email: accessEmail.trim(),
+        createdAt: new Date().toISOString(),
+      },
+      ...savedRequests,
+    ].slice(0, 25);
+
+    window.localStorage.setItem(
+      "tts_access_requests",
+      JSON.stringify(nextRequests)
+    );
+
+    setAccessSubmitted(true);
+
+    setModal({
+      label: "Access Request",
+      title: "Request Captured",
+      body: "Your access request has been captured locally for now. The next upgrade can connect this to a real email list, CRM, or database.",
+      icon: <CheckCircle2 className="h-5 w-5" />,
+    });
+  };
 
   const runLiveSignalCheck = async () => {
     const trimmedContract = contract.trim();
@@ -449,6 +501,22 @@ export default function Home() {
     setChecking(false);
   };
 
+  const routeToTokenPage = () => {
+    const trimmedContract = contract.trim();
+
+    if (!trimmedContract) {
+      setModal({
+        label: "Token Page",
+        title: "No Contract Entered",
+        body: "Paste a Solana contract first, then open its dedicated token intelligence page.",
+        icon: <FileSearch className="h-5 w-5" />,
+      });
+      return;
+    }
+
+    window.location.href = `/token/${encodeURIComponent(trimmedContract)}`;
+  };
+
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <Modal modal={modal} closeModal={closeModal} />
@@ -491,20 +559,20 @@ export default function Home() {
               <Badge>👁️ Signal.Detected()</Badge>
               <Badge>📡 System.Listening</Badge>
               <Badge>🔒 Protected.Channel</Badge>
-              <Badge>🧠 Token.Pages.Live</Badge>
+              <Badge>🧠 Conversion.Layer.Live</Badge>
             </div>
 
             <h2 className="max-w-4xl text-5xl font-semibold leading-[0.92] tracking-tight md:text-7xl">
               Token intelligence,
               <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                built for signal operators.
+                built to convert attention.
               </span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 md:text-xl">
-              Trust The Signal is evolving into a premium Solana intelligence
-              ecosystem: live signal checks, trending discovery, dedicated token
-              pages, product education, and protected access routes.
+              Trust The Signal now routes users from discovery to analysis to
+              protected access — turning a utility site into a premium Solana
+              intelligence funnel.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
@@ -514,19 +582,6 @@ export default function Home() {
               <Button href="/trending" variant="outline">
                 Explore Trending
               </Button>
-            </div>
-
-            <div className="mt-8 grid max-w-2xl gap-3 md:grid-cols-3">
-              {["Utility First", "Structure Over Noise", "Access Earned"].map(
-                (item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/65"
-                  >
-                    <span className="text-emerald-300">⌁</span> {item}
-                  </div>
-                )
-              )}
             </div>
           </motion.div>
 
@@ -547,35 +602,44 @@ export default function Home() {
               Paste Solana token address
             </label>
 
-            <div className="flex flex-col gap-3 md:flex-row">
+            <div className="flex flex-col gap-3">
               <input
                 value={contract}
                 onChange={(e) => setContract(e.target.value)}
                 placeholder="Enter live Solana contract..."
-                className="h-12 flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
+                className="h-12 rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
               />
 
-              <button
-                onClick={runLiveSignalCheck}
-                className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
-              >
-                {checking ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Checking
-                  </span>
-                ) : (
-                  "Run Check"
-                )}
-              </button>
+              <div className="grid gap-3 md:grid-cols-2">
+                <button
+                  onClick={runLiveSignalCheck}
+                  className="h-12 rounded-2xl bg-emerald-400 px-5 font-medium text-black hover:bg-emerald-300"
+                >
+                  {checking ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Checking
+                    </span>
+                  ) : (
+                    "Run Quick Check"
+                  )}
+                </button>
+
+                <button
+                  onClick={routeToTokenPage}
+                  className="h-12 rounded-2xl border border-white/10 bg-white/5 px-5 font-medium text-white/75 transition hover:border-emerald-300/30 hover:text-white"
+                >
+                  Open Token Page
+                </button>
+              </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {[
                 ["Signal Engine", "Operational"],
-                ["Trending Board", "Connected"],
                 ["Token Pages", "Live"],
-                ["Authority Mode", "Phase 15"],
+                ["Access Capture", "Prepared"],
+                ["Authority Mode", "Phase 16"],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -632,17 +696,77 @@ export default function Home() {
         </section>
 
         <section className="pt-20">
+          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
+            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                  <Mail className="h-5 w-5" />
+                  <span className="text-sm uppercase tracking-[0.24em]">
+                    Access Capture
+                  </span>
+                </div>
+
+                <h2 className="text-3xl font-semibold md:text-5xl">
+                  Request protected access before the signal room opens.
+                </h2>
+
+                <p className="mt-4 leading-8 text-white/65">
+                  This capture layer prepares the site for Telegram, Discord,
+                  premium guide drops, private alerts, and future membership
+                  routes.
+                </p>
+
+                <div className="mt-6 flex flex-col gap-3 md:flex-row">
+                  <input
+                    value={accessEmail}
+                    onChange={(e) => setAccessEmail(e.target.value)}
+                    placeholder="Email or preferred contact..."
+                    className="h-12 flex-1 rounded-2xl border border-white/10 bg-black/30 px-4 text-white outline-none"
+                  />
+
+                  <button
+                    onClick={submitAccessRequest}
+                    className="h-12 rounded-2xl bg-emerald-400 px-6 font-semibold text-black hover:bg-emerald-300"
+                  >
+                    {accessSubmitted ? "Request Captured" : "Request Access"}
+                  </button>
+                </div>
+
+                <p className="mt-3 text-xs text-white/40">
+                  Local capture active now. Database/email integration can be
+                  connected in the next backend phase.
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {accessBenefits.map((benefit) => (
+                  <div
+                    key={benefit}
+                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4"
+                  >
+                    <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
+                    <p className="text-sm leading-7 text-white/70">
+                      {benefit}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </section>
+
+        <section className="pt-20">
           <div className="mb-6">
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
               Premium Utility Layer
             </p>
             <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
-              More than a checker. A signal ecosystem.
+              More than a checker. A conversion ecosystem.
             </h2>
             <p className="mt-4 max-w-3xl leading-8 text-white/60">
-              Each page now connects to another useful action: discover tokens,
-              analyze them, route to Signal Check Pro, and return to the wider
-              intelligence system.
+              Each page now routes users toward deeper utility: discover tokens,
+              analyze contracts, open token pages, request protected access, and
+              return to the wider intelligence system.
             </p>
           </div>
 
@@ -702,7 +826,7 @@ export default function Home() {
                 {[
                   ["Discovery", "Find movement through Trending Intelligence."],
                   ["Analysis", "Open dedicated token pages with live scoring."],
-                  ["Confirmation", "Route contracts back into Signal Check Pro."],
+                  ["Conversion", "Request access after using the live utility."],
                   ["Retention", "Recent checks keep users returning."],
                 ].map(([title, desc]) => (
                   <div
@@ -785,7 +909,7 @@ export default function Home() {
                         {product.price}
                       </span>
                       <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-                        View
+                        {product.action}
                       </button>
                     </div>
                   </div>
@@ -881,10 +1005,10 @@ export default function Home() {
               "Trending",
               "Token Pages",
               "Signal Check",
+              "Access",
+              "Products",
               "Telegram",
               "Discord",
-              "Guides",
-              "Protected Access",
             ].map((item) => (
               <span
                 key={item}
