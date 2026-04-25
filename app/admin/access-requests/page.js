@@ -10,6 +10,7 @@ import {
     Inbox,
     Copy,
     Check,
+    Trash2,
 } from "lucide-react";
 
 const Card = ({ children, className = "" }) => (
@@ -30,8 +31,17 @@ const formatDate = (value) => {
     }
 };
 
-const RequestRow = ({ request }) => {
+const statusStyles = {
+    new_access_request: "bg-emerald-400/10 text-emerald-200 border-emerald-400/20",
+    reviewing: "bg-blue-400/10 text-blue-200 border-blue-400/20",
+    contacted: "bg-yellow-400/10 text-yellow-100 border-yellow-400/20",
+    accepted: "bg-purple-400/10 text-purple-100 border-purple-400/20",
+    archived: "bg-white/10 text-white/55 border-white/10",
+};
+
+const RequestRow = ({ request, onRefresh }) => {
     const [copied, setCopied] = useState(false);
+    const [busy, setBusy] = useState(false);
 
     const copyContact = async () => {
         if (!request?.contact) return;
@@ -53,9 +63,44 @@ const RequestRow = ({ request }) => {
         }
     };
 
+    const updateStatus = async (status) => {
+        setBusy(true);
+
+        await fetch("/api/admin/access-requests", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id: request.id,
+                status,
+            }),
+        });
+
+        setBusy(false);
+        onRefresh();
+    };
+
+    const deleteRequest = async () => {
+        setBusy(true);
+
+        await fetch("/api/admin/access-requests", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id: request.id,
+            }),
+        });
+
+        setBusy(false);
+        onRefresh();
+    };
+
     return (
         <Card>
-            <div className="grid gap-4 p-5 lg:grid-cols-[1.1fr_0.8fr_1fr_0.9fr_auto] lg:items-center">
+            <div className="grid gap-5 p-5 xl:grid-cols-[1.05fr_0.7fr_1fr_0.9fr_auto] xl:items-start">
                 <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-white/35">
                         Contact
@@ -63,15 +108,30 @@ const RequestRow = ({ request }) => {
                     <p className="mt-2 break-all font-mono text-sm text-emerald-200">
                         {request.contact || "--"}
                     </p>
+
+                    <button
+                        onClick={copyContact}
+                        className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {copied ? "Copied" : "Copy"}
+                        </span>
+                    </button>
                 </div>
 
                 <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-white/35">
                         Source
                     </p>
-                    <p className="mt-2 text-sm text-white/75">
-                        {request.source || "--"}
-                    </p>
+                    <p className="mt-2 text-sm text-white/75">{request.source || "--"}</p>
+
+                    <div
+                        className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs ${statusStyles[request.status] || statusStyles.new_access_request
+                            }`}
+                    >
+                        {request.status}
+                    </div>
                 </div>
 
                 <div>
@@ -92,15 +152,31 @@ const RequestRow = ({ request }) => {
                     </p>
                 </div>
 
-                <button
-                    onClick={copyContact}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
-                >
-                    <span className="inline-flex items-center gap-2">
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        {copied ? "Copied" : "Copy"}
-                    </span>
-                </button>
+                <div className="grid gap-2">
+                    <select
+                        disabled={busy}
+                        value={request.status}
+                        onChange={(e) => updateStatus(e.target.value)}
+                        className="rounded-xl border border-white/10 bg-black px-3 py-2 text-xs text-white"
+                    >
+                        <option value="new_access_request">new_access_request</option>
+                        <option value="reviewing">reviewing</option>
+                        <option value="contacted">contacted</option>
+                        <option value="accepted">accepted</option>
+                        <option value="archived">archived</option>
+                    </select>
+
+                    <button
+                        disabled={busy}
+                        onClick={deleteRequest}
+                        className="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs text-red-100"
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <Trash2 className="h-3 w-3" />
+                            Delete
+                        </span>
+                    </button>
+                </div>
             </div>
         </Card>
     );
@@ -142,9 +218,7 @@ export default function AccessRequestsAdminPage() {
 
     useEffect(() => {
         loadRequests();
-    }, []);
-
-    return (
+    }, []); return (
         <main className="min-h-screen overflow-hidden bg-black text-white">
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
             <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
@@ -185,20 +259,19 @@ export default function AccessRequestsAdminPage() {
                             📥 Backend Capture
                         </span>
                         <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            🧠 Phase 19
+                            🧠 Lead Management
                         </span>
                     </div>
 
                     <h2 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
-                        Access requests.
+                        Captured contacts.
                         <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                            Captured intelligence leads.
+                            Managed pipeline.
                         </span>
                     </h2>
 
                     <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-                        View contacts submitted through the homepage and token page protected
-                        access forms.
+                        Review, mark, contact, archive, and delete protected access leads.
                     </p>
                 </section>
 
@@ -217,10 +290,10 @@ export default function AccessRequestsAdminPage() {
                     <Card>
                         <div className="p-5">
                             <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                                Storage
+                                Route
                             </p>
                             <p className="mt-2 text-2xl font-semibold text-emerald-300">
-                                JSON File
+                                Active
                             </p>
                         </div>
                     </Card>
@@ -228,10 +301,10 @@ export default function AccessRequestsAdminPage() {
                     <Card>
                         <div className="p-5">
                             <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                                Route
+                                Storage
                             </p>
-                            <p className="mt-2 text-sm font-mono text-white/65">
-                                /api/admin/access-requests
+                            <p className="mt-2 text-2xl font-semibold text-emerald-300">
+                                Persistent
                             </p>
                         </div>
                     </Card>
@@ -241,7 +314,7 @@ export default function AccessRequestsAdminPage() {
                     <div className="mb-5 flex items-center justify-between gap-4">
                         <div>
                             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-                                Captured Contacts
+                                Captured Leads
                             </p>
                             <h3 className="mt-2 text-2xl font-semibold">
                                 Latest access requests
@@ -286,10 +359,6 @@ export default function AccessRequestsAdminPage() {
                                 <h3 className="mt-4 text-xl font-semibold">
                                     No access requests captured yet.
                                 </h3>
-                                <p className="mt-3 max-w-xl text-sm leading-7 text-white/60">
-                                    Submit a request from the homepage or a token page, then return
-                                    here and refresh.
-                                </p>
                             </div>
                         </Card>
                     )}
@@ -297,7 +366,11 @@ export default function AccessRequestsAdminPage() {
                     {!loading && !error && requests.length > 0 && (
                         <div className="space-y-4">
                             {requests.map((request) => (
-                                <RequestRow key={request.id || request.createdAt} request={request} />
+                                <RequestRow
+                                    key={request.id || request.createdAt}
+                                    request={request}
+                                    onRefresh={() => loadRequests({ refresh: true })}
+                                />
                             ))}
                         </div>
                     )}
