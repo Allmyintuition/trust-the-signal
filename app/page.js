@@ -26,6 +26,8 @@ import {
   Send,
   MessageCircle,
   Layers,
+  Sparkles,
+  FileSearch,
 } from "lucide-react";
 
 const fadeUp = {
@@ -35,18 +37,26 @@ const fadeUp = {
 
 const clampBar = (num) => Math.max(0, Math.min(100, Number(num || 0)));
 
-const Button = ({ children, variant = "solid", onClick }) => (
-  <button
-    onClick={onClick}
-    className={
-      variant === "outline"
-        ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
-        : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300"
-    }
-  >
-    <span className="inline-flex items-center gap-2">{children}</span>
-  </button>
-);
+const Button = ({ children, variant = "solid", onClick, href }) => {
+  const className =
+    variant === "outline"
+      ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+      : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300";
+
+  if (href) {
+    return (
+      <a href={href} className={className}>
+        <span className="inline-flex items-center gap-2">{children}</span>
+      </a>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={className}>
+      <span className="inline-flex items-center gap-2">{children}</span>
+    </button>
+  );
+};
 
 const NavLink = ({ href, children }) => (
   <a
@@ -264,8 +274,13 @@ const tools = [
   },
   {
     title: "Trending Intelligence",
-    desc: "Live Solana trending discovery board pulling top liquidity, volume, and momentum.",
+    desc: "Live Solana discovery board for liquidity, volume, and momentum before deeper confirmation.",
     icon: TrendingUp,
+  },
+  {
+    title: "Token Intelligence Pages",
+    desc: "Dedicated shareable token pages built around live scoring, risk flags, and source data.",
+    icon: FileSearch,
   },
   {
     title: "Wallet Intelligence",
@@ -275,10 +290,10 @@ const tools = [
 ];
 
 const liveStats = [
-  ["Tracked Tokens", "18,420+"],
-  ["Wallet Signals", "4,900+"],
-  ["Daily Checks", "1,200+"],
-  ["Protected Members", "2,100+"],
+  ["Live Utility", "Active"],
+  ["Signal Engine", "Pro"],
+  ["Discovery Board", "Online"],
+  ["Token Pages", "Live"],
 ];
 
 const terminalFeed = [
@@ -286,7 +301,7 @@ const terminalFeed = [
   ["06:42:14", "RUG_FILTER", "caution: low_liq_to_mc"],
   ["06:42:39", "WALLET_TRACE", "candidate wallet recurrence detected"],
   ["06:43:08", "SIGNAL_ENGINE", "setup classified: early_potential"],
-  ["06:43:21", "ALERT_ROUTE", "telegram preview queued"],
+  ["06:43:21", "TOKEN_PAGE", "shareable intelligence route generated"],
 ];
 
 const products = [
@@ -340,10 +355,10 @@ export default function Home() {
   const saveRecentCheck = (address) => {
     if (!address) return;
 
-    const next = [address, ...recentChecks.filter((item) => item !== address)].slice(
-      0,
-      6
-    );
+    const next = [
+      address,
+      ...recentChecks.filter((item) => item !== address),
+    ].slice(0, 6);
 
     setRecentChecks(next);
     window.localStorage.setItem("tts_recent_checks", JSON.stringify(next));
@@ -476,26 +491,42 @@ export default function Home() {
               <Badge>👁️ Signal.Detected()</Badge>
               <Badge>📡 System.Listening</Badge>
               <Badge>🔒 Protected.Channel</Badge>
+              <Badge>🧠 Token.Pages.Live</Badge>
             </div>
 
             <h2 className="max-w-4xl text-5xl font-semibold leading-[0.92] tracking-tight md:text-7xl">
-              The signal was never noise.
+              Token intelligence,
               <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                It was structure waiting to be seen.
+                built for signal operators.
               </span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 md:text-xl">
-              A premium intelligence platform for token discovery, risk
-              awareness, wallet behavior, digital products, community growth,
-              and signal-based execution.
+              Trust The Signal is evolving into a premium Solana intelligence
+              ecosystem: live signal checks, trending discovery, dedicated token
+              pages, product education, and protected access routes.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
               <Button onClick={openSignalModal}>
                 Activate Signal Layer <ArrowRight className="h-4 w-4" />
               </Button>
-              <NavLink href="/trending">View Trending Intelligence</NavLink>
+              <Button href="/trending" variant="outline">
+                Explore Trending
+              </Button>
+            </div>
+
+            <div className="mt-8 grid max-w-2xl gap-3 md:grid-cols-3">
+              {["Utility First", "Structure Over Noise", "Access Earned"].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/65"
+                  >
+                    <span className="text-emerald-300">⌁</span> {item}
+                  </div>
+                )
+              )}
             </div>
           </motion.div>
 
@@ -541,10 +572,10 @@ export default function Home() {
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {[
-                ["Backend Route", "Connected"],
-                ["DexScreener API", "Live"],
-                ["Signal Layer", "Operational"],
-                ["Authority Mode", "Phase 12"],
+                ["Signal Engine", "Operational"],
+                ["Trending Board", "Connected"],
+                ["Token Pages", "Live"],
+                ["Authority Mode", "Phase 15"],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -603,14 +634,19 @@ export default function Home() {
         <section className="pt-20">
           <div className="mb-6">
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-              Platform Utility Layer
+              Premium Utility Layer
             </p>
             <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
-              Tools that make people return.
+              More than a checker. A signal ecosystem.
             </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-white/60">
+              Each page now connects to another useful action: discover tokens,
+              analyze them, route to Signal Check Pro, and return to the wider
+              intelligence system.
+            </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {tools.map((tool) => {
               const Icon = tool.icon;
 
@@ -629,6 +665,59 @@ export default function Home() {
               );
             })}
           </div>
+        </section>
+
+        <section className="pt-20">
+          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
+            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                  <FileSearch className="h-5 w-5" />
+                  <span className="text-sm uppercase tracking-[0.24em]">
+                    Token Intelligence Pages
+                  </span>
+                </div>
+
+                <h2 className="text-3xl font-semibold md:text-5xl">
+                  Every contract can become a shareable intelligence route.
+                </h2>
+
+                <p className="mt-4 leading-8 text-white/65">
+                  Dedicated token pages create a stronger platform feeling:
+                  shareable analysis, cleaner discovery flow, and future SEO
+                  potential for token-specific intelligence.
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-4">
+                  <Button href="/trending">
+                    Explore Token Pages <ArrowRight className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" onClick={openSignalModal}>
+                    Run Signal Check
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {[
+                  ["Discovery", "Find movement through Trending Intelligence."],
+                  ["Analysis", "Open dedicated token pages with live scoring."],
+                  ["Confirmation", "Route contracts back into Signal Check Pro."],
+                  ["Retention", "Recent checks keep users returning."],
+                ].map(([title, desc]) => (
+                  <div
+                    key={title}
+                    className="rounded-2xl border border-white/10 bg-black/30 p-5"
+                  >
+                    <p className="font-semibold text-emerald-200">{title}</p>
+                    <p className="mt-2 text-sm leading-6 text-white/60">
+                      {desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
         </section>
 
         <section className="pt-20">
@@ -777,7 +866,9 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <Button onClick={openSignalModal}>Launch Foundation</Button>
-                <NavLink href="/trending">Explore Trending</NavLink>
+                <Button href="/trending" variant="outline">
+                  Explore Trending
+                </Button>
               </div>
             </div>
           </Card>
@@ -788,6 +879,7 @@ export default function Home() {
             {[
               "Home",
               "Trending",
+              "Token Pages",
               "Signal Check",
               "Telegram",
               "Discord",
