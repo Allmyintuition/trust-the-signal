@@ -65,6 +65,47 @@ const formatNum = (num) => {
   return Number(num).toLocaleString();
 };
 
+const formatPercent = (num) => {
+  if (!num && num !== 0) return "--";
+  return `${Number(num).toFixed(2)}%`;
+};
+
+const getVerdictStyle = (verdict) => {
+  if (verdict === "SAFE") return "border-emerald-400/30 bg-emerald-400/15 text-emerald-200";
+  if (verdict === "DANGER") return "border-red-400/30 bg-red-400/15 text-red-200";
+  return "border-yellow-400/30 bg-yellow-400/15 text-yellow-100";
+};
+
+const SignalScoreBar = ({ label, value }) => (
+  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    <div className="mb-2 flex items-center justify-between gap-3">
+      <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+      <p className="text-sm font-semibold text-emerald-200">{value ?? 0}/100</p>
+    </div>
+    <div className="h-2 overflow-hidden rounded-full bg-white/10">
+      <div
+        className="h-full rounded-full bg-emerald-300"
+        style={{ width: `${Math.max(0, Math.min(100, value || 0))}%` }}
+      />
+    </div>
+  </div>
+);
+
+const ExternalLinkButton = ({ href, children }) => {
+  if (!href) return null;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/20"
+    >
+      {children}
+    </a>
+  );
+};
+
 const Modal = ({ modal, closeModal }) => {
   if (!modal) return null;
 
@@ -73,7 +114,7 @@ const Modal = ({ modal, closeModal }) => {
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="relative w-full max-w-2xl rounded-[32px] border border-emerald-400/20 bg-black p-7 shadow-2xl shadow-emerald-500/20"
+        className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[32px] border border-emerald-400/20 bg-black p-7 shadow-2xl shadow-emerald-500/20"
       >
         <button
           onClick={closeModal}
@@ -89,21 +130,52 @@ const Modal = ({ modal, closeModal }) => {
           </span>
         </div>
 
-        <h3 className="text-3xl font-semibold">{modal.title}</h3>
+        <h3 className="pr-10 text-3xl font-semibold">{modal.title}</h3>
         <p className="mt-4 leading-8 text-white/65">{modal.body}</p>
 
         {modal.type === "signal" && modal.live && (
           <>
+            <div className="mt-6 rounded-[28px] border border-emerald-400/20 bg-emerald-400/10 p-5">
+              <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-white/45">
+                    Final Signal Score
+                  </p>
+                  <div className="mt-2 flex items-end gap-2">
+                    <span className="text-6xl font-semibold text-emerald-300">
+                      {modal.live.score ?? "--"}
+                    </span>
+                    <span className="mb-2 text-white/45">/100</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 md:items-end">
+                  <span className={`rounded-full border px-4 py-2 text-sm font-semibold tracking-[0.18em] ${getVerdictStyle(modal.live.verdict)}`}>
+                    {modal.live.verdict || "CAUTION"}
+                  </span>
+                  <p className="text-right text-sm text-white/55">
+                    {modal.live.action || "Observe structure before action."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {[
                 ["Token", `${modal.live.name} (${modal.live.symbol})`],
-                ["Signal Verdict", modal.live.signal],
-                ["Risk Status", modal.live.risk],
+                ["Signal", modal.live.signal],
+                ["Risk", modal.live.risk],
+                ["Pair Age", modal.live.pairAge],
                 ["Liquidity", `$${formatNum(modal.live.liquidity)}`],
                 ["24H Volume", `$${formatNum(modal.live.volume24h)}`],
                 ["Market Cap", `$${formatNum(modal.live.marketCap)}`],
-                ["24H Change", `${modal.live.priceChange24h}%`],
+                ["24H Change", formatPercent(modal.live.priceChange24h)],
+                ["24H Buys", formatNum(modal.live.buys24h)],
+                ["24H Sells", formatNum(modal.live.sells24h)],
                 ["DEX", modal.live.dex],
+                ["Quote", modal.live.quoteToken || "--"],
+                ["Source Health", modal.live.sourceHealth || "limited_presence"],
+                ["Price", modal.live.priceUsd ? `$${modal.live.priceUsd}` : "--"],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -112,16 +184,92 @@ const Modal = ({ modal, closeModal }) => {
                   <p className="text-xs uppercase tracking-[0.22em] text-white/40">
                     {label}
                   </p>
-                  <p className="mt-2 text-lg font-medium text-emerald-200">
-                    {value}
+                  <p className="mt-2 break-words text-lg font-medium text-emerald-200">
+                    {value || "--"}
                   </p>
                 </div>
               ))}
             </div>
 
+            <div className="mt-6">
+              <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
+                Score Breakdown
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <SignalScoreBar label="Liquidity" value={modal.live.breakdown?.liquidity} />
+                <SignalScoreBar label="Volume" value={modal.live.breakdown?.volume} />
+                <SignalScoreBar label="Liquidity Balance" value={modal.live.breakdown?.liquidityBalance} />
+                <SignalScoreBar label="Momentum" value={modal.live.breakdown?.momentum} />
+                <SignalScoreBar label="Age" value={modal.live.breakdown?.age} />
+                <SignalScoreBar label="Transactions" value={modal.live.breakdown?.transactions} />
+                <SignalScoreBar label="Metadata" value={modal.live.breakdown?.metadata} />
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
+                Source + Social Presence
+              </p>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">Website</p>
+                  <p className="mt-2 text-lg font-medium text-emerald-200">
+                    {modal.live.socialPresence?.hasWebsite ? "Detected" : "Not Detected"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">Socials</p>
+                  <p className="mt-2 text-lg font-medium text-emerald-200">
+                    {modal.live.socialPresence?.socialCount ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">Presence</p>
+                  <p className="mt-2 text-lg font-medium text-emerald-200">
+                    {modal.live.sourceHealth || "limited_presence"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ExternalLinkButton href={modal.live.pairUrl}>Open DexScreener Pair</ExternalLinkButton>
+                {modal.live.socialPresence?.websites?.map((site, index) => (
+                  <ExternalLinkButton key={`site-${index}`} href={site.url}>
+                    {site.label || "Website"}
+                  </ExternalLinkButton>
+                ))}
+                {modal.live.socialPresence?.socials?.map((social, index) => (
+                  <ExternalLinkButton key={`social-${index}`} href={social.url}>
+                    {social.type || "Social"}
+                  </ExternalLinkButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
+                Risk Flags
+              </p>
+              {modal.live.riskFlags?.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {modal.live.riskFlags.map((flag) => (
+                    <span
+                      key={flag}
+                      className="rounded-full border border-yellow-400/25 bg-yellow-400/10 px-3 py-1 text-xs text-yellow-100"
+                    >
+                      {flag}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-emerald-200">
+                  No major automated risk flags detected.
+                </p>
+              )}
+            </div>
+
             <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-              Live DexScreener intelligence successfully routed through Trust The
-              Signal signal layer.
+              Signal Check Pro is now processing live DexScreener data through a branded Trust The Signal scoring engine. This is not financial advice. Always confirm manually before execution.
             </div>
           </>
         )}
@@ -259,7 +407,9 @@ const roadmap = [
 export default function Home() {
   const [modal, setModal] = useState(null);
   const [contract, setContract] = useState("");
-  const [checking, setChecking] = useState(false); const closeModal = () => setModal(null);
+  const [checking, setChecking] = useState(false);
+
+  const closeModal = () => setModal(null);
 
   const openSignalModal = () =>
     setModal({
@@ -323,8 +473,8 @@ export default function Home() {
         setModal({
           type: "signal",
           label: "Live Signal Result",
-          title: "Contract Intelligence Result",
-          body: "Live token data has been processed through the Trust The Signal authority layer.",
+          title: "Signal Check Pro Result",
+          body: "Live token data has been processed through the Trust The Signal scoring engine.",
           icon: <Radar className="h-5 w-5" />,
           live: data.result,
         });
@@ -418,10 +568,10 @@ export default function Home() {
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <p className="text-sm uppercase tracking-[0.24em] text-white/45">
-                      Signal Check
+                      Signal Check Pro
                     </p>
                     <h3 className="mt-1 text-2xl font-semibold">
-                      Contract Intelligence Layer
+                      Contract Intelligence Engine
                     </h3>
                   </div>
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10">
@@ -459,8 +609,8 @@ export default function Home() {
                     {[
                       ["Backend Route", "Connected"],
                       ["DexScreener API", "Live"],
-                      ["Signal Layer", "Operational"],
-                      ["Authority Mode", "Phase 6"],
+                      ["Scoring Engine", "Phase 8 Pro"],
+                      ["Metadata Layer", "Socials + Source Health"],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                         <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
@@ -470,13 +620,15 @@ export default function Home() {
                   </div>
 
                   <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-                    Live contract intelligence is now routed through real DexScreener data.
+                    Live contract intelligence now scores liquidity, volume, balance, momentum, age, transactions, metadata, source health, socials, and risk flags.
                   </div>
                 </div>
               </div>
             </Card>
           </motion.div>
-        </section>        <section className="pt-10">
+        </section>
+
+        <section className="pt-10">
           <div className="overflow-hidden rounded-3xl border border-emerald-400/20 bg-emerald-400/10 py-3 shadow-2xl shadow-emerald-500/10">
             <motion.div
               className="flex min-w-max gap-10 whitespace-nowrap px-6 text-sm text-emerald-100/90"
