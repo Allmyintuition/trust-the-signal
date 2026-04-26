@@ -24,6 +24,9 @@ import {
   RadioTower,
   Layers,
   Sparkles,
+  BarChart3,
+  Database,
+  ExternalLink,
 } from "lucide-react";
 
 const fadeUp = {
@@ -328,6 +331,8 @@ export default function Home() {
   const [recentChecks, setRecentChecks] = useState([]);
   const [accessEmail, setAccessEmail] = useState("");
   const [accessSubmitted, setAccessSubmitted] = useState(false);
+  const [platformMetrics, setPlatformMetrics] = useState(null);
+  const [signalReceipts, setSignalReceipts] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -354,7 +359,37 @@ export default function Home() {
       }
     }
 
+    async function loadPlatformMetrics() {
+      try {
+        const response = await fetch("/api/platform-metrics", {
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setPlatformMetrics(data.metrics);
+        }
+      } catch {}
+    }
+
+    async function loadSignalReceipts() {
+      try {
+        const response = await fetch("/api/signal-receipts", {
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.receipts)) {
+          setSignalReceipts(data.receipts.slice(0, 3));
+        }
+      } catch {}
+    }
+
     loadRecentChecks();
+    loadPlatformMetrics();
+    loadSignalReceipts();
   }, []);
 
   const closeModal = () => setModal(null);
@@ -733,6 +768,104 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+
+        <section className="pt-14">
+          <div className="mb-6 flex items-center gap-2 text-emerald-300">
+            <BarChart3 className="h-5 w-5" />
+            <p className="text-sm uppercase tracking-[0.24em]">Live Platform Authority</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+            {[
+              ["Contracts", platformMetrics?.contractsProcessed ?? "--"],
+              ["Total Checks", platformMetrics?.totalChecks ?? "--"],
+              ["Protected Queue", platformMetrics?.protectedQueue ?? "--"],
+              ["Safe Routes", platformMetrics?.safeRoutes ?? "--"],
+              ["Caution Routes", platformMetrics?.cautionRoutes ?? "--"],
+              ["Operator Marked", platformMetrics?.operatorMarked ?? "--"],
+            ].map(([label, value]) => (
+              <Card key={label}>
+                <div className="p-5 text-center">
+                  <p className="text-3xl font-semibold text-emerald-300">{value}</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-white/45">{label}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="pt-20">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+                Signal Receipt Archive
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
+                Public proof of recent intelligence.
+              </h2>
+            </div>
+
+            <a
+              href="/receipts"
+              className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-200"
+            >
+              <span className="inline-flex items-center gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Open Receipts
+              </span>
+            </a>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {signalReceipts.map((receipt) => (
+              <Card key={receipt.id} className="h-full">
+                <div className="p-6">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                      {receipt.receiptType}
+                    </span>
+
+                    <span className="text-xs text-white/40">
+                      {receipt.checkCount || 0} checks
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-semibold">
+                    {receipt.tokenName} ({receipt.tokenSymbol})
+                  </h3>
+
+                  <p className="mt-2 break-all font-mono text-[11px] text-white/35">
+                    {receipt.contract}
+                  </p>
+
+                  <div className="mt-4 grid gap-2 text-sm">
+                    <p>Score: <span className="text-emerald-300">{receipt.score ?? "--"}</span></p>
+                    <p>Risk: <span className="text-emerald-300">{receipt.risk || "--"}</span></p>
+                    <p>MC: <span className="text-emerald-300">${formatNum(receipt.marketCap)}</span></p>
+                  </div>
+
+                  <div className="mt-5 flex gap-2">
+                    <a
+                      href={`/token/${receipt.contract}`}
+                      className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[11px] font-black text-emerald-200"
+                    >
+                      Open Dossier
+                    </a>
+
+                    <a
+                      href={`/tools/token-memory?q=${receipt.contract}`}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/70"
+                    >
+                      Memory
+                    </a>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
 
         <section className="pt-20">
           <div className="mb-6">
