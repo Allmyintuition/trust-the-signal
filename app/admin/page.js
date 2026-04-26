@@ -9,6 +9,10 @@ import {
   Activity,
   ArrowRight,
   ShieldCheck,
+  Crown,
+  BarChart3,
+  ExternalLink,
+  RadioTower,
 } from "lucide-react";
 
 const ADMIN_MODULES = [
@@ -27,23 +31,23 @@ const ADMIN_MODULES = [
     status: "Live",
   },
   {
-    title: "Watchlist",
+    title: "Public Receipts",
     description:
-      "Future private watchlist for tracked contracts, narratives, alerts, and priority setups.",
-    href: "#",
-    status: "Coming Soon",
+      "Control public proof layer, recent authority receipts, and visible trust archive routes.",
+    href: "/receipts",
+    status: "Live",
   },
   {
-    title: "Analytics",
+    title: "Homepage Authority",
     description:
-      "Future dashboard for traffic, access demand, signal usage, and platform growth metrics.",
-    href: "#",
-    status: "Coming Soon",
+      "Monitor visible platform metrics, public trust cards, and homepage intelligence presentation.",
+    href: "/",
+    status: "Live",
   },
   {
-    title: "Operator Settings",
+    title: "Operator Analytics",
     description:
-      "Future internal controls for platform tuning, access rules, scoring thresholds, and admin tools.",
+      "Incoming command layer for advanced usage patterns, conversion visibility, and route performance.",
     href: "#",
     status: "Coming Soon",
   },
@@ -95,14 +99,24 @@ export default function AdminGatewayPage() {
       icon: Users,
     },
     {
-      label: "New Leads",
-      value: summary?.newAccessCount ?? 0,
-      icon: ShieldCheck,
-    },
-    {
       label: "Recent Visible Checks",
       value: summary?.recentVisibleChecks ?? 0,
       icon: Activity,
+    },
+    {
+      label: "Strong Receipts",
+      value: summary?.strongReceiptCount ?? 0,
+      icon: ShieldCheck,
+    },
+    {
+      label: "Caution Receipts",
+      value: summary?.cautionReceiptCount ?? 0,
+      icon: RadioTower,
+    },
+    {
+      label: "Operator Marked",
+      value: summary?.operatorMarked ?? 0,
+      icon: Crown,
     },
   ];
 
@@ -120,13 +134,13 @@ export default function AdminGatewayPage() {
               </div>
 
               <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
-                Operator Control Center
+                Operator Intelligence Command Center
               </h1>
 
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
-                Hidden admin command layer for protected platform operations,
-                lead management, token intelligence memory, platform activity,
-                and future growth tools.
+              <p className="mt-4 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
+                Protected command layer controlling token memory, visible proof,
+                public receipts, homepage authority, access queue, and platform
+                intelligence narrative.
               </p>
             </div>
 
@@ -148,7 +162,7 @@ export default function AdminGatewayPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
           {stats.map((stat) => {
             const Icon = stat.icon;
 
@@ -159,7 +173,7 @@ export default function AdminGatewayPage() {
               >
                 <Icon className="h-5 w-5 text-emerald-300" />
 
-                <p className="mt-4 text-xs font-bold uppercase tracking-[0.25em] text-white/40">
+                <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.25em] text-white/40">
                   {stat.label}
                 </p>
 
@@ -171,8 +185,8 @@ export default function AdminGatewayPage() {
           })}
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 lg:col-span-2">
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-300">
@@ -191,7 +205,7 @@ export default function AdminGatewayPage() {
               </Link>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-3 md:grid-cols-2">
               {(summary?.recentTokenLogs || []).length > 0 ? (
                 summary.recentTokenLogs.map((log) => (
                   <div
@@ -227,52 +241,33 @@ export default function AdminGatewayPage() {
           </div>
 
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.25em] text-emerald-300">
-                  Recent Access Queue
-                </p>
-                <h2 className="mt-2 text-2xl font-black">
-                  Latest Protected Requests
-                </h2>
+            <div className="mb-5 flex items-center gap-3 text-emerald-300">
+              <BarChart3 className="h-5 w-5" />
+              <p className="text-xs font-black uppercase tracking-[0.25em]">
+                Public Authority
+              </p>
+            </div>
+
+            <div className="grid gap-3 text-sm">
+              <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                <p className="text-white/45">Top Checked Contract</p>
+                <p className="mt-2 font-black">{summary?.topCheckedToken || "—"}</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                <p className="text-white/45">Protected Queue</p>
+                <p className="mt-2 font-black">{summary?.newAccessCount || 0} pending leads</p>
               </div>
 
               <Link
-                href="/admin/access-requests"
-                className="text-sm font-black text-emerald-200 hover:text-emerald-100"
+                href="/receipts"
+                className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 p-4 font-black text-emerald-200"
               >
-                Open →
+                <span className="inline-flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Open Public Receipts
+                </span>
               </Link>
-            </div>
-
-            <div className="grid gap-3">
-              {(summary?.recentAccessRequests || []).length > 0 ? (
-                summary.recentAccessRequests.map((request) => {
-                  const contact =
-                    request.contact ||
-                    request.email ||
-                    request.telegram ||
-                    request.wallet ||
-                    "No contact";
-
-                  return (
-                    <div
-                      key={request.id}
-                      className="rounded-2xl border border-white/10 bg-black/35 p-4"
-                    >
-                      <p className="break-words font-black">{contact}</p>
-
-                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-white/35">
-                        {request.status || "new"} • {request.source || "unknown source"}
-                      </p>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-white/45">
-                  No access requests yet.
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -283,10 +278,11 @@ export default function AdminGatewayPage() {
 
             const card = (
               <div
-                className={`h-full rounded-[1.75rem] border p-6 transition ${isLive
-                  ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
-                  : "border-white/10 bg-white/[0.04] opacity-70"
-                  }`}
+                className={`h-full rounded-[1.75rem] border p-6 transition ${
+                  isLive
+                    ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
+                    : "border-white/10 bg-white/[0.04] opacity-70"
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-2xl font-black tracking-tight">
@@ -294,10 +290,11 @@ export default function AdminGatewayPage() {
                   </h2>
 
                   <span
-                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${isLive
-                      ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
-                      : "border-white/15 bg-white/5 text-white/40"
-                      }`}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
+                      isLive
+                        ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
+                        : "border-white/15 bg-white/5 text-white/40"
+                    }`}
                   >
                     {module.status}
                   </span>
@@ -322,18 +319,6 @@ export default function AdminGatewayPage() {
               <div key={module.title}>{card}</div>
             );
           })}
-        </div>
-
-        <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-white/35">
-            Current Live Admin Routes
-          </p>
-
-          <div className="mt-3 flex flex-col gap-2 text-sm font-bold text-white/70">
-            <p>/admin/access-requests</p>
-            <p>/admin/token-logs</p>
-            <p>/api/admin/summary</p>
-          </div>
         </div>
       </section>
     </main>
