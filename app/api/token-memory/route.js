@@ -13,7 +13,7 @@ export async function GET(request) {
         let builder = supabase
             .from("token_logs")
             .select(
-                "id, contract, token_name, token_symbol, chain, check_count, latest_score, latest_risk, latest_setup, latest_source, market_cap, liquidity, volume_24h, risk_flags, verdict, last_checked_at"
+                "id, contract, token_name, token_symbol, chain, check_count, latest_score, latest_risk, latest_setup, latest_source, market_cap, liquidity, volume_24h, risk_flags, verdict, operator_note, operator_label, last_checked_at"
             )
             .order("last_checked_at", { ascending: false })
             .limit(limit);
