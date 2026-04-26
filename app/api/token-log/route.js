@@ -7,6 +7,7 @@ function normalizeContract(value) {
 
 export async function POST(request) {
     try {
+        const supabase = getSupabaseAdmin();
         const body = await request.json();
 
         const contract = normalizeContract(body.contract);

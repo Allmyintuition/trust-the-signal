@@ -35,6 +35,7 @@ function generateCSV(logs) {
 
 export async function GET(request) {
     try {
+        const supabase = getSupabaseAdmin();
         const { searchParams } = new URL(request.url);
         const format = searchParams.get("format");
 
