@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
     Eye,
@@ -16,6 +16,7 @@ import {
     Check,
     ShieldCheck,
     FileSearch,
+    Search,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -33,7 +34,6 @@ const Card = ({ children, className = "" }) => (
 
 const TokenCard = ({ token }) => {
     const [copied, setCopied] = useState(false);
-
     const encodedAddress = token.address ? encodeURIComponent(token.address) : "";
 
     const copyContract = async () => {
@@ -50,7 +50,6 @@ const TokenCard = ({ token }) => {
             textArea.select();
             document.execCommand("copy");
             document.body.removeChild(textArea);
-
             setCopied(true);
             setTimeout(() => setCopied(false), 1400);
         }
@@ -140,11 +139,7 @@ const TokenCard = ({ token }) => {
                                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-white/75 transition hover:border-emerald-300/30 hover:text-white"
                             >
                                 <span className="inline-flex items-center justify-center gap-2">
-                                    {copied ? (
-                                        <Check className="h-4 w-4" />
-                                    ) : (
-                                        <Copy className="h-4 w-4" />
-                                    )}
+                                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                     {copied ? "Copied" : "Copy CA"}
                                 </span>
                             </button>
@@ -177,13 +172,25 @@ const Section = ({ title, subtitle, icon: Icon, tokens }) => (
                 </div>
                 <h2 className="text-3xl font-semibold md:text-5xl">{title}</h2>
             </div>
+
+            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white/45">
+                {tokens.length} visible
+            </span>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {tokens.map((token, index) => (
-                <TokenCard key={`${token.address}-${index}`} token={token} />
-            ))}
-        </div>
+        {tokens.length === 0 ? (
+            <Card>
+                <div className="p-8 text-center text-white/45">
+                    No matching tokens in this section.
+                </div>
+            </Card>
+        ) : (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {tokens.map((token, index) => (
+                    <TokenCard key={`${token.address}-${index}`} token={token} />
+                ))}
+            </div>
+        )}
     </section>
 );
 
@@ -191,6 +198,8 @@ export default function TrendingPage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [search, setSearch] = useState("");
+    const [minLiquidity, setMinLiquidity] = useState("0");
 
     useEffect(() => {
         const loadTrending = async () => {
@@ -216,6 +225,40 @@ export default function TrendingPage() {
 
         loadTrending();
     }, []);
+
+    const filterTokens = (tokens = []) => {
+        const q = search.trim().toLowerCase();
+        const min = Number(minLiquidity || 0);
+
+        return tokens.filter((token) => {
+            const text = `${token.name} ${token.symbol} ${token.address} ${token.dex}`.toLowerCase();
+            const matchesSearch = q ? text.includes(q) : true;
+            const matchesLiquidity = Number(token.liquidity || 0) >= min;
+
+            return matchesSearch && matchesLiquidity;
+        });
+    };
+
+    const filtered = useMemo(() => {
+        if (!data) {
+            return {
+                topLiquidity: [],
+                topVolume: [],
+                topMomentum: [],
+            };
+        }
+
+        return {
+            topLiquidity: filterTokens(data.topLiquidity || []),
+            topVolume: filterTokens(data.topVolume || []),
+            topMomentum: filterTokens(data.topMomentum || []),
+        };
+    }, [data, search, minLiquidity]);
+
+    const totalVisible =
+        filtered.topLiquidity.length +
+        filtered.topVolume.length +
+        filtered.topMomentum.length;
 
     return (
         <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -286,15 +329,48 @@ export default function TrendingPage() {
                     <h2 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
                         Live token discovery.
                         <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                            Analyze what is moving now.
+                            Filter what is moving now.
                         </span>
                     </h2>
 
                     <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70">
-                        A live intelligence board for discovering Solana tokens by liquidity,
-                        volume, and momentum before deeper Signal Check confirmation.
+                        Discover Solana tokens by liquidity, volume, and momentum, then route
+                        directly into dossiers, Signal Check, memory, and operator tools.
                     </p>
                 </motion.section>
+
+                <section className="pt-10">
+                    <Card className="border-emerald-400/20 bg-emerald-400/10">
+                        <div className="grid gap-4 p-5 lg:grid-cols-[1fr_220px_140px]">
+                            <div className="relative">
+                                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                                <input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search token, symbol, contract, dex..."
+                                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-11 py-4 text-sm outline-none placeholder:text-white/30"
+                                />
+                            </div>
+
+                            <select
+                                value={minLiquidity}
+                                onChange={(e) => setMinLiquidity(e.target.value)}
+                                className="rounded-2xl border border-white/10 bg-black/40 px-4 py-4 text-sm font-bold outline-none"
+                            >
+                                <option value="0">Min Liquidity: Any</option>
+                                <option value="5000">$5K+</option>
+                                <option value="10000">$10K+</option>
+                                <option value="25000">$25K+</option>
+                                <option value="50000">$50K+</option>
+                                <option value="100000">$100K+</option>
+                            </select>
+
+                            <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-center text-sm font-black text-emerald-200">
+                                {totalVisible} visible
+                            </div>
+                        </div>
+                    </Card>
+                </section>
 
                 <section className="pt-10">
                     <Card className="border-emerald-400/20 bg-emerald-400/10">
@@ -302,12 +378,9 @@ export default function TrendingPage() {
                             {[
                                 ["Analyze Token", "Open a dedicated token intelligence page."],
                                 ["Quick Check", "Send the contract directly to the homepage checker."],
-                                ["Copy CA", "Copy the contract address for external tools."],
+                                ["Token Memory", "Search prior checked contracts from the platform archive."],
                             ].map(([title, desc]) => (
-                                <div
-                                    key={title}
-                                    className="rounded-2xl border border-white/10 bg-black/25 p-4"
-                                >
+                                <div key={title} className="rounded-2xl border border-white/10 bg-black/25 p-4">
                                     <p className="font-semibold text-emerald-200">{title}</p>
                                     <p className="mt-2 text-sm leading-6 text-white/60">{desc}</p>
                                 </div>
@@ -340,21 +413,21 @@ export default function TrendingPage() {
                             title="Top Liquidity"
                             subtitle="Structure Strength"
                             icon={Droplets}
-                            tokens={data.topLiquidity || []}
+                            tokens={filtered.topLiquidity}
                         />
 
                         <Section
                             title="Top Volume"
                             subtitle="Market Activity"
                             icon={Activity}
-                            tokens={data.topVolume || []}
+                            tokens={filtered.topVolume}
                         />
 
                         <Section
                             title="Top Momentum"
                             subtitle="Price Movement"
                             icon={TrendingUp}
-                            tokens={data.topMomentum || []}
+                            tokens={filtered.topMomentum}
                         />
 
                         <section className="pb-12 pt-20">
@@ -367,12 +440,20 @@ export default function TrendingPage() {
                                         </p>
                                     </div>
                                     <h2 className="text-3xl font-semibold">
-                                        Discovery now routes into token pages and Signal Check Pro.
+                                        Discovery routes into dossiers, memory, and Signal Check Pro.
                                     </h2>
                                     <p className="mt-4 max-w-3xl leading-8 text-white/65">
-                                        Use Analyze Token for a dedicated intelligence URL, or Quick
-                                        Check to route directly into the homepage Signal Check engine.
+                                        Use Analyze Token for a dedicated intelligence URL, Quick Check
+                                        for the homepage engine, or Token Memory to revisit archived
+                                        checks and repeated demand.
                                     </p>
+
+                                    <a
+                                        href="/tools/token-memory"
+                                        className="mt-6 inline-flex rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-200 hover:bg-emerald-300/20"
+                                    >
+                                        Open Token Memory
+                                    </a>
                                 </div>
                             </Card>
                         </section>
