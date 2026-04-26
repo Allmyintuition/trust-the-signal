@@ -21,26 +21,26 @@ const tools = [
     {
         title: "Rug Risk Checker",
         description:
-            "Structured rug-risk review shell for liquidity, source presence, flags, and dangerous setup behavior.",
+            "Live contract risk analyzer using the Trust The Signal engine for liquidity, source health, and active risk flags.",
         href: "/tools/rug-risk",
         icon: ShieldAlert,
-        status: "Foundation",
+        status: "Live",
     },
     {
         title: "Wallet Snapshot",
         description:
-            "Prepared wallet review layer for future smart wallet, recurrence, and behavioral intelligence.",
+            "Solana wallet format validation and prepared behavior-review layer for future smart wallet intelligence.",
         href: "/tools/wallet-snapshot",
         icon: Wallet,
-        status: "Foundation",
+        status: "Preview",
     },
     {
         title: "Contract Metadata",
         description:
-            "Fast contract profile shell for token identity, links, routing, and source confidence review.",
+            "Live token identity and source-health inspector using contract metadata from the Signal Check engine.",
         href: "/tools/contract-metadata",
         icon: FileSearch,
-        status: "Foundation",
+        status: "Live",
     },
 ];
 
@@ -78,7 +78,6 @@ export default function ToolsPage() {
                         >
                             Products
                         </Link>
-
                         <Link
                             href="/protected"
                             className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20"
@@ -97,12 +96,12 @@ export default function ToolsPage() {
                     </div>
 
                     <h2 className="max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
-                        A growing suite of signal-first crypto tools.
+                        A growing suite of live signal-first crypto tools.
                     </h2>
 
                     <p className="mt-5 max-w-3xl text-base leading-8 text-white/65">
-                        Trust The Signal is being structured as a premium intelligence
-                        ecosystem: contract checks, rug-risk review, wallet behavior,
+                        Trust The Signal is now structured as a premium intelligence
+                        ecosystem: live signal checks, rug-risk review, wallet validation,
                         metadata routing, token dossiers, and future protected operator
                         access.
                     </p>
