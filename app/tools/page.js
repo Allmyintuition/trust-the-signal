@@ -4,6 +4,7 @@ import {
     ShieldAlert,
     Wallet,
     FileSearch,
+    Database,
     ArrowRight,
     Eye,
     Lock,
@@ -40,6 +41,14 @@ const tools = [
             "Live token identity and source-health inspector using contract metadata from the Signal Check engine.",
         href: "/tools/contract-metadata",
         icon: FileSearch,
+        status: "Live",
+    },
+    {
+        title: "Token Memory",
+        description:
+            "Search the platform memory archive for previously checked tokens, repeated demand, scores, and dossiers.",
+        href: "/tools/token-memory",
+        icon: Database,
         status: "Live",
     },
 ];
@@ -102,8 +111,8 @@ export default function ToolsPage() {
                     <p className="mt-5 max-w-3xl text-base leading-8 text-white/65">
                         Trust The Signal is now structured as a premium intelligence
                         ecosystem: live signal checks, rug-risk review, wallet validation,
-                        metadata routing, token dossiers, and future protected operator
-                        access.
+                        metadata routing, token dossiers, memory search, and future
+                        protected operator access.
                     </p>
                 </div>
 
