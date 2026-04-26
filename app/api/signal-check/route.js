@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 import fs from "fs/promises";
 import path from "path";
 
@@ -46,57 +47,57 @@ function normalizeContract(value) {
 
 async function logTokenCheck(result) {
     try {
-        const logs = await readTokenLogs();
-        const now = new Date().toISOString();
         const contract = normalizeContract(result.address);
 
         if (!contract) return;
 
-        const existingIndex = logs.findIndex(
-            (item) =>
-                normalizeContract(item.contract).toLowerCase() ===
-                contract.toLowerCase()
-        );
+        const { data: existing } = await supabase
+            .from("token_logs")
+            .select("*")
+            .eq("contract", contract)
+            .maybeSingle();
 
-        if (existingIndex >= 0) {
-            logs[existingIndex] = {
-                ...logs[existingIndex],
-                tokenName: result.name || logs[existingIndex].tokenName || "",
-                tokenSymbol: result.symbol || logs[existingIndex].tokenSymbol || "",
-                chain: "solana",
-                lastCheckedAt: now,
-                checkCount: Number(logs[existingIndex].checkCount || 0) + 1,
-                latestScore:
-                    result.score !== undefined
-                        ? result.score
-                        : logs[existingIndex].latestScore || null,
-                latestRisk: result.risk || logs[existingIndex].latestRisk || "",
-                latestSetup: result.verdict || logs[existingIndex].latestSetup || "",
-                latestSource:
-                    result.sourceHealth || logs[existingIndex].latestSource || "",
-            };
+        if (existing) {
+            const { error } = await supabase
+                .from("token_logs")
+                .update({
+                    token_name: result.name || existing.token_name || "",
+                    token_symbol: result.symbol || existing.token_symbol || "",
+                    chain: "solana",
+                    check_count: Number(existing.check_count || 0) + 1,
+                    latest_score:
+                        result.score !== undefined
+                            ? result.score
+                            : existing.latest_score,
+                    latest_risk: result.risk || existing.latest_risk || "",
+                    latest_setup: result.verdict || existing.latest_setup || "",
+                    latest_source:
+                        result.sourceHealth || existing.latest_source || "",
+                    last_checked_at: new Date().toISOString(),
+                })
+                .eq("contract", contract);
+
+            if (error) throw error;
         } else {
-            logs.unshift({
-                id: crypto.randomUUID(),
+            const { error } = await supabase.from("token_logs").insert({
                 contract,
-                tokenName: result.name || "",
-                tokenSymbol: result.symbol || "",
+                token_name: result.name || "",
+                token_symbol: result.symbol || "",
                 chain: "solana",
-                firstCheckedAt: now,
-                lastCheckedAt: now,
-                checkCount: 1,
-                latestScore: result.score !== undefined ? result.score : null,
-                latestRisk: result.risk || "",
-                latestSetup: result.verdict || "",
-                latestSource: result.sourceHealth || "",
+                check_count: 1,
+                latest_score: result.score !== undefined ? result.score : null,
+                latest_risk: result.risk || "",
+                latest_setup: result.verdict || "",
+                latest_source: result.sourceHealth || "",
             });
-        }
 
-        await writeTokenLogs(logs.slice(0, 1000));
+            if (error) throw error;
+        }
     } catch (error) {
-        console.error("Token log direct write failed:", error);
+        console.error("Token log Supabase write failed:", error);
     }
 }
+
 
 const scoreLiquidity = (liquidity) => {
     if (liquidity >= 250000) return 100;
