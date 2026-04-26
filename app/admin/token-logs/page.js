@@ -17,15 +17,18 @@ function formatNumber(value) {
 
 function badgeStyle(type) {
   const map = {
-    SAFE: "bg-green-500/20 text-green-300 border border-green-500/30",
-    MEDIUM: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-    HIGH: "bg-red-500/20 text-red-300 border border-red-500/30",
-    LOW: "bg-green-500/20 text-green-300 border border-green-500/30",
-    CAUTION: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-    DANGER: "bg-red-500/20 text-red-300 border border-red-500/30",
+    SAFE: "border-emerald-300/35 bg-emerald-300/10 text-emerald-200",
+    LOW: "border-emerald-300/35 bg-emerald-300/10 text-emerald-200",
+    MEDIUM: "border-yellow-300/35 bg-yellow-300/10 text-yellow-200",
+    CAUTION: "border-yellow-300/35 bg-yellow-300/10 text-yellow-200",
+    HIGH: "border-red-300/35 bg-red-300/10 text-red-200",
+    DANGER: "border-red-300/35 bg-red-300/10 text-red-200",
   };
 
-  return map[type] || "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+  return (
+    map[type] ||
+    "border-white/15 bg-white/5 text-white/60"
+  );
 }
 
 export default function TokenLogsPage() {
@@ -68,45 +71,75 @@ export default function TokenLogsPage() {
     )[0] || null;
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-10">
-      <div className="max-w-7xl mx-auto">
-        <div className="border border-cyan-500/30 rounded-3xl p-8 bg-zinc-950 shadow-2xl">
+    <main className="min-h-screen bg-black text-white">
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
+        <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-emerald-900/20 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
           <div className="flex flex-wrap justify-between items-start gap-4">
             <div>
-              <div className="text-cyan-400 tracking-[4px] text-xs font-semibold mb-2">
-                TRUST THE SIGNAL INTELLIGENCE ARCHIVE
-              </div>
-              <h1 className="text-5xl font-bold mb-3">Token Check Logs</h1>
-              <p className="text-zinc-400 max-w-3xl">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-emerald-300">
+                Trust The Signal Intelligence Archive
+              </p>
+
+              <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
+                Token Check Logs
+              </h1>
+
+              <p className="mt-4 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
                 Hidden operator view for contracts checked across the platform.
-                This becomes the memory layer for demand, repeated interest, and
-                future signal intelligence.
+                This memory layer tracks repeated interest, signal demand, and
+                future intelligence behavior.
               </p>
             </div>
 
             <div className="flex gap-3 flex-wrap">
-              <a href="/" className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700">Home</a>
-              <a href="/admin" className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700">Admin Home</a>
-              <button onClick={loadLogs} className="px-5 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700">Refresh</button>
-              <a href="/api/admin/token-logs?format=csv" className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500">Export CSV</a>
+              <a
+                href="/"
+                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold hover:border-emerald-300/40 hover:bg-emerald-300/10"
+              >
+                Home
+              </a>
+              <a
+                href="/admin"
+                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold hover:border-emerald-300/40 hover:bg-emerald-300/10"
+              >
+                Admin Home
+              </a>
+              <button
+                onClick={loadLogs}
+                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold hover:border-emerald-300/40 hover:bg-emerald-300/10"
+              >
+                Refresh
+              </button>
+              <a
+                href="/api/admin/token-logs?format=csv"
+                className="rounded-2xl border border-emerald-300/35 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-200 hover:bg-emerald-300/20"
+              >
+                Export CSV
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5 mt-8">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-            <div className="text-xs tracking-[4px] text-zinc-500 mb-3">UNIQUE TOKENS</div>
-            <div className="text-5xl font-bold">{filteredLogs.length}</div>
+        <div className="grid gap-5 md:grid-cols-3">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">
+              Unique Tokens
+            </div>
+            <div className="mt-3 text-5xl font-black">{filteredLogs.length}</div>
           </div>
 
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-            <div className="text-xs tracking-[4px] text-zinc-500 mb-3">TOTAL CHECKS</div>
-            <div className="text-5xl font-bold">{totalChecks}</div>
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">
+              Total Checks
+            </div>
+            <div className="mt-3 text-5xl font-black">{totalChecks}</div>
           </div>
 
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6">
-            <div className="text-xs tracking-[4px] text-zinc-500 mb-3">MOST CHECKED</div>
-            <div className="text-3xl font-bold">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">
+              Most Checked
+            </div>
+            <div className="mt-3 text-2xl font-black">
               {mostChecked
                 ? `${mostChecked.token_name || "Unknown"} (${mostChecked.token_symbol || "?"})`
                 : "—"}
@@ -114,64 +147,66 @@ export default function TokenLogsPage() {
           </div>
         </div>
 
-        <div className="mt-8">
+        <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-4">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search contract, token, symbol, risk, setup, source..."
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl px-6 py-4 outline-none"
+            className="w-full rounded-2xl border border-white/10 bg-black/50 px-5 py-4 outline-none placeholder:text-white/25"
           />
         </div>
 
-        <div className="mt-8 space-y-6">
-          {loading && <div className="text-zinc-500">Loading archive...</div>}
+        <div className="space-y-6">
+          {loading && <div className="text-white/40">Loading archive...</div>}
 
           {!loading &&
             filteredLogs.map((log) => (
               <div
                 key={log.id}
-                className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6"
+                className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6"
               >
                 <div className="flex flex-wrap justify-between gap-4 items-start">
                   <div>
                     <div className="flex gap-3 flex-wrap mb-3">
-                      <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs">
+                      <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
                         SOLANA
                       </span>
-                      <span className="px-3 py-1 rounded-full bg-zinc-800 text-xs">
+
+                      <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-black text-white/60">
                         {log.check_count || 0} CHECKS
                       </span>
-                      <span className={`px-3 py-1 rounded-full text-xs ${badgeStyle((log.latest_risk || "").split(" ")[0])}`}>
+
+                      <span className={`rounded-full px-3 py-1 text-xs font-black ${badgeStyle((log.latest_risk || "").split(" ")[0])}`}>
                         {log.latest_risk || "UNKNOWN"}
                       </span>
                     </div>
 
-                    <h2 className="text-3xl font-bold">
+                    <h2 className="text-3xl font-black">
                       {log.token_name || "Unknown Token"} ({log.token_symbol || "?"})
                     </h2>
 
-                    <div className="text-zinc-500 text-sm mt-1 break-all">
+                    <div className="mt-1 text-sm text-white/35 break-all">
                       {log.contract}
                     </div>
                   </div>
 
                   <button
                     onClick={() => navigator.clipboard.writeText(log.contract)}
-                    className="px-4 py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700"
+                    className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold hover:border-emerald-300/40 hover:bg-emerald-300/10"
                   >
                     Copy Contract
                   </button>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4 mt-6">
-                  <div>Score: <span className="font-bold">{log.latest_score ?? "—"}</span></div>
-                  <div>Market Cap: <span className="font-bold">{formatNumber(log.market_cap)}</span></div>
-                  <div>Liquidity: <span className="font-bold">{formatNumber(log.liquidity)}</span></div>
-                  <div>24H Volume: <span className="font-bold">{formatNumber(log.volume_24h)}</span></div>
-                  <div>Buys: <span className="font-bold">{log.buys_24h ?? "—"}</span></div>
-                  <div>Sells: <span className="font-bold">{log.sells_24h ?? "—"}</span></div>
-                  <div>Verdict: <span className="font-bold">{log.verdict || "—"}</span></div>
-                  <div>Source: <span className="font-bold">{log.latest_source || "—"}</span></div>
+                <div className="mt-6 grid gap-4 md:grid-cols-4">
+                  <div>Score: <span className="font-black">{log.latest_score ?? "—"}</span></div>
+                  <div>Market Cap: <span className="font-black">{formatNumber(log.market_cap)}</span></div>
+                  <div>Liquidity: <span className="font-black">{formatNumber(log.liquidity)}</span></div>
+                  <div>24H Volume: <span className="font-black">{formatNumber(log.volume_24h)}</span></div>
+                  <div>Buys: <span className="font-black">{log.buys_24h ?? "—"}</span></div>
+                  <div>Sells: <span className="font-black">{log.sells_24h ?? "—"}</span></div>
+                  <div>Verdict: <span className="font-black">{log.verdict || "—"}</span></div>
+                  <div>Source: <span className="font-black">{log.latest_source || "—"}</span></div>
                 </div>
 
                 {Array.isArray(log.risk_flags) && log.risk_flags.length > 0 && (
@@ -179,7 +214,7 @@ export default function TokenLogsPage() {
                     {log.risk_flags.map((flag, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-300 text-xs"
+                        className="rounded-full border border-red-300/20 bg-red-300/10 px-3 py-1 text-xs font-black text-red-200"
                       >
                         {flag}
                       </span>
@@ -187,13 +222,13 @@ export default function TokenLogsPage() {
                   </div>
                 )}
 
-                <div className="mt-5 text-xs text-zinc-500">
+                <div className="mt-5 text-xs text-white/30">
                   Last Checked: {log.last_checked_at}
                 </div>
               </div>
             ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
