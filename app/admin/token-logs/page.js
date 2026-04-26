@@ -21,12 +21,12 @@ function shortenContract(contract) {
 }
 
 function getTokenTitle(log) {
-  if (log.tokenName && log.tokenSymbol) {
-    return `${log.tokenName} (${log.tokenSymbol})`;
+  if (log.token_name && log.token_symbol) {
+    return `${log.token_name} (${log.token_symbol})`;
   }
 
-  if (log.tokenName) return log.tokenName;
-  if (log.tokenSymbol) return log.tokenSymbol;
+  if (log.token_name) return log.token_name;
+  if (log.token_symbol) return log.token_symbol;
 
   return "Unknown Token";
 }
@@ -86,14 +86,14 @@ export default function AdminTokenLogsPage() {
 
   const stats = useMemo(() => {
     const totalChecks = logs.reduce(
-      (sum, log) => sum + Number(log.checkCount || 0),
+      (sum, log) => sum + Number(log.check_count || 0),
       0
     );
 
     const uniqueTokens = logs.length;
 
     const mostChecked = [...logs].sort(
-      (a, b) => Number(b.checkCount || 0) - Number(a.checkCount || 0)
+      (a, b) => Number(b.check_count || 0) - Number(a.check_count || 0)
     )[0];
 
     return {
@@ -111,13 +111,13 @@ export default function AdminTokenLogsPage() {
     return logs.filter((log) => {
       const searchableText = [
         log.contract,
-        log.tokenName,
-        log.tokenSymbol,
+        log.token_name,
+        log.token_symbol,
         log.chain,
-        log.latestRisk,
-        log.latestSetup,
-        log.latestSource,
-        log.latestScore,
+        log.latest_risk,
+        log.latest_setup,
+        log.latest_source,
+        log.latest_score,
       ]
         .filter(Boolean)
         .join(" ")
@@ -130,10 +130,10 @@ export default function AdminTokenLogsPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <div className="rounded-[2rem] border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 via-black to-emerald-400/10 p-6 shadow-[0_0_80px_rgba(34,211,238,0.12)] sm:p-8">
+        <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-emerald-900/20 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-cyan-300">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-emerald-300">
                 Trust The Signal Intelligence Archive
               </p>
 
@@ -150,8 +150,15 @@ export default function AdminTokenLogsPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
+                href="/"
+                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
+              >
+                Home
+              </Link>
+
+              <Link
                 href="/admin"
-                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:border-cyan-300/50 hover:bg-cyan-300/10"
+                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
               >
                 Admin Home
               </Link>
@@ -166,7 +173,7 @@ export default function AdminTokenLogsPage() {
 
               <button
                 onClick={exportCSV}
-                className="rounded-2xl border border-cyan-300/40 bg-cyan-300/15 px-5 py-3 text-sm font-black text-cyan-100 transition hover:bg-cyan-300/25"
+                className="rounded-2xl border border-emerald-300/40 bg-emerald-300/15 px-5 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/25"
               >
                 Export CSV
               </button>
@@ -204,7 +211,7 @@ export default function AdminTokenLogsPage() {
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search contract, token, symbol, risk, setup, source..."
-            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-cyan-300/50"
+            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-300/50"
           />
         </div>
 
@@ -216,8 +223,9 @@ export default function AdminTokenLogsPage() {
 
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm font-bold text-white/50">
-            Showing <span className="text-cyan-200">{filteredLogs.length}</span>{" "}
-            of <span className="text-white">{logs.length}</span> token logs
+            Showing{" "}
+            <span className="text-emerald-200">{filteredLogs.length}</span> of{" "}
+            <span className="text-white">{logs.length}</span> token logs
           </p>
         </div>
 
@@ -243,17 +251,17 @@ export default function AdminTokenLogsPage() {
                 <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-cyan-300/35 bg-cyan-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-cyan-200">
+                      <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
                         {log.chain || "solana"}
                       </span>
 
                       <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white/55">
-                        {Number(log.checkCount || 0)} checks
+                        {Number(log.check_count || 0)} checks
                       </span>
 
-                      {log.latestRisk && (
+                      {log.latest_risk && (
                         <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-emerald-200">
-                          {log.latestRisk}
+                          {log.latest_risk}
                         </span>
                       )}
                     </div>
@@ -272,7 +280,7 @@ export default function AdminTokenLogsPage() {
                           Score
                         </p>
                         <p className="mt-2 font-black text-white/85">
-                          {log.latestScore ?? "Unknown"}
+                          {log.latest_score ?? "Unknown"}
                         </p>
                       </div>
 
@@ -281,7 +289,7 @@ export default function AdminTokenLogsPage() {
                           Setup
                         </p>
                         <p className="mt-2 break-words font-bold text-white/85">
-                          {log.latestSetup || "Unknown"}
+                          {log.latest_setup || "Unknown"}
                         </p>
                       </div>
 
@@ -290,7 +298,7 @@ export default function AdminTokenLogsPage() {
                           Source
                         </p>
                         <p className="mt-2 break-words font-bold text-white/85">
-                          {log.latestSource || "Unknown"}
+                          {log.latest_source || "Unknown"}
                         </p>
                       </div>
 
@@ -305,15 +313,15 @@ export default function AdminTokenLogsPage() {
                     </div>
 
                     <div className="mt-4 grid gap-3 text-xs font-bold uppercase tracking-[0.18em] text-white/30 sm:grid-cols-2">
-                      <p>First checked: {formatDate(log.firstCheckedAt)}</p>
-                      <p>Last checked: {formatDate(log.lastCheckedAt)}</p>
+                      <p>First checked: {formatDate(log.first_checked_at)}</p>
+                      <p>Last checked: {formatDate(log.last_checked_at)}</p>
                     </div>
                   </div>
 
                   <div className="flex w-full flex-col gap-3 xl:w-[230px]">
                     <button
                       onClick={() => copyText(log.id, log.contract)}
-                      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-emerald-300/40 hover:bg-emerald-300/10"
                     >
                       {copiedId === log.id ? "Copied" : "Copy Contract"}
                     </button>
