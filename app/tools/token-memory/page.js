@@ -24,6 +24,18 @@ function formatNumber(value) {
     return `$${num.toFixed(2)}`;
 }
 
+function labelStyle(label) {
+    const map = {
+        watch: "border-cyan-300/25 bg-cyan-300/10 text-cyan-200",
+        high_interest: "border-emerald-300/25 bg-emerald-300/10 text-emerald-200",
+        revisit: "border-yellow-300/25 bg-yellow-300/10 text-yellow-200",
+        dead: "border-red-300/25 bg-red-300/10 text-red-200",
+        premium_candidate: "border-purple-300/25 bg-purple-300/10 text-purple-200",
+    };
+
+    return map[label] || "border-white/10 bg-white/5 text-white/60";
+}
+
 export default function TokenMemoryPage() {
     const [query, setQuery] = useState("");
     const [logs, setLogs] = useState([]);
@@ -92,17 +104,11 @@ export default function TokenMemoryPage() {
                     </div>
 
                     <div className="flex gap-3">
-                        <Link
-                            href="/tools"
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-                        >
+                        <Link href="/tools" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
                             Tools
                         </Link>
 
-                        <Link
-                            href="/"
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-                        >
+                        <Link href="/" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
                             <span className="inline-flex items-center gap-2">
                                 <ArrowLeft className="h-4 w-4" />
                                 Home
@@ -115,18 +121,16 @@ export default function TokenMemoryPage() {
                     <div className="mb-4 flex items-center gap-2 text-emerald-300">
                         <Database className="h-5 w-5" />
                         <p className="text-sm uppercase tracking-[0.28em]">
-                            Supabase Intelligence Memory
+                            Hybrid Intelligence Memory
                         </p>
                     </div>
 
                     <h2 className="max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
-                        Search what the platform already remembers.
+                        Search what the platform remembers + what the operator marked.
                     </h2>
 
                     <p className="mt-5 max-w-3xl text-base leading-8 text-white/65">
-                        Token Memory lets you search previously checked contracts, revisit
-                        live dossiers, review repeated demand, and use existing platform
-                        intelligence instead of starting from zero every time.
+                        Machine logs, repeated checks, dossier history, and manual conviction notes now live together inside one searchable archive.
                     </p>
 
                     <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_180px]">
@@ -136,52 +140,34 @@ export default function TokenMemoryPage() {
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") loadMemory(query);
                             }}
-                            placeholder="Search token, symbol, contract, risk..."
-                            className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 text-sm outline-none placeholder:text-white/30 focus:border-emerald-300/40"
+                            placeholder="Search token, symbol, contract, risk, notes..."
+                            className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 text-sm outline-none"
                         />
 
                         <button
                             onClick={() => loadMemory(query)}
                             disabled={loading}
-                            className="rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300 disabled:opacity-60"
+                            className="rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black"
                         >
-                            {loading ? (
-                                <span className="inline-flex items-center gap-2">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Loading
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center gap-2">
-                                    <Search className="h-4 w-4" />
-                                    Search
-                                </span>
-                            )}
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : <span className="inline-flex items-center gap-2"><Search className="h-4 w-4" />Search</span>}
                         </button>
                     </div>
                 </div>
 
                 <div className="mt-8 grid gap-4 md:grid-cols-3">
                     <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-                            Results
-                        </p>
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">Results</p>
                         <p className="mt-3 text-4xl font-black">{logs.length}</p>
                     </div>
 
                     <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-                            Visible Checks
-                        </p>
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">Visible Checks</p>
                         <p className="mt-3 text-4xl font-black">{totalChecks}</p>
                     </div>
 
                     <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">
-                            Mode
-                        </p>
-                        <p className="mt-3 text-2xl font-black text-emerald-300">
-                            Memory Search
-                        </p>
+                        <p className="text-xs font-black uppercase tracking-[0.25em] text-white/35">Mode</p>
+                        <p className="mt-3 text-2xl font-black text-emerald-300">Hybrid Memory</p>
                     </div>
                 </div>
 
@@ -196,10 +182,7 @@ export default function TokenMemoryPage() {
                         </div>
                     ) : (
                         logs.map((log) => (
-                            <article
-                                key={log.id}
-                                className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6"
-                            >
+                            <article key={log.id} className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
                                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap gap-3">
@@ -214,6 +197,10 @@ export default function TokenMemoryPage() {
                                             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/60">
                                                 {log.latest_risk || "unknown risk"}
                                             </span>
+
+                                            <span className={`rounded-full px-3 py-1 text-xs font-black ${labelStyle(log.operator_label || "watch")}`}>
+                                                {log.operator_label || "watch"}
+                                            </span>
                                         </div>
 
                                         <h3 className="mt-4 text-3xl font-black">
@@ -225,38 +212,26 @@ export default function TokenMemoryPage() {
                                         </p>
 
                                         <div className="mt-5 grid gap-3 text-sm md:grid-cols-4">
-                                            <p>
-                                                Score:{" "}
-                                                <span className="font-black">
-                                                    {log.latest_score ?? "—"}
-                                                </span>
-                                            </p>
-                                            <p>
-                                                MC:{" "}
-                                                <span className="font-black">
-                                                    {formatNumber(log.market_cap)}
-                                                </span>
-                                            </p>
-                                            <p>
-                                                Liquidity:{" "}
-                                                <span className="font-black">
-                                                    {formatNumber(log.liquidity)}
-                                                </span>
-                                            </p>
-                                            <p>
-                                                Volume:{" "}
-                                                <span className="font-black">
-                                                    {formatNumber(log.volume_24h)}
-                                                </span>
-                                            </p>
+                                            <p>Score: <span className="font-black">{log.latest_score ?? "—"}</span></p>
+                                            <p>MC: <span className="font-black">{formatNumber(log.market_cap)}</span></p>
+                                            <p>Liquidity: <span className="font-black">{formatNumber(log.liquidity)}</span></p>
+                                            <p>Volume: <span className="font-black">{formatNumber(log.volume_24h)}</span></p>
                                         </div>
+
+                                        {log.operator_note && (
+                                            <div className="mt-5 rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-4">
+                                                <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200">
+                                                    Operator Note
+                                                </p>
+                                                <p className="mt-2 text-sm leading-7 text-white/70">
+                                                    {log.operator_note}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap gap-3">
-                                        <Link
-                                            href={`/token/${log.contract}`}
-                                            className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-200 hover:bg-emerald-300/20"
-                                        >
+                                        <Link href={`/token/${log.contract}`} className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-200">
                                             <span className="inline-flex items-center gap-2">
                                                 <ExternalLink className="h-4 w-4" />
                                                 Open Dossier
@@ -265,7 +240,7 @@ export default function TokenMemoryPage() {
 
                                         <button
                                             onClick={() => copyContract(log.id, log.contract)}
-                                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/75 hover:border-emerald-300/30"
+                                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/75"
                                         >
                                             <span className="inline-flex items-center gap-2">
                                                 <Copy className="h-4 w-4" />
