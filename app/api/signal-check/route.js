@@ -225,6 +225,36 @@ const getSourceHealth = (pairUrl, info) => {
     return "limited_presence";
 };
 
+async function logTokenCheck(result) {
+    try {
+        const baseUrl =
+            process.env.NEXT_PUBLIC_SITE_URL ||
+                process.env.VERCEL_URL
+                ? `https://${process.env.VERCEL_URL}`
+                : "http://localhost:3000";
+
+        await fetch(`${baseUrl}/api/token-log`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contract: result.address,
+                tokenName: result.name,
+                tokenSymbol: result.symbol,
+                chain: "solana",
+                score: result.score,
+                risk: result.risk,
+                setup: result.verdict,
+                source: result.sourceHealth,
+            }),
+            cache: "no-store",
+        });
+    } catch (error) {
+        console.error("Token log background write failed:", error);
+    }
+}
+
 export async function POST(req) {
     try {
         const { contract } = await req.json();
@@ -330,36 +360,40 @@ export async function POST(req) {
 
         const verdictData = getVerdict(finalScore, riskFlags);
 
+        const result = {
+            name: bestPair?.baseToken?.name || "Unknown Token",
+            symbol: bestPair?.baseToken?.symbol || "UNKNOWN",
+            address: tokenAddress,
+            pairAddress: bestPair?.pairAddress || null,
+            quoteToken: bestPair?.quoteToken?.symbol || null,
+            dex: bestPair?.dexId || "unknown",
+            pairUrl: bestPair?.url || null,
+            priceUsd: bestPair?.priceUsd || null,
+            liquidity,
+            volume24h,
+            marketCap,
+            fdv: Number(bestPair?.fdv || 0),
+            priceChange24h,
+            pairAge: getAgeLabel(pairCreatedAt),
+            pairCreatedAt,
+            buys24h: Number(txns?.h24?.buys || 0),
+            sells24h: Number(txns?.h24?.sells || 0),
+            score: finalScore,
+            verdict: verdictData.verdict,
+            signal: verdictData.signal,
+            risk: verdictData.risk,
+            action: verdictData.action,
+            riskFlags,
+            breakdown,
+            sourceHealth: getSourceHealth(bestPair?.url, info),
+            socialPresence,
+        };
+
+        await logTokenCheck(result);
+
         return NextResponse.json({
             success: true,
-            result: {
-                name: bestPair?.baseToken?.name || "Unknown Token",
-                symbol: bestPair?.baseToken?.symbol || "UNKNOWN",
-                address: tokenAddress,
-                pairAddress: bestPair?.pairAddress || null,
-                quoteToken: bestPair?.quoteToken?.symbol || null,
-                dex: bestPair?.dexId || "unknown",
-                pairUrl: bestPair?.url || null,
-                priceUsd: bestPair?.priceUsd || null,
-                liquidity,
-                volume24h,
-                marketCap,
-                fdv: Number(bestPair?.fdv || 0),
-                priceChange24h,
-                pairAge: getAgeLabel(pairCreatedAt),
-                pairCreatedAt,
-                buys24h: Number(txns?.h24?.buys || 0),
-                sells24h: Number(txns?.h24?.sells || 0),
-                score: finalScore,
-                verdict: verdictData.verdict,
-                signal: verdictData.signal,
-                risk: verdictData.risk,
-                action: verdictData.action,
-                riskFlags,
-                breakdown,
-                sourceHealth: getSourceHealth(bestPair?.url, info),
-                socialPresence,
-            },
+            result,
         });
     } catch (error) {
         return NextResponse.json(
