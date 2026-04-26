@@ -546,6 +546,9 @@ export default function Home() {
             <Badge>Signal.Observed()</Badge>
             <NavLink href="/">Home</NavLink>
             <NavLink href="/trending">Trending</NavLink>
+            <NavLink href="/tools">Tools</NavLink>
+            <NavLink href="/products">Products</NavLink>
+            <NavLink href="/protected">Protected</NavLink>
             <Button onClick={openAccessModal}>Enter System</Button>
           </div>
         </header>

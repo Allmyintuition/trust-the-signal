@@ -200,10 +200,20 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
             </div>
           </div>
 
-          <ActionLink href="/trending" variant="outline">
-            <ArrowLeft className="h-4 w-4" />
-            Trending
-          </ActionLink>
+          <div className="flex gap-3">
+            <ActionLink href="/tools" variant="outline">
+              Tools
+            </ActionLink>
+
+            <ActionLink href="/products" variant="outline">
+              Products
+            </ActionLink>
+
+            <ActionLink href="/trending" variant="outline">
+              <ArrowLeft className="h-4 w-4" />
+              Trending
+            </ActionLink>
+          </div>
         </header>
 
         <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">

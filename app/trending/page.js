@@ -238,15 +238,31 @@ export default function TrendingPage() {
                         </div>
                     </div>
 
-                    <a
-                        href="/"
-                        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
-                    >
-                        <span className="inline-flex items-center gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            Home
-                        </span>
-                    </a>
+                    <div className="flex gap-3">
+                        <a
+                            href="/tools"
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
+                        >
+                            Tools
+                        </a>
+
+                        <a
+                            href="/products"
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
+                        >
+                            Products
+                        </a>
+
+                        <a
+                            href="/"
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
+                        >
+                            <span className="inline-flex items-center gap-2">
+                                <ArrowLeft className="h-4 w-4" />
+                                Home
+                            </span>
+                        </a>
+                    </div>
                 </header>
 
                 <motion.section
