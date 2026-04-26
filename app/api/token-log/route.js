@@ -1,38 +1,5 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE = path.join(DATA_DIR, "token-logs.json");
-
-async function ensureDataFile() {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-
-    try {
-        await fs.access(DATA_FILE);
-    } catch {
-        await fs.writeFile(DATA_FILE, JSON.stringify([], null, 2), "utf8");
-    }
-}
-
-async function readLogs() {
-    await ensureDataFile();
-
-    try {
-        const raw = await fs.readFile(DATA_FILE, "utf8");
-        const parsed = JSON.parse(raw);
-
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-        console.error("Failed to read token logs:", error);
-        return [];
-    }
-}
-
-async function writeLogs(logs) {
-    await ensureDataFile();
-    await fs.writeFile(DATA_FILE, JSON.stringify(logs, null, 2), "utf8");
-}
+import { supabase } from "@/lib/supabase";
 
 function normalizeContract(value) {
     return String(value || "").trim();
@@ -56,52 +23,45 @@ export async function POST(request) {
             );
         }
 
-        const logs = await readLogs();
+        const { data: existing } = await supabase
+            .from("token_logs")
+            .select("*")
+            .eq("contract", contract)
+            .maybeSingle();
 
-        const now = new Date().toISOString();
+        if (existing) {
+            const { error } = await supabase
+                .from("token_logs")
+                .update({
+                    token_name: tokenName || existing.token_name || "",
+                    token_symbol: tokenSymbol || existing.token_symbol || "",
+                    chain: body.chain || existing.chain || "solana",
+                    check_count: Number(existing.check_count || 0) + 1,
+                    latest_score:
+                        body.score !== undefined ? body.score : existing.latest_score,
+                    latest_risk: body.risk || existing.latest_risk || "",
+                    latest_setup: body.setup || existing.latest_setup || "",
+                    latest_source: body.source || existing.latest_source || "",
+                    last_checked_at: new Date().toISOString(),
+                })
+                .eq("contract", contract);
 
-        const existingIndex = logs.findIndex(
-            (item) =>
-                normalizeContract(item.contract).toLowerCase() ===
-                contract.toLowerCase()
-        );
-
-        if (existingIndex >= 0) {
-            logs[existingIndex] = {
-                ...logs[existingIndex],
-                tokenName: tokenName || logs[existingIndex].tokenName || "",
-                tokenSymbol: tokenSymbol || logs[existingIndex].tokenSymbol || "",
-                chain: body.chain || logs[existingIndex].chain || "solana",
-                lastCheckedAt: now,
-                checkCount: Number(logs[existingIndex].checkCount || 0) + 1,
-                latestScore:
-                    body.score !== undefined
-                        ? body.score
-                        : logs[existingIndex].latestScore || null,
-                latestRisk: body.risk || logs[existingIndex].latestRisk || "",
-                latestSetup: body.setup || logs[existingIndex].latestSetup || "",
-                latestSource: body.source || logs[existingIndex].latestSource || "",
-            };
+            if (error) throw error;
         } else {
-            logs.unshift({
-                id: crypto.randomUUID(),
+            const { error } = await supabase.from("token_logs").insert({
                 contract,
-                tokenName,
-                tokenSymbol,
+                token_name: tokenName,
+                token_symbol: tokenSymbol,
                 chain: body.chain || "solana",
-                firstCheckedAt: now,
-                lastCheckedAt: now,
-                checkCount: 1,
-                latestScore: body.score !== undefined ? body.score : null,
-                latestRisk: body.risk || "",
-                latestSetup: body.setup || "",
-                latestSource: body.source || "",
+                check_count: 1,
+                latest_score: body.score !== undefined ? body.score : null,
+                latest_risk: body.risk || "",
+                latest_setup: body.setup || "",
+                latest_source: body.source || "",
             });
+
+            if (error) throw error;
         }
-
-        const trimmedLogs = logs.slice(0, 1000);
-
-        await writeLogs(trimmedLogs);
 
         return NextResponse.json({
             success: true,
