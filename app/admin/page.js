@@ -11,9 +11,9 @@ const ADMIN_MODULES = [
   {
     title: "Token Logs",
     description:
-      "Future operator view for checked token history, signal outcomes, and intelligence trails.",
-    href: "#",
-    status: "Coming Soon",
+      "View checked token history, repeated demand, signal outcomes, market data, risk flags, and intelligence trails.",
+    href: "/admin/token-logs",
+    status: "Live",
   },
   {
     title: "Watchlist",
@@ -42,7 +42,7 @@ export default function AdminGatewayPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-cyan-400/10 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
+        <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-emerald-900/20 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-emerald-300">
             Trust The Signal Internal Gateway
           </p>
@@ -63,11 +63,10 @@ export default function AdminGatewayPage() {
 
             const card = (
               <div
-                className={`h-full rounded-[1.75rem] border p-6 transition ${
-                  isLive
-                    ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
-                    : "border-white/10 bg-white/[0.04] opacity-70"
-                }`}
+                className={`h-full rounded-[1.75rem] border p-6 transition ${isLive
+                  ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
+                  : "border-white/10 bg-white/[0.04] opacity-70"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-2xl font-black tracking-tight">
@@ -75,11 +74,10 @@ export default function AdminGatewayPage() {
                   </h2>
 
                   <span
-                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
-                      isLive
-                        ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
-                        : "border-white/15 bg-white/5 text-white/40"
-                    }`}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${isLive
+                      ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
+                      : "border-white/15 bg-white/5 text-white/40"
+                      }`}
                   >
                     {module.status}
                   </span>
@@ -107,12 +105,13 @@ export default function AdminGatewayPage() {
 
         <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-white/35">
-            Current Live Admin Route
+            Current Live Admin Routes
           </p>
 
-          <p className="mt-3 break-words text-sm font-bold text-white/70">
-            /admin/access-requests
-          </p>
+          <div className="mt-3 flex flex-col gap-2 text-sm font-bold text-white/70">
+            <p>/admin/access-requests</p>
+            <p>/admin/token-logs</p>
+          </div>
         </div>
       </section>
     </main>
