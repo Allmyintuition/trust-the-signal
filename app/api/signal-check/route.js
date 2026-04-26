@@ -52,9 +52,39 @@ async function logTokenCheck(result) {
 
         if (!contract) return;
 
+        const payload = {
+            token_name: result.name || "",
+            token_symbol: result.symbol || "",
+            chain: "solana",
+            latest_score: result.score !== undefined ? result.score : null,
+            latest_risk: result.risk || "",
+            latest_setup: result.verdict || "",
+            latest_source: result.sourceHealth || "",
+            market_cap: result.marketCap ?? null,
+            liquidity: result.liquidity ?? null,
+            volume_24h: result.volume24h ?? null,
+            fdv: result.fdv ?? null,
+            price_usd: result.priceUsd || null,
+            price_change_24h: result.priceChange24h ?? null,
+            buys_24h: result.buys24h ?? null,
+            sells_24h: result.sells24h ?? null,
+            dex: result.dex || "",
+            pair_address: result.pairAddress || null,
+            pair_url: result.pairUrl || null,
+            pair_age: result.pairAge || "",
+            risk_flags: Array.isArray(result.riskFlags) ? result.riskFlags : [],
+            breakdown: result.breakdown || {},
+            social_presence: result.socialPresence || {},
+            quote_token: result.quoteToken || null,
+            action: result.action || "",
+            signal: result.signal || "",
+            verdict: result.verdict || "",
+            last_checked_at: new Date().toISOString(),
+        };
+
         const { data: existing } = await supabase
             .from("token_logs")
-            .select("*")
+            .select("id, check_count")
             .eq("contract", contract)
             .maybeSingle();
 
@@ -62,19 +92,8 @@ async function logTokenCheck(result) {
             const { error } = await supabase
                 .from("token_logs")
                 .update({
-                    token_name: result.name || existing.token_name || "",
-                    token_symbol: result.symbol || existing.token_symbol || "",
-                    chain: "solana",
+                    ...payload,
                     check_count: Number(existing.check_count || 0) + 1,
-                    latest_score:
-                        result.score !== undefined
-                            ? result.score
-                            : existing.latest_score,
-                    latest_risk: result.risk || existing.latest_risk || "",
-                    latest_setup: result.verdict || existing.latest_setup || "",
-                    latest_source:
-                        result.sourceHealth || existing.latest_source || "",
-                    last_checked_at: new Date().toISOString(),
                 })
                 .eq("contract", contract);
 
@@ -82,23 +101,16 @@ async function logTokenCheck(result) {
         } else {
             const { error } = await supabase.from("token_logs").insert({
                 contract,
-                token_name: result.name || "",
-                token_symbol: result.symbol || "",
-                chain: "solana",
+                ...payload,
                 check_count: 1,
-                latest_score: result.score !== undefined ? result.score : null,
-                latest_risk: result.risk || "",
-                latest_setup: result.verdict || "",
-                latest_source: result.sourceHealth || "",
             });
 
             if (error) throw error;
         }
     } catch (error) {
-        console.error("Token log Supabase write failed:", error);
+        console.error("Token log full intelligence write failed:", error);
     }
 }
-
 
 const scoreLiquidity = (liquidity) => {
     if (liquidity >= 250000) return 100;
