@@ -73,6 +73,13 @@ export default function ToolsPage() {
                             Home
                         </Link>
                         <Link
+                            href="/products"
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
+                        >
+                            Products
+                        </Link>
+
+                        <Link
                             href="/protected"
                             className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100 hover:bg-emerald-300/20"
                         >
