@@ -245,7 +245,15 @@ const Modal = ({ modal, closeModal }) => {
   );
 };
 
-const recentFallback = ["So11111111111111111111111111111111111111112"];
+const recentFallback = [
+  {
+    contract: "So11111111111111111111111111111111111111112",
+    token_name: "Wrapped SOL",
+    token_symbol: "SOL",
+    latest_score: null,
+    latest_risk: "Reference Asset",
+  },
+];
 
 const tools = [
   {
@@ -333,27 +341,41 @@ export default function Home() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    const stored = window.localStorage.getItem("tts_recent_checks");
-
-    if (stored) {
+    async function loadRecentChecks() {
       try {
-        const parsed = JSON.parse(stored);
-        setRecentChecks(Array.isArray(parsed) ? parsed.slice(0, 6) : []);
+        const response = await fetch("/api/recent-token-checks", {
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.logs)) {
+          setRecentChecks(data.logs);
+        }
       } catch {
         setRecentChecks([]);
       }
     }
+
+    loadRecentChecks();
   }, []);
 
   const closeModal = () => setModal(null);
 
-  const saveRecentCheck = (address) => {
-    if (!address) return;
+  const saveRecentCheck = async () => {
+    try {
+      const response = await fetch("/api/recent-token-checks", {
+        cache: "no-store",
+      });
 
-    const next = [address, ...recentChecks.filter((item) => item !== address)].slice(0, 6);
+      const data = await response.json();
 
-    setRecentChecks(next);
-    window.localStorage.setItem("tts_recent_checks", JSON.stringify(next));
+      if (data.success && Array.isArray(data.logs)) {
+        setRecentChecks(data.logs);
+      }
+    } catch {
+      setRecentChecks((current) => current);
+    }
   };
 
   const openSignalModal = () =>
@@ -466,7 +488,7 @@ export default function Home() {
           icon: <Radar className="h-5 w-5" />,
         });
       } else {
-        saveRecentCheck(trimmedContract);
+        await saveRecentCheck();
 
         setModal({
           type: "signal",
@@ -655,15 +677,40 @@ export default function Home() {
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {(recentChecks.length ? recentChecks : recentFallback).map(
-                (item) => (
-                  <button
-                    key={item}
-                    onClick={() => setContract(item)}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left font-mono text-xs text-white/70 transition hover:border-emerald-300/30"
-                  >
-                    {item}
-                  </button>
-                )
+                (item) => {
+                  const address = item.contract || item;
+                  const name = item.token_name || "Unknown Token";
+                  const symbol = item.token_symbol || "TOKEN";
+
+                  return (
+                    <button
+                      key={address}
+                      onClick={() => setContract(address)}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-emerald-300/30 hover:bg-emerald-300/10"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            {name} ({symbol})
+                          </p>
+                          <p className="mt-2 break-all font-mono text-xs text-white/45">
+                            {address}
+                          </p>
+                        </div>
+
+                        {item.latest_score !== null && item.latest_score !== undefined && (
+                          <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
+                            {item.latest_score}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-white/35">
+                        {item.latest_risk || "Live platform check"}
+                      </p>
+                    </button>
+                  );
+                }
               )}
             </div>
           </Card>
