@@ -52,6 +52,26 @@ const riskTone = (value = "") => {
   return "border-white/15 bg-white/5 text-white/60";
 };
 
+const receiptType = (log, liveData) => {
+  const score = Number(liveData?.score || log?.latest_score || 0);
+  const risk = String(liveData?.risk || log?.latest_risk || "").toUpperCase();
+  const label = String(log?.operator_label || "").toLowerCase();
+
+  if (label === "high_interest" || label === "premium_candidate") return "operator_high_interest";
+  if (risk.includes("LOW") && score >= 75) return "strong_signal";
+  if (risk.includes("MEDIUM") || risk.includes("CAUTION")) return "caution_signal";
+  if (risk.includes("HIGH") || risk.includes("DANGER")) return "risk_blocked";
+
+  return "archived_signal";
+};
+
+const memoryConfidence = (checks = 0, note = "") => {
+  if (note && checks >= 3) return "High";
+  if (checks >= 3) return "Medium";
+  if (checks > 0) return "Developing";
+  return "Fresh";
+};
+
 const labelTone = (value = "") => {
   const v = String(value).toLowerCase();
 
@@ -179,6 +199,8 @@ export default function TokenPage() {
   const archivedChecks = useMemo(() => memoryData?.check_count || 0, [memoryData]);
   const operatorLabel = memoryData?.operator_label || "watch";
   const operatorNote = memoryData?.operator_note || "";
+  const currentReceiptType = receiptType(memoryData, data);
+  const currentMemoryConfidence = memoryConfidence(archivedChecks, operatorNote);
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -196,7 +218,7 @@ export default function TokenPage() {
                 TRUST THE SIGNAL
               </p>
               <h1 className="text-sm sm:text-lg font-semibold tracking-[0.2em]">
-                TOKEN DOSSIER V5
+                TOKEN DOSSIER V6
               </h1>
             </div>
           </div>
@@ -222,6 +244,9 @@ export default function TokenPage() {
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
                 🧠 Hybrid.Memory
+              </span>
+              <span className={`rounded-full border px-4 py-1.5 text-sm ${labelTone(operatorLabel)}`}>
+                {currentReceiptType}
               </span>
             </div>
 
@@ -278,6 +303,22 @@ export default function TokenPage() {
                 </p>
               </div>
 
+              <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">
+                  Memory Confidence
+                </p>
+                <p className="mt-2 text-xl font-black">{currentMemoryConfidence}</p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                  Receipt Type
+                </p>
+                <p className="mt-2 text-xl font-black text-emerald-200">
+                  {currentReceiptType}
+                </p>
+              </div>
+
               <div className={`rounded-2xl border p-4 ${labelTone(operatorLabel)}`}>
                 <p className="text-xs uppercase tracking-[0.2em]">
                   Operator Label
@@ -303,6 +344,11 @@ export default function TokenPage() {
               <ActionLink href={`/tools/token-memory?q=${encodeURIComponent(contract)}`} variant="outline">
                 <Database className="h-4 w-4" />
                 Open Full Memory Search
+              </ActionLink>
+
+              <ActionLink href="/receipts" variant="outline">
+                <ExternalLink className="h-4 w-4" />
+                View Signal Receipts
               </ActionLink>
             </div>
           </Card>
@@ -419,6 +465,19 @@ export default function TokenPage() {
 
             <section className="pt-10">
               <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black p-6">
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                    <Brain className="h-5 w-5" />
+                    <p className="text-sm uppercase tracking-[0.24em]">Dossier Authority Interpretation</p>
+                  </div>
+
+                  <p className="max-w-3xl text-sm leading-7 text-white/65">
+                    This report combines live signal scoring, archived memory,
+                    repeated check behavior, operator labeling, and protected
+                    continuation routing into one token intelligence page.
+                  </p>
+                </div>
+
                 <div className="grid gap-6 lg:grid-cols-3">
                   <ActionLink href="/trending" variant="outline">
                     <TrendingUp className="h-4 w-4" />
