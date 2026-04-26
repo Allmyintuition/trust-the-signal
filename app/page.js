@@ -5,13 +5,9 @@ import { motion } from "framer-motion";
 import {
   Eye,
   ShieldCheck,
-  Activity,
   Lock,
   ArrowRight,
-  Search,
-  Users,
   BookOpen,
-  Zap,
   TerminalSquare,
   Signal,
   Wallet,
@@ -21,15 +17,13 @@ import {
   Loader2,
   TrendingUp,
   History,
-  Crown,
-  RadioTower,
-  Send,
-  MessageCircle,
-  Layers,
-  Sparkles,
   FileSearch,
   Mail,
   CheckCircle2,
+  Crown,
+  RadioTower,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 
 const fadeUp = {
@@ -123,15 +117,15 @@ const ExternalLinkButton = ({ href, children }) => {
   );
 };
 
-const Modal = ({ modal, closeModal }) => {
+const Modal = ({ modal, closeModal, routeToTokenPage }) => {
   if (!modal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6 backdrop-blur-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 px-4 backdrop-blur-xl">
       <motion.div
         initial={{ opacity: 0, y: 24, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[32px] border border-emerald-400/20 bg-black p-7 shadow-2xl shadow-emerald-500/20"
+        className="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[32px] border border-emerald-400/20 bg-black p-6 md:p-8 shadow-2xl shadow-emerald-500/20"
       >
         <button
           onClick={closeModal}
@@ -147,25 +141,25 @@ const Modal = ({ modal, closeModal }) => {
           </span>
         </div>
 
-        <h3 className="text-3xl font-semibold">{modal.title}</h3>
+        <h3 className="text-3xl md:text-4xl font-semibold">{modal.title}</h3>
         <p className="mt-4 leading-8 text-white/65">{modal.body}</p>
 
         {modal.type === "signal" && modal.live && (
           <>
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
+            <div className="mt-7 grid gap-3 md:grid-cols-4">
               {[
                 ["Token", `${modal.live.name} (${modal.live.symbol})`],
+                ["Final Score", `${modal.live.score}/100`],
                 ["Verdict", modal.live.verdict],
                 ["Signal", modal.live.signal],
                 ["Risk", modal.live.risk],
                 ["DEX", modal.live.dex],
                 ["Quote", modal.live.quoteToken || "--"],
+                ["Source Health", modal.live.sourceHealth],
                 ["Liquidity", `$${formatNum(modal.live.liquidity)}`],
                 ["24H Volume", `$${formatNum(modal.live.volume24h)}`],
                 ["Market Cap", `$${formatNum(modal.live.marketCap)}`],
                 ["24H Change", `${modal.live.priceChange24h}%`],
-                ["Pair Age", modal.live.pairAge],
-                ["Source Health", modal.live.sourceHealth],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -174,61 +168,56 @@ const Modal = ({ modal, closeModal }) => {
                   <p className="text-xs uppercase tracking-[0.22em] text-white/40">
                     {label}
                   </p>
-                  <p className="mt-2 text-lg font-medium text-emerald-200">
+                  <p className="mt-2 text-base md:text-lg font-medium text-emerald-200">
                     {value}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               <SignalScoreBar label="Liquidity" value={modal.live.breakdown?.liquidity} />
               <SignalScoreBar label="Volume" value={modal.live.breakdown?.volume} />
               <SignalScoreBar label="Balance" value={modal.live.breakdown?.liquidityBalance} />
               <SignalScoreBar label="Momentum" value={modal.live.breakdown?.momentum} />
               <SignalScoreBar label="Age" value={modal.live.breakdown?.age} />
               <SignalScoreBar label="Transactions" value={modal.live.breakdown?.transactions} />
-              <SignalScoreBar label="Metadata" value={modal.live.breakdown?.metadata} />
             </div>
 
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
-                Source + Social Presence
-              </p>
-
-              <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                    Website
-                  </p>
-                  <p className="mt-2 text-lg font-medium text-emerald-200">
-                    {modal.live.socialPresence?.hasWebsite ? "Detected" : "Not Detected"}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                    Socials
-                  </p>
-                  <p className="mt-2 text-lg font-medium text-emerald-200">
-                    {modal.live.socialPresence?.socialCount ?? 0}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                    Final Score
-                  </p>
-                  <p className="mt-2 text-lg font-medium text-emerald-200">
-                    {modal.live.score}/100
-                  </p>
+            {Array.isArray(modal.live.riskFlags) && modal.live.riskFlags.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/5 p-4">
+                <p className="text-xs uppercase tracking-[0.22em] text-red-200/70">
+                  Active Risk Flags
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {modal.live.riskFlags.map((flag) => (
+                    <span
+                      key={flag}
+                      className="rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1 text-xs font-bold text-red-200"
+                    >
+                      {flag}
+                    </span>
+                  ))}
                 </div>
               </div>
+            )}
 
-              <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/45">
+                Intelligence Continuation
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-3">
                 <ExternalLinkButton href={modal.live.pairUrl}>
                   Open DexScreener Pair
                 </ExternalLinkButton>
+
+                <button
+                  onClick={() => routeToTokenPage(modal.live.address)}
+                  className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/20"
+                >
+                  Open Full Token Report
+                </button>
               </div>
             </div>
           </>
@@ -236,16 +225,13 @@ const Modal = ({ modal, closeModal }) => {
 
         {modal.type !== "signal" && (
           <div className="mt-7 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-100/90">
-            This layer continues expanding into products, access systems, and
-            premium intelligence routes.
+            This layer continues expanding into products, access systems, premium signal routes, and protected operator infrastructure.
           </div>
         )}
       </motion.div>
     </div>
   );
-};
-
-const recentFallback = [
+}; const recentFallback = [
   {
     contract: "So11111111111111111111111111111111111111112",
     token_name: "Wrapped SOL",
@@ -258,70 +244,77 @@ const recentFallback = [
 const tools = [
   {
     title: "Signal Check Pro",
-    desc: "Paste a Solana contract and receive weighted live contract intelligence with verdict logic.",
+    desc: "Run weighted Solana contract interpretation through the live Trust The Signal authority engine.",
     icon: ShieldCheck,
   },
   {
     title: "Trending Intelligence",
-    desc: "Live Solana discovery board for liquidity, volume, and momentum before deeper confirmation.",
+    desc: "Observe liquidity, velocity, and volume concentration across active Solana pairs before commitment.",
     icon: TrendingUp,
   },
   {
-    title: "Token Intelligence Pages",
-    desc: "Dedicated shareable token pages built around live scoring, risk flags, and source data.",
+    title: "Token Intelligence Reports",
+    desc: "Dedicated premium token dossier pages generated per contract for deeper continuation review.",
     icon: FileSearch,
   },
   {
-    title: "Wallet Intelligence",
-    desc: "Future learned wallets, smart clusters, recurrence, and execution intelligence.",
-    icon: Wallet,
+    title: "Protected Access Layer",
+    desc: "Private route preparation for premium guides, operator alerts, and future member signal infrastructure.",
+    icon: Lock,
   },
 ];
 
 const liveStats = [
-  ["Live Utility", "Active"],
-  ["Signal Engine", "Pro"],
-  ["Discovery Board", "Online"],
-  ["Token Pages", "Live"],
+  ["Signal Engine", "Active"],
+  ["Platform Memory", "Live"],
+  ["Token Reports", "Online"],
+  ["Lead Capture", "Secured"],
 ];
 
 const terminalFeed = [
-  ["06:42:01", "DEX_STREAM", "new pair detected / liquidity seeded"],
-  ["06:42:14", "RUG_FILTER", "caution: low_liq_to_mc"],
-  ["06:42:39", "WALLET_TRACE", "candidate wallet recurrence detected"],
-  ["06:43:08", "SIGNAL_ENGINE", "setup classified: early_potential"],
-  ["06:43:21", "TOKEN_PAGE", "shareable intelligence route generated"],
+  ["06:42:01", "DEX_STREAM", "new liquidity event detected"],
+  ["06:42:14", "RISK_LAYER", "caution flag triggered / liquidity imbalance"],
+  ["06:42:39", "MEMORY_CORE", "contract demand archived to supabase"],
+  ["06:43:08", "SIGNAL_ENGINE", "setup classified / early_potential"],
+  ["06:43:21", "ACCESS_ROUTE", "lead captured / protected queue"],
 ];
 
 const products = [
   {
     title: "Signal Operator Guide",
     price: "$19",
-    desc: "A premium beginner-to-operator guide for understanding token structure and execution.",
+    desc: "Beginner to structured operator guide for understanding entries, warnings, setups, and survival.",
     icon: BookOpen,
     action: "Preview Guide",
   },
   {
     title: "Wallet Intelligence Notes",
     price: "$29",
-    desc: "Smart wallet pattern recognition, recurrence logic, and movement interpretation.",
+    desc: "Smart wallet recurrence, cluster behavior, movement logic, and high-value tracking interpretation.",
     icon: Wallet,
     action: "View Notes",
   },
   {
     title: "Protected Signal Framework",
     price: "Soon",
-    desc: "Private ecosystem access, alert routing, and disciplined execution architecture.",
+    desc: "Private signal ecosystem, premium operator access, structured route alerts, and gated intelligence.",
     icon: KeyRound,
     action: "Request Access",
   },
 ];
 
 const accessBenefits = [
-  "Early access to private signal intelligence",
-  "Priority updates as the scanner ecosystem expands",
-  "Premium product and guide release notifications",
-  "Protected community and alert route preparation",
+  "Early entry into the protected operator waiting list",
+  "Private signal route preparation and alert notifications",
+  "Premium product + guide release priority",
+  "Future Telegram / Discord / member intelligence expansion",
+];
+
+const accessTiers = [
+  "Public Utility Layer",
+  "Premium Guide Layer",
+  "Protected Operator Layer",
+  "Future Signal Membership Layer",
 ];
 
 export default function Home() {
@@ -383,15 +376,15 @@ export default function Home() {
       type: "signal",
       label: "Signal Check Pro",
       title: "Contract Intelligence Result",
-      body: "The entered token is being interpreted through a live weighted authority engine.",
+      body: "The entered contract is interpreted through a live weighted authority engine built around liquidity, flow, source health, risk behavior, and structure.",
       icon: <Radar className="h-5 w-5" />,
     });
 
   const openAccessModal = () =>
     setModal({
       label: "Protected Access",
-      title: "Access Route Opening Soon",
-      body: "This access layer is being prepared for Telegram, Discord, premium product drops, private signal rooms, and future membership routes.",
+      title: "Protected Operator Access Route",
+      body: "This access layer is being prepared for private signal infrastructure, premium guide releases, gated community routes, and member intelligence expansion.",
       icon: <Lock className="h-5 w-5" />,
     });
 
@@ -399,7 +392,7 @@ export default function Home() {
     setModal({
       label: "Digital Product",
       title: product.title,
-      body: `${product.desc} This product layer is being prepared for checkout, previews, and premium guide delivery.`,
+      body: `${product.desc} This premium product route is being prepared for checkout, delivery, and wider ecosystem integration.`,
       icon: <BookOpen className="h-5 w-5" />,
     });
 
@@ -439,7 +432,7 @@ export default function Home() {
       setModal({
         label: "Access Request",
         title: "Request Captured",
-        body: "Your access request has been captured. The protected route is being prepared.",
+        body: "Your request has been captured into the protected access queue.",
         icon: <CheckCircle2 className="h-5 w-5" />,
       });
     } catch (error) {
@@ -460,7 +453,7 @@ export default function Home() {
         type: "signal",
         label: "Signal Error",
         title: "No Contract Entered",
-        body: "Paste a valid Solana token contract address to run the live intelligence layer.",
+        body: "Paste a valid Solana contract address to activate the live intelligence layer.",
         icon: <Radar className="h-5 w-5" />,
       });
       return;
@@ -477,9 +470,7 @@ export default function Home() {
         body: JSON.stringify({ contract: trimmedContract }),
       });
 
-      const data = await response.json();
-
-      if (!data.success) {
+      const data = await response.json(); if (!data.success) {
         setModal({
           type: "signal",
           label: "Signal Error",
@@ -494,7 +485,7 @@ export default function Home() {
           type: "signal",
           label: "Live Signal Result",
           title: "Contract Intelligence Result",
-          body: "Live token data has been processed through the Trust The Signal authority layer.",
+          body: "Live token data has been processed through the Trust The Signal weighted authority layer.",
           icon: <Radar className="h-5 w-5" />,
           live: data.result,
         });
@@ -504,7 +495,7 @@ export default function Home() {
         type: "signal",
         label: "Signal Error",
         title: "System Route Failure",
-        body: "Unable to complete live DexScreener request.",
+        body: "Unable to complete live intelligence request.",
         icon: <Radar className="h-5 w-5" />,
       });
     }
@@ -512,40 +503,40 @@ export default function Home() {
     setChecking(false);
   };
 
-  const routeToTokenPage = () => {
-    const trimmedContract = contract.trim();
+  const routeToTokenPage = (manualContract) => {
+    const target = manualContract || contract.trim();
 
-    if (!trimmedContract) {
+    if (!target) {
       setModal({
-        label: "Token Page",
+        label: "Token Report",
         title: "No Contract Entered",
-        body: "Paste a Solana contract first, then open its dedicated token intelligence page.",
+        body: "Paste a Solana contract first, then open its dedicated intelligence report.",
         icon: <FileSearch className="h-5 w-5" />,
       });
       return;
     }
 
-    window.location.href = `/token/${encodeURIComponent(trimmedContract)}`;
+    window.location.href = `/token/${encodeURIComponent(target)}`;
   };
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <Modal modal={modal} closeModal={closeModal} />
+      <Modal modal={modal} closeModal={closeModal} routeToTokenPage={routeToTokenPage} />
 
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
       <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-8">
-        <header className="sticky top-4 z-40 flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-8">
+        <header className="sticky top-4 z-40 flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-4 sm:px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
               <Eye className="relative h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-white/45">
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-white/45">
                 ALL MY INTUITION
               </p>
-              <h1 className="text-lg font-semibold tracking-[0.2em]">
+              <h1 className="text-sm sm:text-lg font-semibold tracking-[0.2em]">
                 TRUST THE SIGNAL
               </h1>
             </div>
@@ -560,38 +551,31 @@ export default function Home() {
         </header>
 
         <section className="grid gap-10 pt-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.6 }}>
             <div className="mb-5 flex flex-wrap gap-3">
               <Badge>👁️ Signal.Detected()</Badge>
               <Badge>📡 System.Listening</Badge>
               <Badge>🔒 Protected.Channel</Badge>
-              <Badge>🧠 Conversion.Layer.Live</Badge>
+              <Badge>🧠 Platform.Memory.Live</Badge>
             </div>
 
             <h2 className="max-w-4xl text-5xl font-semibold leading-[0.92] tracking-tight md:text-7xl">
-              Token intelligence,
+              Premium Solana intelligence,
               <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                built to convert attention.
+                structured beyond basic scanners.
               </span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 md:text-xl">
-              Trust The Signal now routes users from discovery to analysis to
-              protected access — turning a utility site into a premium Solana
-              intelligence funnel.
+              Analyze live contracts, observe active demand, open dedicated token dossiers, and secure protected access into the wider Trust The Signal ecosystem.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button onClick={openSignalModal}>
-                Activate Signal Layer <ArrowRight className="h-4 w-4" />
+              <Button onClick={runLiveSignalCheck}>
+                Run Signal Check <ArrowRight className="h-4 w-4" />
               </Button>
               <Button href="/trending" variant="outline">
-                Explore Trending
+                Explore Trending Board
               </Button>
             </div>
           </motion.div>
@@ -600,10 +584,10 @@ export default function Home() {
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.24em] text-white/45">
-                  Signal Check Pro
+                  Live Contract Intelligence
                 </p>
                 <h3 className="mt-1 text-2xl font-semibold">
-                  Contract Intelligence Layer
+                  Signal Check Pro
                 </h3>
               </div>
               <Radar className="h-5 w-5 text-emerald-300" />
@@ -637,10 +621,10 @@ export default function Home() {
                 </button>
 
                 <button
-                  onClick={routeToTokenPage}
+                  onClick={() => routeToTokenPage()}
                   className="h-12 rounded-2xl border border-white/10 bg-white/5 px-5 font-medium text-white/75 transition hover:border-emerald-300/30 hover:text-white"
                 >
-                  Open Token Page
+                  Open Token Report
                 </button>
               </div>
             </div>
@@ -648,17 +632,12 @@ export default function Home() {
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {[
                 ["Signal Engine", "Operational"],
-                ["Token Pages", "Live"],
-                ["Access Capture", "Backend Ready"],
-                ["Authority Mode", "Phase 18"],
+                ["Platform Memory", "Supabase Live"],
+                ["Token Reports", "Generated"],
+                ["Protected Access", "Capturing"],
               ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                >
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                    {label}
-                  </p>
+                <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
                   <p className="mt-2 text-lg font-medium">{value}</p>
                 </div>
               ))}
@@ -670,48 +649,44 @@ export default function Home() {
           <Card className="p-6">
             <div className="mb-4 flex items-center gap-2 text-emerald-300">
               <History className="h-5 w-5" />
-              <p className="text-sm uppercase tracking-[0.24em]">
-                Recent Checked Tokens
-              </p>
+              <p className="text-sm uppercase tracking-[0.24em]">Recent Platform Checks</p>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {(recentChecks.length ? recentChecks : recentFallback).map(
-                (item) => {
-                  const address = item.contract || item;
-                  const name = item.token_name || "Unknown Token";
-                  const symbol = item.token_symbol || "TOKEN";
+              {(recentChecks.length ? recentChecks : recentFallback).map((item) => {
+                const address = item.contract || item;
+                const name = item.token_name || "Unknown Token";
+                const symbol = item.token_symbol || "TOKEN";
 
-                  return (
-                    <button
-                      key={address}
-                      onClick={() => setContract(address)}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-emerald-300/30 hover:bg-emerald-300/10"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {name} ({symbol})
-                          </p>
-                          <p className="mt-2 break-all font-mono text-xs text-white/45">
-                            {address}
-                          </p>
-                        </div>
-
-                        {item.latest_score !== null && item.latest_score !== undefined && (
-                          <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
-                            {item.latest_score}
-                          </span>
-                        )}
+                return (
+                  <button
+                    key={address}
+                    onClick={() => setContract(address)}
+                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-emerald-300/30 hover:bg-emerald-300/10"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          {name} ({symbol})
+                        </p>
+                        <p className="mt-2 break-all font-mono text-xs text-white/45">
+                          {address}
+                        </p>
                       </div>
 
-                      <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-white/35">
-                        {item.latest_risk || "Live platform check"}
-                      </p>
-                    </button>
-                  );
-                }
-              )}
+                      {item.latest_score !== null && item.latest_score !== undefined && (
+                        <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
+                          {item.latest_score}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-white/35">
+                      {item.latest_risk || "Live platform check"}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </Card>
         </section>
@@ -721,12 +696,8 @@ export default function Home() {
             {liveStats.map(([label, value]) => (
               <Card key={label}>
                 <div className="p-5 text-center">
-                  <p className="text-3xl font-semibold text-emerald-300">
-                    {value}
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/45">
-                    {label}
-                  </p>
+                  <p className="text-3xl font-semibold text-emerald-300">{value}</p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.22em] text-white/45">{label}</p>
                 </div>
               </Card>
             ))}
@@ -734,24 +705,47 @@ export default function Home() {
         </section>
 
         <section className="pt-20">
+          <div className="mb-6">
+            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
+              Platform Intelligence Layers
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
+              Built as a system, not a single checker.
+            </h2>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+
+              return (
+                <Card key={tool.title}>
+                  <div className="p-6">
+                    <Icon className="h-5 w-5 text-emerald-300" />
+                    <h3 className="mt-4 text-xl font-semibold">{tool.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/65">{tool.desc}</p>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="pt-20">
           <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black">
-            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-2">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Mail className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">
-                    Access Capture
-                  </span>
+                  <span className="text-sm uppercase tracking-[0.24em]">Protected Access Queue</span>
                 </div>
 
                 <h2 className="text-3xl font-semibold md:text-5xl">
-                  Request protected access before the signal room opens.
+                  Secure early placement before operator access expands.
                 </h2>
 
                 <p className="mt-4 leading-8 text-white/65">
-                  This capture layer sends requests through the backend route,
-                  preparing the site for Telegram, Discord, premium guide drops,
-                  private alerts, and future membership routes.
+                  This route captures protected interest for premium releases, private alerts, gated rooms, and future signal membership access.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 md:flex-row">
@@ -769,23 +763,13 @@ export default function Home() {
                     {accessSubmitted ? "Request Captured" : "Request Access"}
                   </button>
                 </div>
-
-                <p className="mt-3 text-xs text-white/40">
-                  Backend route active now. Add ACCESS_REQUEST_WEBHOOK_URL in Vercel
-                  later to forward requests externally.
-                </p>
               </div>
 
               <div className="grid gap-3">
                 {accessBenefits.map((benefit) => (
-                  <div
-                    key={benefit}
-                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4"
-                  >
+                  <div key={benefit} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4">
                     <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
-                    <p className="text-sm leading-7 text-white/70">
-                      {benefit}
-                    </p>
+                    <p className="text-sm leading-7 text-white/70">{benefit}</p>
                   </div>
                 ))}
               </div>
@@ -794,81 +778,47 @@ export default function Home() {
         </section>
 
         <section className="pt-20">
-          <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-              Premium Utility Layer
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
-              More than a checker. A conversion ecosystem.
-            </h2>
-            <p className="mt-4 max-w-3xl leading-8 text-white/60">
-              Each page now routes users toward deeper utility: discover tokens,
-              analyze contracts, open token pages, request protected access, and
-              return to the wider intelligence system.
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {tools.map((tool) => {
-              const Icon = tool.icon;
-
-              return (
-                <Card key={tool.title}>
-                  <div className="p-6">
-                    <Icon className="h-5 w-5 text-emerald-300" />
-                    <h3 className="mt-4 text-xl font-semibold">
-                      {tool.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-white/65">
-                      {tool.desc}
-                    </p>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="pt-20">
-          <Card className="overflow-hidden">
-            <div className="border-b border-white/10 bg-black/40 px-6 py-4">
-              <div className="flex items-center gap-3 text-emerald-300">
-                <TerminalSquare className="h-5 w-5" />
-                <span className="text-sm uppercase tracking-[0.24em]">
-                  Scanner Terminal
-                </span>
+          <div className="grid gap-5 md:grid-cols-2">
+            <Card className="p-7">
+              <div className="flex items-center gap-2 text-emerald-300">
+                <Layers className="h-5 w-5" />
+                <span className="text-sm uppercase tracking-[0.24em]">Access Tier Preview</span>
               </div>
-            </div>
 
-            <div className="space-y-3 p-6 font-mono text-sm">
-              {terminalFeed.map(([time, source, text]) => (
-                <div
-                  key={time + source}
-                  className="grid gap-2 rounded-2xl border border-white/10 bg-black/40 p-4 md:grid-cols-[100px_160px_1fr]"
-                >
-                  <span className="text-white/35">{time}</span>
-                  <span className="text-emerald-300">{source}</span>
-                  <span className="text-white/70">{text}</span>
+              <div className="mt-5 space-y-3">
+                {accessTiers.map((tier) => (
+                  <div key={tier} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    {tier}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <div className="border-b border-white/10 bg-black/40 px-6 py-4">
+                <div className="flex items-center gap-3 text-emerald-300">
+                  <TerminalSquare className="h-5 w-5" />
+                  <span className="text-sm uppercase tracking-[0.24em]">Platform Activity</span>
                 </div>
-              ))}
-            </div>
-          </Card>
+              </div>
+
+              <div className="space-y-3 p-6 font-mono text-sm">
+                {terminalFeed.map(([time, source, text]) => (
+                  <div key={time + source} className="grid gap-2 rounded-2xl border border-white/10 bg-black/40 p-4 md:grid-cols-[100px_150px_1fr]">
+                    <span className="text-white/35">{time}</span>
+                    <span className="text-emerald-300">{source}</span>
+                    <span className="text-white/70">{text}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         </section>
 
         <section className="pt-20">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-                Digital Product Layer
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold md:text-5xl">
-                Monetize the intelligence.
-              </h2>
-            </div>
-            <p className="max-w-xl text-white/60">
-              Premium guides and private frameworks turn trust into an actual
-              product ecosystem.
-            </p>
+          <div className="mb-6">
+            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Premium Product Layer</p>
+            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Monetize the intelligence trust.</h2>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
@@ -883,16 +833,10 @@ export default function Home() {
                 >
                   <div className="p-7">
                     <Icon className="h-6 w-6 text-emerald-300" />
-                    <h3 className="mt-5 text-2xl font-semibold">
-                      {product.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-white/65">
-                      {product.desc}
-                    </p>
+                    <h3 className="mt-5 text-2xl font-semibold">{product.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
                     <div className="mt-6 flex items-center justify-between">
-                      <span className="text-2xl font-semibold text-emerald-300">
-                        {product.price}
-                      </span>
+                      <span className="text-2xl font-semibold text-emerald-300">{product.price}</span>
                       <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
                         {product.action}
                       </button>
@@ -904,22 +848,10 @@ export default function Home() {
           </div>
         </section>
 
-        <footer className="pb-10 pt-16 text-center text-sm text-white/40">
+        <footer className="pb-10 pt-20 text-center text-sm text-white/40">
           <div className="mb-6 flex flex-wrap justify-center gap-3">
-            {[
-              "Home",
-              "Trending",
-              "Token Pages",
-              "Signal Check",
-              "Access",
-              "Products",
-              "Telegram",
-              "Discord",
-            ].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55"
-              >
+            {["Home", "Trending", "Token Reports", "Signal Check", "Protected Access", "Products", "Admin"].map((item) => (
+              <span key={item} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/55">
                 {item}
               </span>
             ))}
@@ -930,10 +862,9 @@ export default function Home() {
             <span>Signal Over Noise.</span>
           </div>
 
-          <p className="mt-3">© Trust The Signal. Built by ALL MY INTUITION.</p>
+          <p className="mt-3">© Trust The Signal — Built by ALL MY INTUITION.</p>
         </footer>
       </div>
     </main>
   );
 }
-
