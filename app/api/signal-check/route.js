@@ -1,10 +1,102 @@
 import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
 const BASE58_SOLANA_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+const DATA_DIR = path.join(process.cwd(), "data");
+const TOKEN_LOG_FILE = path.join(DATA_DIR, "token-logs.json");
 
 const clamp = (num, min = 0, max = 100) => {
     return Math.max(min, Math.min(max, Math.round(num)));
 };
+
+async function ensureTokenLogFile() {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+
+    try {
+        await fs.access(TOKEN_LOG_FILE);
+    } catch {
+        await fs.writeFile(TOKEN_LOG_FILE, JSON.stringify([], null, 2), "utf8");
+    }
+}
+
+async function readTokenLogs() {
+    await ensureTokenLogFile();
+
+    try {
+        const raw = await fs.readFile(TOKEN_LOG_FILE, "utf8");
+        const parsed = JSON.parse(raw);
+
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        console.error("Signal Check failed to read token logs:", error);
+        return [];
+    }
+}
+
+async function writeTokenLogs(logs) {
+    await ensureTokenLogFile();
+    await fs.writeFile(TOKEN_LOG_FILE, JSON.stringify(logs, null, 2), "utf8");
+}
+
+function normalizeContract(value) {
+    return String(value || "").trim();
+}
+
+async function logTokenCheck(result) {
+    try {
+        const logs = await readTokenLogs();
+        const now = new Date().toISOString();
+        const contract = normalizeContract(result.address);
+
+        if (!contract) return;
+
+        const existingIndex = logs.findIndex(
+            (item) =>
+                normalizeContract(item.contract).toLowerCase() ===
+                contract.toLowerCase()
+        );
+
+        if (existingIndex >= 0) {
+            logs[existingIndex] = {
+                ...logs[existingIndex],
+                tokenName: result.name || logs[existingIndex].tokenName || "",
+                tokenSymbol: result.symbol || logs[existingIndex].tokenSymbol || "",
+                chain: "solana",
+                lastCheckedAt: now,
+                checkCount: Number(logs[existingIndex].checkCount || 0) + 1,
+                latestScore:
+                    result.score !== undefined
+                        ? result.score
+                        : logs[existingIndex].latestScore || null,
+                latestRisk: result.risk || logs[existingIndex].latestRisk || "",
+                latestSetup: result.verdict || logs[existingIndex].latestSetup || "",
+                latestSource:
+                    result.sourceHealth || logs[existingIndex].latestSource || "",
+            };
+        } else {
+            logs.unshift({
+                id: crypto.randomUUID(),
+                contract,
+                tokenName: result.name || "",
+                tokenSymbol: result.symbol || "",
+                chain: "solana",
+                firstCheckedAt: now,
+                lastCheckedAt: now,
+                checkCount: 1,
+                latestScore: result.score !== undefined ? result.score : null,
+                latestRisk: result.risk || "",
+                latestSetup: result.verdict || "",
+                latestSource: result.sourceHealth || "",
+            });
+        }
+
+        await writeTokenLogs(logs.slice(0, 1000));
+    } catch (error) {
+        console.error("Token log direct write failed:", error);
+    }
+}
 
 const scoreLiquidity = (liquidity) => {
     if (liquidity >= 250000) return 100;
@@ -225,36 +317,6 @@ const getSourceHealth = (pairUrl, info) => {
     return "limited_presence";
 };
 
-async function logTokenCheck(result) {
-    try {
-        const baseUrl =
-            process.env.NEXT_PUBLIC_SITE_URL ||
-                process.env.VERCEL_URL
-                ? `https://${process.env.VERCEL_URL}`
-                : "http://localhost:3000";
-
-        await fetch(`${baseUrl}/api/token-log`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                contract: result.address,
-                tokenName: result.name,
-                tokenSymbol: result.symbol,
-                chain: "solana",
-                score: result.score,
-                risk: result.risk,
-                setup: result.verdict,
-                source: result.sourceHealth,
-            }),
-            cache: "no-store",
-        });
-    } catch (error) {
-        console.error("Token log background write failed:", error);
-    }
-}
-
 export async function POST(req) {
     try {
         const { contract } = await req.json();
@@ -396,6 +458,8 @@ export async function POST(req) {
             result,
         });
     } catch (error) {
+        console.error("Signal check failed:", error);
+
         return NextResponse.json(
             {
                 success: false,
