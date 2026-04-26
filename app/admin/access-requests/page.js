@@ -28,7 +28,6 @@ const STATUS_STYLES = {
 
 function formatDate(value) {
     if (!value) return "Unknown";
-
     try {
         return new Date(value).toLocaleString();
     } catch {
@@ -39,7 +38,6 @@ function formatDate(value) {
 function shortenWallet(wallet) {
     if (!wallet) return "Not provided";
     if (wallet.length <= 14) return wallet;
-
     return `${wallet.slice(0, 6)}...${wallet.slice(-6)}`;
 }
 
@@ -119,9 +117,7 @@ export default function AdminAccessRequestsPage() {
     }
 
     async function deleteRequest(id) {
-        const confirmed = window.confirm(
-            "Delete this access request? This cannot be undone."
-        );
+        const confirmed = window.confirm("Delete this access request?");
 
         if (!confirmed) return;
 
@@ -158,7 +154,7 @@ export default function AdminAccessRequestsPage() {
                 setCopiedId("");
             }, 1500);
         } catch {
-            setError("Copy failed. Try copying manually.");
+            setError("Copy failed.");
         }
     }
 
@@ -178,10 +174,7 @@ export default function AdminAccessRequestsPage() {
 
         for (const request of requests) {
             const status = request.status || "new_access_request";
-
-            if (base[status] !== undefined) {
-                base[status] += 1;
-            }
+            if (base[status] !== undefined) base[status] += 1;
         }
 
         return base;
@@ -192,9 +185,7 @@ export default function AdminAccessRequestsPage() {
 
         return requests.filter((request) => {
             const status = request.status || "new_access_request";
-
-            const matchesStatus =
-                statusFilter === "all" ? true : status === statusFilter;
+            const matchesStatus = statusFilter === "all" ? true : status === statusFilter;
 
             const searchableText = [
                 request.contact,
@@ -204,7 +195,6 @@ export default function AdminAccessRequestsPage() {
                 request.status,
                 request.source,
                 request.message,
-                request.createdAt,
             ]
                 .filter(Boolean)
                 .join(" ")
@@ -233,38 +223,21 @@ export default function AdminAccessRequestsPage() {
                             </h1>
 
                             <p className="mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
-                                Manage protected access leads, review incoming requests, update
-                                status, export records, and keep operator intake clean.
+                                Protected lead intake, queue review, contact management, and access pipeline handling.
                             </p>
                         </div>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
-                            <a
-                                href="/"
-                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
-                            >
+                            <a href="/" className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold">
                                 Home
                             </a>
-
-                            <a
-                                href="/admin"
-                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
-                            >
+                            <a href="/admin" className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold">
                                 Admin Home
                             </a>
-
-                            <button
-                                onClick={loadRequests}
-                                disabled={loading}
-                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                            <button onClick={loadRequests} className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold">
                                 {loading ? "Refreshing..." : "Refresh"}
                             </button>
-
-                            <button
-                                onClick={exportCSV}
-                                className="rounded-2xl border border-emerald-300/40 bg-emerald-300/15 px-5 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/25"
-                            >
+                            <button onClick={exportCSV} className="rounded-2xl border border-emerald-300/40 bg-emerald-300/15 px-5 py-3 text-sm font-black text-emerald-100">
                                 Export CSV
                             </button>
                         </div>
@@ -273,9 +246,7 @@ export default function AdminAccessRequestsPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
                     <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/40">
-                            Total
-                        </p>
+                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/40">Total</p>
                         <p className="mt-3 text-3xl font-black">{counts.total}</p>
                     </div>
 
@@ -285,7 +256,7 @@ export default function AdminAccessRequestsPage() {
                             onClick={() => setStatusFilter(status)}
                             className={`rounded-3xl border p-5 text-left transition ${statusFilter === status
                                 ? STATUS_STYLES[status]
-                                : "border-white/10 bg-white/[0.04] text-white hover:border-emerald-300/30"
+                                : "border-white/10 bg-white/[0.04] text-white"
                                 }`}
                         >
                             <p className="text-xs font-bold uppercase tracking-[0.25em] opacity-60">
@@ -296,53 +267,26 @@ export default function AdminAccessRequestsPage() {
                     ))}
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
-                    <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-                        <input
-                            value={searchQuery}
-                            onChange={(event) => setSearchQuery(event.target.value)}
-                            placeholder="Search email, telegram, wallet, source, message..."
-                            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-300/50"
-                        />
+                <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+                    <input
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        placeholder="Search email, telegram, wallet, source, message..."
+                        className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+                    />
 
-                        <select
-                            value={statusFilter}
-                            onChange={(event) => setStatusFilter(event.target.value)}
-                            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm font-bold text-white outline-none transition focus:border-emerald-300/50"
-                        >
-                            <option value="all">All Statuses</option>
-                            {STATUS_OPTIONS.map((status) => (
-                                <option key={status} value={status}>
-                                    {STATUS_LABELS[status]}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/40">
-                        <button
-                            onClick={() => setStatusFilter("all")}
-                            className={`rounded-full border px-4 py-2 transition ${statusFilter === "all"
-                                ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-200"
-                                : "border-white/10 bg-white/5 hover:border-white/25"
-                                }`}
-                        >
-                            All
-                        </button>
-
+                    <select
+                        value={statusFilter}
+                        onChange={(event) => setStatusFilter(event.target.value)}
+                        className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-4 text-sm font-bold outline-none"
+                    >
+                        <option value="all">All Statuses</option>
                         {STATUS_OPTIONS.map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => setStatusFilter(status)}
-                                className={`rounded-full border px-4 py-2 transition ${statusFilter === status
-                                    ? STATUS_STYLES[status]
-                                    : "border-white/10 bg-white/5 hover:border-white/25"
-                                    }`}
-                            >
+                            <option key={status} value={status}>
                                 {STATUS_LABELS[status]}
-                            </button>
+                            </option>
                         ))}
-                    </div>
+                    </select>
                 </div>
 
                 {error && (
@@ -351,24 +295,18 @@ export default function AdminAccessRequestsPage() {
                     </div>
                 )}
 
-                <div className="flex items-center justify-between gap-4">
-                    <p className="text-sm font-bold text-white/50">
-                        Showing{" "}
-                        <span className="text-emerald-200">{filteredRequests.length}</span>{" "}
-                        of <span className="text-white">{requests.length}</span> requests
-                    </p>
-                </div>
+                <p className="text-sm font-bold text-white/50">
+                    Showing <span className="text-emerald-200">{filteredRequests.length}</span> of{" "}
+                    <span className="text-white">{requests.length}</span> requests
+                </p>
 
                 {loading ? (
                     <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center text-sm font-bold text-white/50">
                         Loading access requests...
                     </div>
                 ) : filteredRequests.length === 0 ? (
-                    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
-                        <p className="text-lg font-black">No matching access requests.</p>
-                        <p className="mt-2 text-sm text-white/45">
-                            Try clearing the search or switching the status filter.
-                        </p>
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center text-white/45">
+                        No matching access requests.
                     </div>
                 ) : (
                     <div className="grid gap-5">
@@ -379,17 +317,16 @@ export default function AdminAccessRequestsPage() {
                             return (
                                 <article
                                     key={request.id}
-                                    className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_0_40px_rgba(255,255,255,0.03)]"
+                                    className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5"
                                 >
                                     <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-3">
                                                 <span
-                                                    className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${STATUS_STYLES[status] ||
-                                                        "border-white/20 bg-white/5 text-white/60"
+                                                    className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${STATUS_STYLES[status]
                                                         }`}
                                                 >
-                                                    {STATUS_LABELS[status] || status}
+                                                    {STATUS_LABELS[status]}
                                                 </span>
 
                                                 <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
@@ -397,74 +334,48 @@ export default function AdminAccessRequestsPage() {
                                                 </span>
                                             </div>
 
-                                            <h2 className="mt-4 break-words text-2xl font-black tracking-tight text-white">
+                                            <h2 className="mt-4 break-words text-2xl font-black">
                                                 {primaryContact}
                                             </h2>
 
                                             <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
                                                 <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
-                                                        Email
-                                                    </p>
-                                                    <p className="mt-2 break-words font-bold text-white/85">
-                                                        {request.email || "Not provided"}
-                                                    </p>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Email</p>
+                                                    <p className="mt-2 break-words font-bold">{request.email || "Not provided"}</p>
                                                 </div>
 
                                                 <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
-                                                        Telegram
-                                                    </p>
-                                                    <p className="mt-2 break-words font-bold text-white/85">
-                                                        {request.telegram || "Not provided"}
-                                                    </p>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Telegram</p>
+                                                    <p className="mt-2 break-words font-bold">{request.telegram || "Not provided"}</p>
                                                 </div>
 
                                                 <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
-                                                        Wallet
-                                                    </p>
-                                                    <p className="mt-2 break-words font-bold text-white/85">
-                                                        {shortenWallet(request.wallet)}
-                                                    </p>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Wallet</p>
+                                                    <p className="mt-2 break-words font-bold">{shortenWallet(request.wallet)}</p>
                                                 </div>
 
                                                 <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
-                                                        Source
-                                                    </p>
-                                                    <p className="mt-2 break-words font-bold text-white/85">
-                                                        {request.source || "Not tracked"}
-                                                    </p>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Source</p>
+                                                    <p className="mt-2 break-words font-bold">{request.source || "Not tracked"}</p>
                                                 </div>
                                             </div>
 
                                             {request.message && (
                                                 <div className="mt-4 rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
-                                                        Message / Notes
-                                                    </p>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-white/35">Message / Notes</p>
                                                     <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/70">
                                                         {request.message}
                                                     </p>
                                                 </div>
-                                            )}
-
-                                            {request.updatedAt && (
-                                                <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-white/30">
-                                                    Last updated: {formatDate(request.updatedAt)}
-                                                </p>
                                             )}
                                         </div>
 
                                         <div className="flex w-full flex-col gap-3 xl:w-[260px]">
                                             <select
                                                 value={status}
-                                                onChange={(event) =>
-                                                    updateStatus(request.id, event.target.value)
-                                                }
+                                                onChange={(event) => updateStatus(request.id, event.target.value)}
                                                 disabled={actionLoadingId === request.id}
-                                                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm font-bold text-white outline-none transition focus:border-emerald-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm font-bold outline-none"
                                             >
                                                 {STATUS_OPTIONS.map((option) => (
                                                     <option key={option} value={option}>
@@ -475,32 +386,26 @@ export default function AdminAccessRequestsPage() {
 
                                             <button
                                                 onClick={() => copyText(request.id, primaryContact)}
-                                                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-emerald-300/40 hover:bg-emerald-300/10"
+                                                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold"
                                             >
                                                 {copiedId === request.id ? "Copied" : "Copy Contact"}
                                             </button>
 
                                             {request.wallet && (
                                                 <button
-                                                    onClick={() =>
-                                                        copyText(`${request.id}-wallet`, request.wallet)
-                                                    }
-                                                    className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                                                    onClick={() => copyText(`${request.id}-wallet`, request.wallet)}
+                                                    className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold"
                                                 >
-                                                    {copiedId === `${request.id}-wallet`
-                                                        ? "Wallet Copied"
-                                                        : "Copy Wallet"}
+                                                    {copiedId === `${request.id}-wallet` ? "Wallet Copied" : "Copy Wallet"}
                                                 </button>
                                             )}
 
                                             <button
                                                 onClick={() => deleteRequest(request.id)}
                                                 disabled={actionLoadingId === request.id}
-                                                className="rounded-2xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="rounded-2xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm font-black text-red-200"
                                             >
-                                                {actionLoadingId === request.id
-                                                    ? "Processing..."
-                                                    : "Delete"}
+                                                {actionLoadingId === request.id ? "Processing..." : "Delete"}
                                             </button>
                                         </div>
                                     </div>
