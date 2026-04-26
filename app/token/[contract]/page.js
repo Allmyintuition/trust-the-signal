@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Eye,
@@ -20,6 +20,8 @@ import {
   Activity,
   Database,
   Copy,
+  Wallet,
+  Brain,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -41,22 +43,28 @@ const riskTone = (value = "") => {
   if (upper.includes("LOW") || upper.includes("SAFE")) {
     return "border-emerald-300/35 bg-emerald-300/10 text-emerald-200";
   }
-
   if (upper.includes("MEDIUM") || upper.includes("CAUTION")) {
     return "border-yellow-300/35 bg-yellow-300/10 text-yellow-200";
   }
-
   if (upper.includes("HIGH") || upper.includes("DANGER")) {
     return "border-red-300/35 bg-red-300/10 text-red-200";
   }
-
   return "border-white/15 bg-white/5 text-white/60";
 };
 
+const labelTone = (value = "") => {
+  const v = String(value).toLowerCase();
+
+  if (v === "high_interest") return "border-emerald-300/25 bg-emerald-300/10 text-emerald-200";
+  if (v === "revisit") return "border-yellow-300/25 bg-yellow-300/10 text-yellow-200";
+  if (v === "dead") return "border-red-300/25 bg-red-300/10 text-red-200";
+  if (v === "premium_candidate") return "border-purple-300/25 bg-purple-300/10 text-purple-200";
+
+  return "border-cyan-300/25 bg-cyan-300/10 text-cyan-200";
+};
+
 const Card = ({ children, className = "" }) => (
-  <div
-    className={`rounded-[28px] border border-white/10 bg-white/[0.055] shadow-2xl shadow-emerald-500/10 backdrop-blur-xl ${className}`}
-  >
+  <div className={`rounded-[28px] border border-white/10 bg-white/[0.055] shadow-2xl shadow-emerald-500/10 backdrop-blur-xl ${className}`}>
     {children}
   </div>
 );
@@ -64,18 +72,11 @@ const Card = ({ children, className = "" }) => (
 const ScoreBar = ({ label, value }) => (
   <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
     <div className="mb-2 flex items-center justify-between">
-      <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-        {label}
-      </p>
-      <p className="text-sm font-semibold text-emerald-200">
-        {value ?? 0}/100
-      </p>
+      <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+      <p className="text-sm font-semibold text-emerald-200">{value ?? 0}/100</p>
     </div>
     <div className="h-2 overflow-hidden rounded-full bg-white/10">
-      <div
-        className="h-full rounded-full bg-emerald-300"
-        style={{ width: `${clampBar(value)}%` }}
-      />
+      <div className="h-full rounded-full bg-emerald-300" style={{ width: `${clampBar(value)}%` }} />
     </div>
   </div>
 );
@@ -93,12 +94,15 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
   >
     {children}
   </a>
-); export default function TokenPage() {
+);
+
+export default function TokenPage() {
   const params = useParams();
   const contract = params?.contract ? decodeURIComponent(params.contract) : "";
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [memoryData, setMemoryData] = useState(null);
   const [error, setError] = useState("");
   const [accessEmail, setAccessEmail] = useState("");
   const [accessSubmitted, setAccessSubmitted] = useState(false);
@@ -112,20 +116,28 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
       setError("");
 
       try {
-        const response = await fetch("/api/signal-check", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ contract }),
-        });
+        const [signalResponse, memoryResponse] = await Promise.all([
+          fetch("/api/signal-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contract }),
+          }),
+          fetch(`/api/token-memory?q=${encodeURIComponent(contract)}`, {
+            cache: "no-store",
+          }),
+        ]);
 
-        const json = await response.json();
+        const signalJson = await signalResponse.json();
+        const memoryJson = await memoryResponse.json();
 
-        if (!json.success) {
-          setError(json.error || "Unable to analyze token.");
+        if (!signalJson.success) {
+          setError(signalJson.error || "Unable to analyze token.");
         } else {
-          setData(json.result);
+          setData(signalJson.result);
+        }
+
+        if (memoryJson.success && memoryJson.logs?.length > 0) {
+          setMemoryData(memoryJson.logs[0]);
         }
       } catch (err) {
         setError("Token intelligence route failed.");
@@ -139,36 +151,21 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
 
   const submitAccessRequest = async () => {
     const contact = accessEmail.trim();
-
-    if (!contact) {
-      setError(
-        "Enter an email, Telegram handle, Discord name, or preferred contact before requesting access."
-      );
-      return;
-    }
+    if (!contact) return;
 
     try {
       const response = await fetch("/api/access-request", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contact,
-          source: "token_page_access_capture",
-          contract,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contact, source: "token_page_access_capture", contract }),
       });
 
       const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || "Access request failed.");
-      }
+      if (!result.success) throw new Error();
 
       setAccessSubmitted(true);
       setError("");
-    } catch (error) {
+    } catch {
       setError("The access route could not capture this request. Try again.");
     }
   };
@@ -178,6 +175,10 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
+
+  const archivedChecks = useMemo(() => memoryData?.check_count || 0, [memoryData]);
+  const operatorLabel = memoryData?.operator_label || "watch";
+  const operatorNote = memoryData?.operator_note || "";
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -195,20 +196,14 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                 TRUST THE SIGNAL
               </p>
               <h1 className="text-sm sm:text-lg font-semibold tracking-[0.2em]">
-                TOKEN DOSSIER
+                TOKEN DOSSIER V5
               </h1>
             </div>
           </div>
 
           <div className="flex gap-3">
-            <ActionLink href="/tools" variant="outline">
-              Tools
-            </ActionLink>
-
-            <ActionLink href="/products" variant="outline">
-              Products
-            </ActionLink>
-
+            <ActionLink href="/tools" variant="outline">Tools</ActionLink>
+            <ActionLink href="/tools/token-memory" variant="outline">Memory</ActionLink>
             <ActionLink href="/trending" variant="outline">
               <ArrowLeft className="h-4 w-4" />
               Trending
@@ -226,12 +221,12 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                 📡 Signal.Engine
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                🧠 Memory.Archived
+                🧠 Hybrid.Memory
               </span>
             </div>
 
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-              Full Contract Intelligence Report
+              Full Contract Intelligence Report + Archived Conviction
             </p>
 
             <h2 className="mt-2 text-3xl font-semibold md:text-5xl break-words">
@@ -239,7 +234,7 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
             </h2>
 
             <p className="mt-5 max-w-3xl text-lg leading-8 text-white/65">
-              Dedicated live dossier generated through the Trust The Signal weighted authority layer for structure, risk, source quality, and continuation routing.
+              Dedicated live dossier generated through the Trust The Signal weighted authority layer, now synced with archived platform memory and operator intelligence.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -257,33 +252,57 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                 <ShieldCheck className="h-4 w-4" />
                 Run Homepage Check
               </ActionLink>
+
+              <ActionLink href="/tools/wallet-snapshot" variant="outline">
+                <Wallet className="h-4 w-4" />
+                Wallet Snapshot
+              </ActionLink>
             </div>
           </div>
 
           <Card className="p-6">
             <div className="mb-3 flex items-center gap-2 text-emerald-300">
-              <Database className="h-5 w-5" />
+              <Brain className="h-5 w-5" />
               <p className="text-sm uppercase tracking-[0.24em]">
-                Intelligence Actions
+                Intelligence Memory Sync
               </p>
             </div>
 
             <div className="grid gap-3">
-              <ActionLink href="/trending" variant="outline">
-                <TrendingUp className="h-4 w-4" />
-                Trending Board
-              </ActionLink>
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/35">
+                  Archived Checks
+                </p>
+                <p className="mt-2 text-2xl font-black text-emerald-200">
+                  {archivedChecks}
+                </p>
+              </div>
 
-              {data?.pairUrl && (
-                <ActionLink href={data.pairUrl} variant="outline">
-                  <ExternalLink className="h-4 w-4" />
-                  Open DexScreener Pair
-                </ActionLink>
+              <div className={`rounded-2xl border p-4 ${labelTone(operatorLabel)}`}>
+                <p className="text-xs uppercase tracking-[0.2em]">
+                  Operator Label
+                </p>
+                <p className="mt-2 text-xl font-black">{operatorLabel}</p>
+              </div>
+
+              {operatorNote ? (
+                <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">
+                    Operator Note
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-white/70">
+                    {operatorNote}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/45">
+                  No archived operator note saved for this token yet.
+                </div>
               )}
 
-              <ActionLink href="/" variant="solid">
-                <FileSearch className="h-4 w-4" />
-                Analyze Another Contract
+              <ActionLink href={`/tools/token-memory?q=${encodeURIComponent(contract)}`} variant="outline">
+                <Database className="h-4 w-4" />
+                Open Full Memory Search
               </ActionLink>
             </div>
           </Card>
@@ -325,7 +344,9 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                 ["Quote", data.quoteToken || "--"],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">
+                    {label}
+                  </p>
                   <p className={`mt-2 break-words text-base font-medium ${label === "Risk" ? riskTone(value) : "text-emerald-200 border-0 bg-transparent p-0"}`}>
                     {value || "--"}
                   </p>
@@ -346,7 +367,9 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
               <Card className="p-6">
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Activity className="h-5 w-5" />
-                  <p className="text-sm uppercase tracking-[0.24em]">Risk Flag Layer</p>
+                  <p className="text-sm uppercase tracking-[0.24em]">
+                    Risk Flag Layer
+                  </p>
                 </div>
 
                 {data.riskFlags?.length > 0 ? (
@@ -370,7 +393,9 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
               <Card className="p-6">
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Radar className="h-5 w-5" />
-                  <p className="text-sm uppercase tracking-[0.24em]">Source Presence</p>
+                  <p className="text-sm uppercase tracking-[0.24em]">
+                    Source Presence
+                  </p>
                 </div>
 
                 <div className="grid gap-3">
@@ -380,10 +405,35 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                     ["Source Health", data.sourceHealth || "limited_presence"],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">{label}</p>
-                      <p className="mt-2 font-medium text-emerald-200">{value}</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">
+                        {label}
+                      </p>
+                      <p className="mt-2 font-medium text-emerald-200">
+                        {value}
+                      </p>
                     </div>
                   ))}
+                </div>
+              </Card>
+            </section>
+
+            <section className="pt-10">
+              <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-white/[0.05] to-black p-6">
+                <div className="grid gap-6 lg:grid-cols-3">
+                  <ActionLink href="/trending" variant="outline">
+                    <TrendingUp className="h-4 w-4" />
+                    Trending Board
+                  </ActionLink>
+
+                  <ActionLink href="/tools/token-memory" variant="outline">
+                    <Database className="h-4 w-4" />
+                    Token Memory
+                  </ActionLink>
+
+                  <ActionLink href="/" variant="solid">
+                    <FileSearch className="h-4 w-4" />
+                    Analyze Another Contract
+                  </ActionLink>
                 </div>
               </Card>
             </section>
@@ -394,7 +444,9 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
                   <div>
                     <div className="mb-3 flex items-center gap-2 text-emerald-300">
                       <Lock className="h-5 w-5" />
-                      <p className="text-sm uppercase tracking-[0.24em]">Protected Continuation</p>
+                      <p className="text-sm uppercase tracking-[0.24em]">
+                        Protected Continuation
+                      </p>
                     </div>
 
                     <h2 className="text-3xl font-semibold">
