@@ -43,7 +43,6 @@ const Button = ({ children, variant = "solid", onClick, href }) => {
     return (
       <a href={href} className={className}>
         <span className="inline-flex items-center gap-2">{children}</span>
-      </a>
     );
   }
 
@@ -60,7 +59,6 @@ const NavLink = ({ href, children }) => (
     className="rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-sm text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
   >
     {children}
-  </a>
 );
 
 const Badge = ({ children }) => (
@@ -113,7 +111,6 @@ const ExternalLinkButton = ({ href, children }) => {
       className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/20"
     >
       {children}
-    </a>
   );
 };
 
@@ -704,14 +701,12 @@ export default function Home() {
                           className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[11px] font-black text-emerald-200"
                         >
                           Open Dossier
-                        </a>
 
                         <a
                           href={`/tools/token-memory?q=${address}`}
                           className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/70"
                         >
                           Memory
-                        </a>
                       </div>
                     </div>
                   </div>
@@ -755,7 +750,7 @@ export default function Home() {
                     <h3 className="mt-4 text-xl font-semibold">{tool.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-white/65">{tool.desc}</p>
                   </div>
-                </Card></a>
+                </Card>
               );
             })}
           </div>
@@ -872,7 +867,7 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                </Card></a>
+                </Card>
               );
             })}
           </div>
