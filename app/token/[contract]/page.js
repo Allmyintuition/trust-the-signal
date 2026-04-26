@@ -16,6 +16,10 @@ import {
   Send,
   MessageCircle,
   CheckCircle2,
+  FileSearch,
+  Activity,
+  Database,
+  Copy,
 } from "lucide-react";
 
 const formatNum = (num) => {
@@ -23,7 +27,31 @@ const formatNum = (num) => {
   return Number(num).toLocaleString();
 };
 
+const shortAddress = (address) => {
+  if (!address) return "--";
+  if (address.length <= 16) return address;
+  return `${address.slice(0, 6)}...${address.slice(-6)}`;
+};
+
 const clampBar = (num) => Math.max(0, Math.min(100, Number(num || 0)));
+
+const riskTone = (value = "") => {
+  const upper = String(value).toUpperCase();
+
+  if (upper.includes("LOW") || upper.includes("SAFE")) {
+    return "border-emerald-300/35 bg-emerald-300/10 text-emerald-200";
+  }
+
+  if (upper.includes("MEDIUM") || upper.includes("CAUTION")) {
+    return "border-yellow-300/35 bg-yellow-300/10 text-yellow-200";
+  }
+
+  if (upper.includes("HIGH") || upper.includes("DANGER")) {
+    return "border-red-300/35 bg-red-300/10 text-red-200";
+  }
+
+  return "border-white/15 bg-white/5 text-white/60";
+};
 
 const Card = ({ children, className = "" }) => (
   <div
@@ -65,9 +93,7 @@ const ActionLink = ({ href, children, variant = "solid" }) => (
   >
     {children}
   </a>
-);
-
-export default function TokenPage() {
+); export default function TokenPage() {
   const params = useParams();
   const contract = params?.contract ? decodeURIComponent(params.contract) : "";
 
@@ -76,6 +102,7 @@ export default function TokenPage() {
   const [error, setError] = useState("");
   const [accessEmail, setAccessEmail] = useState("");
   const [accessSubmitted, setAccessSubmitted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const runCheck = async () => {
@@ -146,97 +173,117 @@ export default function TokenPage() {
     }
   };
 
+  const copyContract = async () => {
+    await navigator.clipboard.writeText(contract);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
       <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-      <div className="relative mx-auto max-w-7xl px-6 py-8">
-        <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-8">
+        <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-4 sm:px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
               <Eye className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-white/45">
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-white/45">
                 TRUST THE SIGNAL
               </p>
-              <h1 className="text-lg font-semibold tracking-[0.2em]">
-                TOKEN INTELLIGENCE
+              <h1 className="text-sm sm:text-lg font-semibold tracking-[0.2em]">
+                TOKEN DOSSIER
               </h1>
             </div>
           </div>
 
-          <a
-            href="/trending"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
-          >
-            <span className="inline-flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Trending
-            </span>
-          </a>
-        </header>        <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+          <ActionLink href="/trending" variant="outline">
+            <ArrowLeft className="h-4 w-4" />
+            Trending
+          </ActionLink>
+        </header>
+
+        <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <div className="mb-5 flex flex-wrap gap-3">
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                👁️ Token.Page.Live
+                👁️ Token.Dossier.Live
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
                 📡 Signal.Engine
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                🔒 Access.Route
+                🧠 Memory.Archived
               </span>
             </div>
 
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-              Contract Intelligence Route
+              Full Contract Intelligence Report
             </p>
-            <h2 className="mt-2 break-all text-3xl font-semibold md:text-5xl">
-              {contract || "Loading contract..."}
+
+            <h2 className="mt-2 text-3xl font-semibold md:text-5xl break-words">
+              {data ? `${data.name} (${data.symbol})` : shortAddress(contract)}
             </h2>
 
             <p className="mt-5 max-w-3xl text-lg leading-8 text-white/65">
-              A dedicated live intelligence page for token structure, score,
-              source quality, risk flags, and next-step routing.
+              Dedicated live dossier generated through the Trust The Signal weighted authority layer for structure, risk, source quality, and continuation routing.
             </p>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                onClick={copyContract}
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75 hover:border-emerald-300/30"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Copy className="h-4 w-4" />
+                  {copied ? "Copied" : "Copy Contract"}
+                </span>
+              </button>
+
+              <ActionLink href={`/?contract=${encodeURIComponent(contract)}`} variant="outline">
+                <ShieldCheck className="h-4 w-4" />
+                Run Homepage Check
+              </ActionLink>
+            </div>
           </div>
 
           <Card className="p-6">
             <div className="mb-3 flex items-center gap-2 text-emerald-300">
-              <Radar className="h-5 w-5" />
+              <Database className="h-5 w-5" />
               <p className="text-sm uppercase tracking-[0.24em]">
-                Next Actions
+                Intelligence Actions
               </p>
             </div>
 
             <div className="grid gap-3">
-              <ActionLink href={`/?contract=${encodeURIComponent(contract)}`}>
-                <ShieldCheck className="h-4 w-4" />
-                Run On Homepage
-              </ActionLink>
-
               <ActionLink href="/trending" variant="outline">
                 <TrendingUp className="h-4 w-4" />
-                Back To Trending
+                Trending Board
               </ActionLink>
 
               {data?.pairUrl && (
                 <ActionLink href={data.pairUrl} variant="outline">
                   <ExternalLink className="h-4 w-4" />
-                  Open DexScreener
+                  Open DexScreener Pair
                 </ActionLink>
               )}
+
+              <ActionLink href="/" variant="solid">
+                <FileSearch className="h-4 w-4" />
+                Analyze Another Contract
+              </ActionLink>
             </div>
           </Card>
         </section>
 
         {loading && (
-          <div className="flex min-h-[300px] items-center justify-center">
+          <div className="flex min-h-[320px] items-center justify-center">
             <div className="flex items-center gap-3 text-emerald-300">
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Running live token intelligence...</span>
+              <span>Generating live token dossier...</span>
             </div>
           </div>
         )}
@@ -252,9 +299,9 @@ export default function TokenPage() {
 
         {!loading && data && (
           <>
-            <section className="grid gap-4 pt-12 md:grid-cols-3">
+            <section className="grid gap-4 pt-12 md:grid-cols-4">
               {[
-                ["Token", `${data.name} (${data.symbol})`],
+                ["Final Score", `${data.score}/100`],
                 ["Verdict", data.verdict],
                 ["Signal", data.signal],
                 ["Risk", data.risk],
@@ -265,48 +312,39 @@ export default function TokenPage() {
                 ["Market Cap", `$${formatNum(data.marketCap)}`],
                 ["24H Change", `${data.priceChange24h}%`],
                 ["Pair Age", data.pairAge],
-                ["Final Score", `${data.score}/100`],
+                ["Quote", data.quoteToken || "--"],
               ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                >
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                    {label}
-                  </p>
-                  <p className="mt-2 break-words text-lg font-medium text-emerald-200">
+                <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
+                  <p className={`mt-2 break-words text-base font-medium ${label === "Risk" ? riskTone(value) : "text-emerald-200 border-0 bg-transparent p-0"}`}>
                     {value || "--"}
                   </p>
                 </div>
               ))}
             </section>
 
-            <section className="grid gap-4 pt-10 md:grid-cols-2">
+            <section className="grid gap-4 pt-10 md:grid-cols-2 xl:grid-cols-3">
               <ScoreBar label="Liquidity" value={data.breakdown?.liquidity} />
               <ScoreBar label="Volume" value={data.breakdown?.volume} />
-              <ScoreBar
-                label="Balance"
-                value={data.breakdown?.liquidityBalance}
-              />
+              <ScoreBar label="Balance" value={data.breakdown?.liquidityBalance} />
               <ScoreBar label="Momentum" value={data.breakdown?.momentum} />
               <ScoreBar label="Age" value={data.breakdown?.age} />
-              <ScoreBar
-                label="Transactions"
-                value={data.breakdown?.transactions}
-              />
-              <ScoreBar label="Metadata" value={data.breakdown?.metadata} />
-            </section>            <section className="grid gap-6 pt-10 lg:grid-cols-[1fr_0.9fr]">
+              <ScoreBar label="Transactions" value={data.breakdown?.transactions} />
+            </section>
+
+            <section className="grid gap-6 pt-10 lg:grid-cols-2">
               <Card className="p-6">
-                <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
-                  Risk Flags
-                </p>
+                <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                  <Activity className="h-5 w-5" />
+                  <p className="text-sm uppercase tracking-[0.24em]">Risk Flag Layer</p>
+                </div>
 
                 {data.riskFlags?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {data.riskFlags.map((flag) => (
                       <span
                         key={flag}
-                        className="rounded-full border border-yellow-400/25 bg-yellow-400/10 px-3 py-1 text-xs text-yellow-100"
+                        className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-bold text-yellow-100"
                       >
                         {flag}
                       </span>
@@ -314,35 +352,26 @@ export default function TokenPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-emerald-200">
-                    No major automated risk flags detected.
+                    No major automated structural risk flags detected.
                   </p>
                 )}
               </Card>
 
               <Card className="p-6">
-                <p className="mb-3 text-xs uppercase tracking-[0.24em] text-white/45">
-                  Source Presence
-                </p>
+                <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                  <Radar className="h-5 w-5" />
+                  <p className="text-sm uppercase tracking-[0.24em]">Source Presence</p>
+                </div>
 
                 <div className="grid gap-3">
                   {[
-                    [
-                      "Website",
-                      data.socialPresence?.hasWebsite ? "Detected" : "Not Detected",
-                    ],
+                    ["Website", data.socialPresence?.hasWebsite ? "Detected" : "Not Detected"],
                     ["Socials", `${data.socialPresence?.socialCount ?? 0}`],
                     ["Source Health", data.sourceHealth || "limited_presence"],
                   ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-2xl border border-white/10 bg-black/25 p-4"
-                    >
-                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                        {label}
-                      </p>
-                      <p className="mt-2 font-medium text-emerald-200">
-                        {value}
-                      </p>
+                    <div key={label} className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">{label}</p>
+                      <p className="mt-2 font-medium text-emerald-200">{value}</p>
                     </div>
                   ))}
                 </div>
@@ -355,18 +384,15 @@ export default function TokenPage() {
                   <div>
                     <div className="mb-3 flex items-center gap-2 text-emerald-300">
                       <Lock className="h-5 w-5" />
-                      <p className="text-sm uppercase tracking-[0.24em]">
-                        Protected Access
-                      </p>
+                      <p className="text-sm uppercase tracking-[0.24em]">Protected Continuation</p>
                     </div>
 
                     <h2 className="text-3xl font-semibold">
-                      Want this token intelligence connected to private alerts?
+                      Want this intelligence connected to future private alerts?
                     </h2>
 
                     <p className="mt-4 leading-8 text-white/65">
-                      Request protected access for future private signal routes,
-                      product drops, Discord/Telegram rooms, and scanner updates.
+                      Enter the protected access queue for scanner upgrades, private routes, gated rooms, premium guides, and member intelligence releases.
                     </p>
                   </div>
 
@@ -394,15 +420,21 @@ export default function TokenPage() {
                         [Lock, "Protected Rooms"],
                         [BookOpen, "Premium Guides"],
                       ].map(([Icon, label]) => (
-                        <div
-                          key={label}
-                          className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-3"
-                        >
+                        <div key={label} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/25 p-3">
                           <Icon className="h-4 w-4 text-emerald-300" />
                           <p className="text-sm text-white/70">{label}</p>
                         </div>
                       ))}
                     </div>
+
+                    {accessSubmitted && (
+                      <div className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-sm text-emerald-100">
+                        <span className="inline-flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Access request captured successfully.
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
