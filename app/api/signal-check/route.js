@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import fs from "fs/promises";
 import path from "path";
 
@@ -47,6 +47,7 @@ function normalizeContract(value) {
 
 async function logTokenCheck(result) {
     try {
+        const supabase = getSupabaseAdmin();
         const contract = normalizeContract(result.address);
 
         if (!contract) return;
