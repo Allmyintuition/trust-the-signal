@@ -1,54 +1,32 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const DATA_FILE = path.join(DATA_DIR, "access-requests.json");
+const ALLOWED_STATUSES = [
+    "new_access_request",
+    "reviewing",
+    "contacted",
+    "accepted",
+    "archived",
+];
 
-async function ensureDataFile() {
-    try {
-        await fs.mkdir(DATA_DIR, { recursive: true });
-
-        try {
-            await fs.access(DATA_FILE);
-        } catch {
-            await fs.writeFile(DATA_FILE, JSON.stringify([], null, 2), "utf8");
-        }
-    } catch (error) {
-        console.error("Failed to ensure access request data file:", error);
-    }
-}
-
-async function readRequests() {
-    await ensureDataFile();
-
-    try {
-        const raw = await fs.readFile(DATA_FILE, "utf8");
-        const parsed = JSON.parse(raw);
-
-        if (!Array.isArray(parsed)) {
-            return [];
-        }
-
-        return parsed;
-    } catch (error) {
-        console.error("Failed to read access requests:", error);
-        return [];
-    }
-}
-
-async function writeRequests(requests) {
-    await ensureDataFile();
-    await fs.writeFile(DATA_FILE, JSON.stringify(requests, null, 2), "utf8");
+function mapRequest(row) {
+    return {
+        id: row.id,
+        contact: row.contact || "",
+        email: row.email || "",
+        telegram: row.telegram || "",
+        wallet: row.wallet || "",
+        status: row.status || "new_access_request",
+        source: row.source || "",
+        message: row.message || "",
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+    };
 }
 
 function escapeCSV(value) {
     if (value === null || value === undefined) return "";
-
-    const stringValue = String(value);
-    const escaped = stringValue.replace(/"/g, '""');
-
-    return `"${escaped}"`;
+    return `"${String(value).replace(/"/g, '""')}"`;
 }
 
 function generateCSV(requests) {
@@ -66,21 +44,7 @@ function generateCSV(requests) {
     ];
 
     const rows = requests.map((request) =>
-        headers
-            .map((key) => {
-                if (key === "contact") {
-                    return escapeCSV(
-                        request.contact ||
-                        request.email ||
-                        request.telegram ||
-                        request.wallet ||
-                        ""
-                    );
-                }
-
-                return escapeCSV(request[key] || "");
-            })
-            .join(",")
+        headers.map((key) => escapeCSV(request[key] || "")).join(",")
     );
 
     return [headers.join(","), ...rows].join("\n");
@@ -88,19 +52,21 @@ function generateCSV(requests) {
 
 export async function GET(request) {
     try {
+        const supabase = getSupabaseAdmin();
         const { searchParams } = new URL(request.url);
         const format = searchParams.get("format");
 
-        const requests = await readRequests();
+        const { data, error } = await supabase
+            .from("access_requests")
+            .select("*")
+            .order("created_at", { ascending: false });
 
-        const sortedRequests = [...requests].sort((a, b) => {
-            const dateA = new Date(a.createdAt || 0).getTime();
-            const dateB = new Date(b.createdAt || 0).getTime();
-            return dateB - dateA;
-        });
+        if (error) throw error;
+
+        const requests = Array.isArray(data) ? data.map(mapRequest) : [];
 
         if (format === "csv") {
-            const csv = generateCSV(sortedRequests);
+            const csv = generateCSV(requests);
 
             return new NextResponse(csv, {
                 status: 200,
@@ -113,11 +79,11 @@ export async function GET(request) {
 
         return NextResponse.json({
             success: true,
-            total: sortedRequests.length,
-            requests: sortedRequests,
+            total: requests.length,
+            requests,
         });
     } catch (error) {
-        console.error("Admin GET access requests error:", error);
+        console.error("Admin access requests GET error:", error);
 
         return NextResponse.json(
             {
@@ -131,6 +97,7 @@ export async function GET(request) {
 
 export async function PATCH(request) {
     try {
+        const supabase = getSupabaseAdmin();
         const body = await request.json();
         const { id, status } = body;
 
@@ -144,15 +111,7 @@ export async function PATCH(request) {
             );
         }
 
-        const allowedStatuses = [
-            "new_access_request",
-            "reviewing",
-            "contacted",
-            "accepted",
-            "archived",
-        ];
-
-        if (!allowedStatuses.includes(status)) {
+        if (!ALLOWED_STATUSES.includes(status)) {
             return NextResponse.json(
                 {
                     success: false,
@@ -162,34 +121,24 @@ export async function PATCH(request) {
             );
         }
 
-        const requests = await readRequests();
+        const { data, error } = await supabase
+            .from("access_requests")
+            .update({
+                status,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", id)
+            .select("*")
+            .single();
 
-        const requestIndex = requests.findIndex((item) => item.id === id);
-
-        if (requestIndex === -1) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: "Access request not found.",
-                },
-                { status: 404 }
-            );
-        }
-
-        requests[requestIndex] = {
-            ...requests[requestIndex],
-            status,
-            updatedAt: new Date().toISOString(),
-        };
-
-        await writeRequests(requests);
+        if (error) throw error;
 
         return NextResponse.json({
             success: true,
-            request: requests[requestIndex],
+            request: mapRequest(data),
         });
     } catch (error) {
-        console.error("Admin PATCH access request error:", error);
+        console.error("Admin access requests PATCH error:", error);
 
         return NextResponse.json(
             {
@@ -203,6 +152,7 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
     try {
+        const supabase = getSupabaseAdmin();
         const { searchParams } = new URL(request.url);
         const id = searchParams.get("id");
 
@@ -216,29 +166,19 @@ export async function DELETE(request) {
             );
         }
 
-        const requests = await readRequests();
+        const { error } = await supabase
+            .from("access_requests")
+            .delete()
+            .eq("id", id);
 
-        const filteredRequests = requests.filter((item) => item.id !== id);
-
-        if (filteredRequests.length === requests.length) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: "Access request not found.",
-                },
-                { status: 404 }
-            );
-        }
-
-        await writeRequests(filteredRequests);
+        if (error) throw error;
 
         return NextResponse.json({
             success: true,
             deletedId: id,
-            remaining: filteredRequests.length,
         });
     } catch (error) {
-        console.error("Admin DELETE access request error:", error);
+        console.error("Admin access requests DELETE error:", error);
 
         return NextResponse.json(
             {
