@@ -36,6 +36,30 @@ function badgeStyle(type) {
   return map[type] || "border-white/15 bg-white/5 text-white/60";
 }
 
+function labelStyle(label = "") {
+  const v = String(label).toLowerCase();
+
+  if (v === "high_interest") return "border-emerald-300/25 bg-emerald-300/10 text-emerald-200";
+  if (v === "premium_candidate") return "border-purple-300/25 bg-purple-300/10 text-purple-200";
+  if (v === "revisit") return "border-yellow-300/25 bg-yellow-300/10 text-yellow-200";
+  if (v === "dead") return "border-red-300/25 bg-red-300/10 text-red-200";
+
+  return "border-cyan-300/25 bg-cyan-300/10 text-cyan-200";
+}
+
+function receiptType(log) {
+  const score = Number(log.latest_score || 0);
+  const risk = String(log.latest_risk || "").toUpperCase();
+  const label = String(log.operator_label || "").toLowerCase();
+
+  if (label === "high_interest" || label === "premium_candidate") return "OPERATOR";
+  if (risk.includes("LOW") && score >= 75) return "STRONG";
+  if (risk.includes("MEDIUM") || risk.includes("CAUTION")) return "CAUTION";
+  if (risk.includes("HIGH") || risk.includes("DANGER")) return "BLOCKED";
+
+  return "ARCHIVED";
+}
+
 export default function TokenLogsPage() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +67,7 @@ export default function TokenLogsPage() {
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState("recent");
   const [riskFilter, setRiskFilter] = useState("all");
+  const [labelFilter, setLabelFilter] = useState("all");
 
   async function loadLogs() {
     try {
@@ -83,9 +108,7 @@ export default function TokenLogsPage() {
 
   function updateLocal(id, field, value) {
     setLogs((current) =>
-      current.map((log) =>
-        log.id === id ? { ...log, [field]: value } : log
-      )
+      current.map((log) => (log.id === id ? { ...log, [field]: value } : log))
     );
   }
 
@@ -95,13 +118,14 @@ export default function TokenLogsPage() {
         `${log.contract} ${log.token_name} ${log.token_symbol} ${log.latest_risk} ${log.latest_setup} ${log.latest_source} ${log.operator_note || ""} ${log.operator_label || ""}`.toLowerCase();
 
       const searchPass = text.includes(search.toLowerCase());
-
       const currentRisk = (log.latest_risk || "").toUpperCase();
+      const riskPass = riskFilter === "all" ? true : currentRisk.includes(riskFilter);
+      const labelPass =
+        labelFilter === "all"
+          ? true
+          : String(log.operator_label || "watch").toLowerCase() === labelFilter;
 
-      const riskPass =
-        riskFilter === "all" ? true : currentRisk.includes(riskFilter);
-
-      return searchPass && riskPass;
+      return searchPass && riskPass && labelPass;
     });
 
     if (sortMode === "checks") {
@@ -117,12 +141,14 @@ export default function TokenLogsPage() {
     }
 
     return base;
-  }, [logs, search, sortMode, riskFilter]);
+  }, [logs, search, sortMode, riskFilter, labelFilter]);
 
   const totalChecks = filteredLogs.reduce(
     (sum, log) => sum + Number(log.check_count || 0),
     0
   );
+
+  const strongCount = filteredLogs.filter((l) => receiptType(l) === "STRONG").length;
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -139,7 +165,8 @@ export default function TokenLogsPage() {
               </h1>
 
               <p className="mt-4 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
-                Hybrid machine intelligence + manual operator conviction memory.
+                Full archived contract conviction center, public receipt preparation,
+                and repeated demand memory.
               </p>
             </div>
 
@@ -151,7 +178,7 @@ export default function TokenLogsPage() {
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-3">
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
             <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Visible Tokens</div>
             <div className="mt-3 text-5xl font-black">{filteredLogs.length}</div>
@@ -161,13 +188,18 @@ export default function TokenLogsPage() {
             <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Total Checks</div>
             <div className="mt-3 text-5xl font-black">{totalChecks}</div>
           </div>
+
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Strong Receipts</div>
+            <div className="mt-3 text-5xl font-black text-emerald-300">{strongCount}</div>
+          </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.7fr_0.7fr]">
+        <div className="grid gap-4 lg:grid-cols-4">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search contract, token, risk, notes, labels..."
+            placeholder="Search contract, token, risk, notes..."
             className="w-full rounded-2xl border border-white/10 bg-black/50 px-5 py-4 outline-none"
           />
 
@@ -191,6 +223,17 @@ export default function TokenLogsPage() {
             <option value="MEDIUM">MEDIUM / CAUTION</option>
             <option value="HIGH">HIGH / DANGER</option>
           </select>
+
+          <select
+            value={labelFilter}
+            onChange={(e) => setLabelFilter(e.target.value)}
+            className="rounded-2xl border border-white/10 bg-black/50 px-5 py-4 outline-none"
+          >
+            <option value="all">Label: All</option>
+            {LABELS.map((label) => (
+              <option key={label} value={label}>{label}</option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-6">
@@ -200,12 +243,20 @@ export default function TokenLogsPage() {
                 <div className="flex flex-wrap justify-between gap-4 items-start">
                   <div>
                     <div className="flex gap-3 flex-wrap mb-3">
-                      <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">SOLANA</span>
+                      <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
+                        {receiptType(log)}
+                      </span>
+
                       <span className={`rounded-full px-3 py-1 text-xs font-black ${badgeStyle((log.latest_risk || "").split(" ")[0])}`}>
                         {log.latest_risk || "UNKNOWN"}
                       </span>
-                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-black text-cyan-200">
+
+                      <span className={`rounded-full px-3 py-1 text-xs font-black ${labelStyle(log.operator_label)}`}>
                         {log.operator_label || "watch"}
+                      </span>
+
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-white/60">
+                        {log.check_count || 0} checks
                       </span>
                     </div>
 
@@ -219,6 +270,14 @@ export default function TokenLogsPage() {
                   <div className="flex gap-3 flex-wrap">
                     <a href={`/token/${log.contract}`} className="rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm font-black text-emerald-200">
                       Open Dossier
+                    </a>
+
+                    <a href={`/tools/token-memory?q=${log.contract}`} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/70">
+                      Memory Search
+                    </a>
+
+                    <a href="/receipts" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white/70">
+                      Receipts
                     </a>
                   </div>
                 </div>
