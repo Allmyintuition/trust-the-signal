@@ -246,21 +246,25 @@ const tools = [
     title: "Signal Check Pro",
     desc: "Run weighted Solana contract interpretation through the live Trust The Signal authority engine.",
     icon: ShieldCheck,
+    href: "/",
   },
   {
     title: "Trending Intelligence",
     desc: "Observe liquidity, velocity, and volume concentration across active Solana pairs before commitment.",
     icon: TrendingUp,
+    href: "/trending",
   },
   {
     title: "Token Intelligence Reports",
     desc: "Dedicated premium token dossier pages generated per contract for deeper continuation review.",
     icon: FileSearch,
+    href: "/tools/token-memory",
   },
   {
     title: "Protected Access Layer",
     desc: "Private route preparation for premium guides, operator alerts, and future member signal infrastructure.",
     icon: Lock,
+    href: "/protected",
   },
 ];
 
@@ -580,6 +584,12 @@ export default function Home() {
               <Button href="/trending" variant="outline">
                 Explore Trending Board
               </Button>
+              <Button href="/tools" variant="outline">
+                Open Tool Suite
+              </Button>
+              <Button href="/tools/token-memory" variant="outline">
+                Token Memory
+              </Button>
             </div>
           </motion.div>
 
@@ -662,20 +672,19 @@ export default function Home() {
                 const symbol = item.token_symbol || "TOKEN";
 
                 return (
-                  <button
+                  <div
                     key={address}
-                    onClick={() => setContract(address)}
                     className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left transition hover:border-emerald-300/30 hover:bg-emerald-300/10"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div>
+                      <button onClick={() => setContract(address)} className="min-w-0 flex-1 text-left">
                         <p className="text-sm font-semibold text-white">
                           {name} ({symbol})
                         </p>
                         <p className="mt-2 break-all font-mono text-xs text-white/45">
                           {address}
                         </p>
-                      </div>
+                      </button>
 
                       {item.latest_score !== null && item.latest_score !== undefined && (
                         <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
@@ -684,10 +693,28 @@ export default function Home() {
                       )}
                     </div>
 
-                    <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-white/35">
-                      {item.latest_risk || "Live platform check"}
-                    </p>
-                  </button>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/35">
+                        {item.latest_risk || "Live platform check"}
+                      </p>
+
+                      <div className="flex gap-2">
+                        <a
+                          href={`/token/${address}`}
+                          className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[11px] font-black text-emerald-200"
+                        >
+                          Open Dossier
+                        </a>
+
+                        <a
+                          href={`/tools/token-memory?q=${address}`}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/70"
+                        >
+                          Memory
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -722,13 +749,13 @@ export default function Home() {
               const Icon = tool.icon;
 
               return (
-                <Card key={tool.title}>
+                <a key={tool.title} href={tool.href}><Card className="h-full cursor-pointer transition hover:-translate-y-1 hover:border-emerald-300/25">
                   <div className="p-6">
                     <Icon className="h-5 w-5 text-emerald-300" />
                     <h3 className="mt-4 text-xl font-semibold">{tool.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-white/65">{tool.desc}</p>
                   </div>
-                </Card>
+                </Card></a>
               );
             })}
           </div>
@@ -845,7 +872,7 @@ export default function Home() {
                       </button>
                     </div>
                   </div>
-                </Card>
+                </Card></a>
               );
             })}
           </div>
