@@ -1,381 +1,501 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-    Eye,
-    Loader2,
-    AlertTriangle,
-    ArrowLeft,
-    RefreshCw,
-    Inbox,
-    Copy,
-    Check,
-    Trash2,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const Card = ({ children, className = "" }) => (
-    <div
-        className={`rounded-[28px] border border-white/10 bg-white/[0.055] shadow-2xl shadow-emerald-500/10 backdrop-blur-xl ${className}`}
-    >
-        {children}
-    </div>
-);
+const STATUS_OPTIONS = [
+    "new_access_request",
+    "reviewing",
+    "contacted",
+    "accepted",
+    "archived",
+];
 
-const formatDate = (value) => {
-    if (!value) return "--";
+const STATUS_LABELS = {
+    new_access_request: "New",
+    reviewing: "Reviewing",
+    contacted: "Contacted",
+    accepted: "Accepted",
+    archived: "Archived",
+};
+
+const STATUS_STYLES = {
+    new_access_request: "border-emerald-400/40 bg-emerald-400/10 text-emerald-200",
+    reviewing: "border-cyan-400/40 bg-cyan-400/10 text-cyan-200",
+    contacted: "border-yellow-400/40 bg-yellow-400/10 text-yellow-200",
+    accepted: "border-purple-400/40 bg-purple-400/10 text-purple-200",
+    archived: "border-white/20 bg-white/5 text-white/50",
+};
+
+function formatDate(value) {
+    if (!value) return "Unknown";
 
     try {
         return new Date(value).toLocaleString();
     } catch {
-        return value;
+        return "Unknown";
     }
-};
+}
 
-const statusStyles = {
-    new_access_request: "bg-emerald-400/10 text-emerald-200 border-emerald-400/20",
-    reviewing: "bg-blue-400/10 text-blue-200 border-blue-400/20",
-    contacted: "bg-yellow-400/10 text-yellow-100 border-yellow-400/20",
-    accepted: "bg-purple-400/10 text-purple-100 border-purple-400/20",
-    archived: "bg-white/10 text-white/55 border-white/10",
-};
+function shortenWallet(wallet) {
+    if (!wallet) return "Not provided";
+    if (wallet.length <= 14) return wallet;
 
-const RequestRow = ({ request, onRefresh }) => {
-    const [copied, setCopied] = useState(false);
-    const [busy, setBusy] = useState(false);
+    return `${wallet.slice(0, 6)}...${wallet.slice(-6)}`;
+}
 
-    const copyContact = async () => {
-        if (!request?.contact) return;
-
-        try {
-            await navigator.clipboard.writeText(request.contact);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1400);
-        } catch {
-            const textArea = document.createElement("textarea");
-            textArea.value = request.contact;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textArea);
-
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1400);
-        }
-    };
-
-    const updateStatus = async (status) => {
-        setBusy(true);
-
-        await fetch("/api/admin/access-requests", {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: request.id,
-                status,
-            }),
-        });
-
-        setBusy(false);
-        onRefresh();
-    };
-
-    const deleteRequest = async () => {
-        setBusy(true);
-
-        await fetch("/api/admin/access-requests", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                id: request.id,
-            }),
-        });
-
-        setBusy(false);
-        onRefresh();
-    };
-
+function getPrimaryContact(request) {
     return (
-        <Card>
-            <div className="grid gap-5 p-5 xl:grid-cols-[1.05fr_0.7fr_1fr_0.9fr_auto] xl:items-start">
-                <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Contact
-                    </p>
-                    <p className="mt-2 break-all font-mono text-sm text-emerald-200">
-                        {request.contact || "--"}
-                    </p>
-
-                    <button
-                        onClick={copyContact}
-                        className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70"
-                    >
-                        <span className="inline-flex items-center gap-2">
-                            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                            {copied ? "Copied" : "Copy"}
-                        </span>
-                    </button>
-                </div>
-
-                <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Source
-                    </p>
-                    <p className="mt-2 text-sm text-white/75">{request.source || "--"}</p>
-
-                    <div
-                        className={`mt-3 inline-flex rounded-full border px-3 py-1 text-xs ${statusStyles[request.status] || statusStyles.new_access_request
-                            }`}
-                    >
-                        {request.status}
-                    </div>
-                </div>
-
-                <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Contract
-                    </p>
-                    <p className="mt-2 break-all font-mono text-xs text-white/55">
-                        {request.contract || "homepage / no contract"}
-                    </p>
-                </div>
-
-                <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                        Captured
-                    </p>
-                    <p className="mt-2 text-sm text-white/65">
-                        {formatDate(request.createdAt)}
-                    </p>
-                </div>
-
-                <div className="grid gap-2">
-                    <select
-                        disabled={busy}
-                        value={request.status}
-                        onChange={(e) => updateStatus(e.target.value)}
-                        className="rounded-xl border border-white/10 bg-black px-3 py-2 text-xs text-white"
-                    >
-                        <option value="new_access_request">new_access_request</option>
-                        <option value="reviewing">reviewing</option>
-                        <option value="contacted">contacted</option>
-                        <option value="accepted">accepted</option>
-                        <option value="archived">archived</option>
-                    </select>
-
-                    <button
-                        disabled={busy}
-                        onClick={deleteRequest}
-                        className="rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs text-red-100"
-                    >
-                        <span className="inline-flex items-center gap-2">
-                            <Trash2 className="h-3 w-3" />
-                            Delete
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </Card>
+        request.contact ||
+        request.email ||
+        request.telegram ||
+        request.wallet ||
+        "No contact provided"
     );
-};
+}
 
-export default function AccessRequestsAdminPage() {
+export default function AdminAccessRequestsPage() {
     const [requests, setRequests] = useState([]);
-    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const [actionLoadingId, setActionLoadingId] = useState(null);
     const [error, setError] = useState("");
+    const [copiedId, setCopiedId] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
 
-    const loadRequests = async ({ refresh = false } = {}) => {
-        if (refresh) setRefreshing(true);
-        if (!refresh) setLoading(true);
-
+    async function loadRequests() {
         try {
+            setLoading(true);
+            setError("");
+
             const response = await fetch("/api/admin/access-requests", {
-                method: "GET",
                 cache: "no-store",
             });
 
-            const json = await response.json();
+            const data = await response.json();
 
-            if (!json.success) {
-                setError(json.error || "Unable to load access requests.");
-            } else {
-                setRequests(Array.isArray(json.requests) ? json.requests : []);
-                setTotal(json.total || 0);
-                setError("");
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to load access requests.");
             }
-        } catch {
-            setError("Admin request route failed.");
-        }
 
-        setLoading(false);
-        setRefreshing(false);
-    };
+            setRequests(Array.isArray(data.requests) ? data.requests : []);
+        } catch (err) {
+            setError(err.message || "Something went wrong.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
         loadRequests();
-    }, []); return (
-        <main className="min-h-screen overflow-hidden bg-black text-white">
-            <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
-            <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
+    }, []);
 
-            <div className="relative mx-auto max-w-7xl px-6 py-8">
-                <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
-                            <Eye className="h-5 w-5 text-emerald-300" />
-                        </div>
+    async function updateStatus(id, status) {
+        try {
+            setActionLoadingId(id);
+            setError("");
+
+            const response = await fetch("/api/admin/access-requests", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id, status }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to update request.");
+            }
+
+            setRequests((current) =>
+                current.map((item) => (item.id === id ? data.request : item))
+            );
+        } catch (err) {
+            setError(err.message || "Failed to update request.");
+        } finally {
+            setActionLoadingId(null);
+        }
+    }
+
+    async function deleteRequest(id) {
+        const confirmed = window.confirm(
+            "Delete this access request? This cannot be undone."
+        );
+
+        if (!confirmed) return;
+
+        try {
+            setActionLoadingId(id);
+            setError("");
+
+            const response = await fetch(`/api/admin/access-requests?id=${id}`, {
+                method: "DELETE",
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to delete request.");
+            }
+
+            setRequests((current) => current.filter((item) => item.id !== id));
+        } catch (err) {
+            setError(err.message || "Failed to delete request.");
+        } finally {
+            setActionLoadingId(null);
+        }
+    }
+
+    async function copyText(id, text) {
+        if (!text) return;
+
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedId(id);
+
+            setTimeout(() => {
+                setCopiedId("");
+            }, 1500);
+        } catch {
+            setError("Copy failed. Try copying manually.");
+        }
+    }
+
+    function exportCSV() {
+        window.open("/api/admin/access-requests?format=csv", "_blank");
+    }
+
+    const counts = useMemo(() => {
+        const base = {
+            total: requests.length,
+            new_access_request: 0,
+            reviewing: 0,
+            contacted: 0,
+            accepted: 0,
+            archived: 0,
+        };
+
+        for (const request of requests) {
+            const status = request.status || "new_access_request";
+
+            if (base[status] !== undefined) {
+                base[status] += 1;
+            }
+        }
+
+        return base;
+    }, [requests]);
+
+    const filteredRequests = useMemo(() => {
+        const normalizedSearch = searchQuery.trim().toLowerCase();
+
+        return requests.filter((request) => {
+            const status = request.status || "new_access_request";
+
+            const matchesStatus =
+                statusFilter === "all" ? true : status === statusFilter;
+
+            const searchableText = [
+                request.contact,
+                request.email,
+                request.telegram,
+                request.wallet,
+                request.status,
+                request.source,
+                request.message,
+                request.createdAt,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            const matchesSearch = normalizedSearch
+                ? searchableText.includes(normalizedSearch)
+                : true;
+
+            return matchesStatus && matchesSearch;
+        });
+    }, [requests, searchQuery, statusFilter]);
+
+    return (
+        <main className="min-h-screen bg-black text-white">
+            <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
+                <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-cyan-400/10 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div>
-                            <p className="text-xs uppercase tracking-[0.35em] text-white/45">
-                                TRUST THE SIGNAL
+                            <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-emerald-300">
+                                Trust The Signal Operator Terminal
                             </p>
-                            <h1 className="text-lg font-semibold tracking-[0.2em]">
-                                ACCESS REQUEST ADMIN
+
+                            <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
+                                Access Request Control
                             </h1>
+
+                            <p className="mt-4 max-w-2xl text-sm leading-6 text-white/60 sm:text-base">
+                                Manage protected access leads, review incoming requests, update
+                                status, export records, and keep operator intake clean.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <button
+                                onClick={loadRequests}
+                                disabled={loading}
+                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {loading ? "Refreshing..." : "Refresh"}
+                            </button>
+
+                            <button
+                                onClick={exportCSV}
+                                className="rounded-2xl border border-emerald-300/40 bg-emerald-300/15 px-5 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-300/25"
+                            >
+                                Export CSV
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <a
-                        href="/"
-                        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
-                    >
-                        <span className="inline-flex items-center gap-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            Home
-                        </span>
-                    </a>
-                </header>
-
-                <section className="pt-16">
-                    <div className="mb-5 flex flex-wrap gap-3">
-                        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            🔒 Hidden Admin Route
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            📥 Backend Capture
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                            🧠 Lead Management
-                        </span>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/40">
+                            Total
+                        </p>
+                        <p className="mt-3 text-3xl font-black">{counts.total}</p>
                     </div>
 
-                    <h2 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
-                        Captured contacts.
-                        <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
-                            Managed pipeline.
-                        </span>
-                    </h2>
-
-                    <p className="mt-6 max-w-3xl text-lg leading-8 text-white/70">
-                        Review, mark, contact, archive, and delete protected access leads.
-                    </p>
-                </section>
-
-                <section className="grid gap-4 pt-10 md:grid-cols-3">
-                    <Card>
-                        <div className="p-5">
-                            <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                                Total Requests
-                            </p>
-                            <p className="mt-2 text-4xl font-semibold text-emerald-300">
-                                {total}
-                            </p>
-                        </div>
-                    </Card>
-
-                    <Card>
-                        <div className="p-5">
-                            <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                                Route
-                            </p>
-                            <p className="mt-2 text-2xl font-semibold text-emerald-300">
-                                Active
-                            </p>
-                        </div>
-                    </Card>
-
-                    <Card>
-                        <div className="p-5">
-                            <p className="text-xs uppercase tracking-[0.22em] text-white/35">
-                                Storage
-                            </p>
-                            <p className="mt-2 text-2xl font-semibold text-emerald-300">
-                                Persistent
-                            </p>
-                        </div>
-                    </Card>
-                </section>
-
-                <section className="pt-8">
-                    <div className="mb-5 flex items-center justify-between gap-4">
-                        <div>
-                            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
-                                Captured Leads
-                            </p>
-                            <h3 className="mt-2 text-2xl font-semibold">
-                                Latest access requests
-                            </h3>
-                        </div>
-
+                    {STATUS_OPTIONS.map((status) => (
                         <button
-                            onClick={() => loadRequests({ refresh: true })}
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/75 hover:border-emerald-300/30 hover:text-white"
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`rounded-3xl border p-5 text-left transition ${statusFilter === status
+                                ? STATUS_STYLES[status]
+                                : "border-white/10 bg-white/[0.04] text-white hover:border-emerald-300/30"
+                                }`}
                         >
-                            <span className="inline-flex items-center gap-2">
-                                <RefreshCw
-                                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                                />
-                                Refresh
-                            </span>
+                            <p className="text-xs font-bold uppercase tracking-[0.25em] opacity-60">
+                                {STATUS_LABELS[status]}
+                            </p>
+                            <p className="mt-3 text-3xl font-black">{counts[status]}</p>
                         </button>
+                    ))}
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
+                    <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+                        <input
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                            placeholder="Search email, telegram, wallet, source, message..."
+                            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-emerald-300/50"
+                        />
+
+                        <select
+                            value={statusFilter}
+                            onChange={(event) => setStatusFilter(event.target.value)}
+                            className="w-full rounded-2xl border border-white/10 bg-black/60 px-4 py-3 text-sm font-bold text-white outline-none transition focus:border-emerald-300/50"
+                        >
+                            <option value="all">All Statuses</option>
+                            {STATUS_OPTIONS.map((status) => (
+                                <option key={status} value={status}>
+                                    {STATUS_LABELS[status]}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
-                    {loading && (
-                        <Card>
-                            <div className="flex min-h-[220px] items-center justify-center p-8 text-emerald-300">
-                                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                                Loading access requests...
-                            </div>
-                        </Card>
-                    )}
+                    <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+                        <button
+                            onClick={() => setStatusFilter("all")}
+                            className={`rounded-full border px-4 py-2 transition ${statusFilter === "all"
+                                ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-200"
+                                : "border-white/10 bg-white/5 hover:border-white/25"
+                                }`}
+                        >
+                            All
+                        </button>
 
-                    {!loading && error && (
-                        <Card className="border-red-400/20 bg-red-400/10">
-                            <div className="flex items-center gap-3 p-6 text-red-100">
-                                <AlertTriangle className="h-5 w-5" />
-                                <p>{error}</p>
-                            </div>
-                        </Card>
-                    )}
+                        {STATUS_OPTIONS.map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setStatusFilter(status)}
+                                className={`rounded-full border px-4 py-2 transition ${statusFilter === status
+                                    ? STATUS_STYLES[status]
+                                    : "border-white/10 bg-white/5 hover:border-white/25"
+                                    }`}
+                            >
+                                {STATUS_LABELS[status]}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                    {!loading && !error && requests.length === 0 && (
-                        <Card>
-                            <div className="flex flex-col items-center justify-center p-10 text-center">
-                                <Inbox className="h-8 w-8 text-emerald-300" />
-                                <h3 className="mt-4 text-xl font-semibold">
-                                    No access requests captured yet.
-                                </h3>
-                            </div>
-                        </Card>
-                    )}
+                {error && (
+                    <div className="rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm font-bold text-red-200">
+                        {error}
+                    </div>
+                )}
 
-                    {!loading && !error && requests.length > 0 && (
-                        <div className="space-y-4">
-                            {requests.map((request) => (
-                                <RequestRow
-                                    key={request.id || request.createdAt}
-                                    request={request}
-                                    onRefresh={() => loadRequests({ refresh: true })}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </section>
-            </div>
+                <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-bold text-white/50">
+                        Showing{" "}
+                        <span className="text-emerald-200">{filteredRequests.length}</span>{" "}
+                        of <span className="text-white">{requests.length}</span> requests
+                    </p>
+                </div>
+
+                {loading ? (
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center text-sm font-bold text-white/50">
+                        Loading access requests...
+                    </div>
+                ) : filteredRequests.length === 0 ? (
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center">
+                        <p className="text-lg font-black">No matching access requests.</p>
+                        <p className="mt-2 text-sm text-white/45">
+                            Try clearing the search or switching the status filter.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid gap-5">
+                        {filteredRequests.map((request) => {
+                            const status = request.status || "new_access_request";
+                            const primaryContact = getPrimaryContact(request);
+
+                            return (
+                                <article
+                                    key={request.id}
+                                    className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_0_40px_rgba(255,255,255,0.03)]"
+                                >
+                                    <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span
+                                                    className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.18em] ${STATUS_STYLES[status] ||
+                                                        "border-white/20 bg-white/5 text-white/60"
+                                                        }`}
+                                                >
+                                                    {STATUS_LABELS[status] || status}
+                                                </span>
+
+                                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                    {formatDate(request.createdAt)}
+                                                </span>
+                                            </div>
+
+                                            <h2 className="mt-4 break-words text-2xl font-black tracking-tight text-white">
+                                                {primaryContact}
+                                            </h2>
+
+                                            <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                        Email
+                                                    </p>
+                                                    <p className="mt-2 break-words font-bold text-white/85">
+                                                        {request.email || "Not provided"}
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                        Telegram
+                                                    </p>
+                                                    <p className="mt-2 break-words font-bold text-white/85">
+                                                        {request.telegram || "Not provided"}
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                        Wallet
+                                                    </p>
+                                                    <p className="mt-2 break-words font-bold text-white/85">
+                                                        {shortenWallet(request.wallet)}
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                        Source
+                                                    </p>
+                                                    <p className="mt-2 break-words font-bold text-white/85">
+                                                        {request.source || "Not tracked"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {request.message && (
+                                                <div className="mt-4 rounded-2xl border border-white/10 bg-black/35 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35">
+                                                        Message / Notes
+                                                    </p>
+                                                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/70">
+                                                        {request.message}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {request.updatedAt && (
+                                                <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-white/30">
+                                                    Last updated: {formatDate(request.updatedAt)}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex w-full flex-col gap-3 xl:w-[260px]">
+                                            <select
+                                                value={status}
+                                                onChange={(event) =>
+                                                    updateStatus(request.id, event.target.value)
+                                                }
+                                                disabled={actionLoadingId === request.id}
+                                                className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-sm font-bold text-white outline-none transition focus:border-emerald-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                {STATUS_OPTIONS.map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {STATUS_LABELS[option]}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            <button
+                                                onClick={() => copyText(request.id, primaryContact)}
+                                                className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-emerald-300/40 hover:bg-emerald-300/10"
+                                            >
+                                                {copiedId === request.id ? "Copied" : "Copy Contact"}
+                                            </button>
+
+                                            {request.wallet && (
+                                                <button
+                                                    onClick={() =>
+                                                        copyText(`${request.id}-wallet`, request.wallet)
+                                                    }
+                                                    className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                                                >
+                                                    {copiedId === `${request.id}-wallet`
+                                                        ? "Wallet Copied"
+                                                        : "Copy Wallet"}
+                                                </button>
+                                            )}
+
+                                            <button
+                                                onClick={() => deleteRequest(request.id)}
+                                                disabled={actionLoadingId === request.id}
+                                                className="rounded-2xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                {actionLoadingId === request.id
+                                                    ? "Processing..."
+                                                    : "Delete"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+                )}
+            </section>
         </main>
     );
 }

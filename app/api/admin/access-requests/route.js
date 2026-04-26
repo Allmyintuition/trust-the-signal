@@ -1,68 +1,144 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
-const dataFilePath = path.join(process.cwd(), "data", "access-requests.json");
+const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_FILE = path.join(DATA_DIR, "access-requests.json");
 
-const ensureDataFile = () => {
-    const dataDir = path.join(process.cwd(), "data");
+async function ensureDataFile() {
+    try {
+        await fs.mkdir(DATA_DIR, { recursive: true });
 
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
+        try {
+            await fs.access(DATA_FILE);
+        } catch {
+            await fs.writeFile(DATA_FILE, JSON.stringify([], null, 2), "utf8");
+        }
+    } catch (error) {
+        console.error("Failed to ensure access request data file:", error);
     }
+}
 
-    if (!fs.existsSync(dataFilePath)) {
-        fs.writeFileSync(dataFilePath, "[]", "utf8");
-    }
-};
-
-const readRequests = () => {
-    ensureDataFile();
+async function readRequests() {
+    await ensureDataFile();
 
     try {
-        const raw = fs.readFileSync(dataFilePath, "utf8");
-        return JSON.parse(raw || "[]");
-    } catch {
+        const raw = await fs.readFile(DATA_FILE, "utf8");
+        const parsed = JSON.parse(raw);
+
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+
+        return parsed;
+    } catch (error) {
+        console.error("Failed to read access requests:", error);
         return [];
     }
-};
+}
 
-const writeRequests = (requests) => {
-    ensureDataFile();
-    fs.writeFileSync(dataFilePath, JSON.stringify(requests, null, 2), "utf8");
-};
+async function writeRequests(requests) {
+    await ensureDataFile();
+    await fs.writeFile(DATA_FILE, JSON.stringify(requests, null, 2), "utf8");
+}
 
-export async function GET() {
+function escapeCSV(value) {
+    if (value === null || value === undefined) return "";
+
+    const stringValue = String(value);
+    const escaped = stringValue.replace(/"/g, '""');
+
+    return `"${escaped}"`;
+}
+
+function generateCSV(requests) {
+    const headers = [
+        "id",
+        "contact",
+        "email",
+        "telegram",
+        "wallet",
+        "status",
+        "source",
+        "message",
+        "createdAt",
+        "updatedAt",
+    ];
+
+    const rows = requests.map((request) =>
+        headers
+            .map((key) => {
+                if (key === "contact") {
+                    return escapeCSV(
+                        request.contact ||
+                        request.email ||
+                        request.telegram ||
+                        request.wallet ||
+                        ""
+                    );
+                }
+
+                return escapeCSV(request[key] || "");
+            })
+            .join(",")
+    );
+
+    return [headers.join(","), ...rows].join("\n");
+}
+
+export async function GET(request) {
     try {
-        const requests = readRequests();
+        const { searchParams } = new URL(request.url);
+        const format = searchParams.get("format");
+
+        const requests = await readRequests();
+
+        const sortedRequests = [...requests].sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+
+        if (format === "csv") {
+            const csv = generateCSV(sortedRequests);
+
+            return new NextResponse(csv, {
+                status: 200,
+                headers: {
+                    "Content-Type": "text/csv; charset=utf-8",
+                    "Content-Disposition": `attachment; filename="trust-the-signal-access-requests.csv"`,
+                },
+            });
+        }
 
         return NextResponse.json({
             success: true,
-            total: requests.length,
-            requests,
+            total: sortedRequests.length,
+            requests: sortedRequests,
         });
     } catch (error) {
+        console.error("Admin GET access requests error:", error);
+
         return NextResponse.json(
             {
                 success: false,
-                error: "Unable to load stored requests.",
+                error: "Failed to load access requests.",
             },
             { status: 500 }
         );
     }
 }
 
-export async function PATCH(req) {
+export async function PATCH(request) {
     try {
-        const body = await req.json();
-        const id = body?.id;
-        const status = body?.status;
+        const body = await request.json();
+        const { id, status } = body;
 
         if (!id || !status) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: "Request id and status are required.",
+                    error: "Missing request id or status.",
                 },
                 { status: 400 }
             );
@@ -86,65 +162,88 @@ export async function PATCH(req) {
             );
         }
 
-        const requests = readRequests();
+        const requests = await readRequests();
 
-        const updatedRequests = requests.map((request) =>
-            request.id === id
-                ? {
-                    ...request,
-                    status,
-                    updatedAt: new Date().toISOString(),
-                }
-                : request
-        );
+        const requestIndex = requests.findIndex((item) => item.id === id);
 
-        writeRequests(updatedRequests);
+        if (requestIndex === -1) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Access request not found.",
+                },
+                { status: 404 }
+            );
+        }
+
+        requests[requestIndex] = {
+            ...requests[requestIndex],
+            status,
+            updatedAt: new Date().toISOString(),
+        };
+
+        await writeRequests(requests);
 
         return NextResponse.json({
             success: true,
-            requests: updatedRequests,
+            request: requests[requestIndex],
         });
     } catch (error) {
+        console.error("Admin PATCH access request error:", error);
+
         return NextResponse.json(
             {
                 success: false,
-                error: "Unable to update request.",
+                error: "Failed to update access request.",
             },
             { status: 500 }
         );
     }
 }
 
-export async function DELETE(req) {
+export async function DELETE(request) {
     try {
-        const body = await req.json();
-        const id = body?.id;
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get("id");
 
         if (!id) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: "Request id is required.",
+                    error: "Missing request id.",
                 },
                 { status: 400 }
             );
         }
 
-        const requests = readRequests();
-        const updatedRequests = requests.filter((request) => request.id !== id);
+        const requests = await readRequests();
 
-        writeRequests(updatedRequests);
+        const filteredRequests = requests.filter((item) => item.id !== id);
+
+        if (filteredRequests.length === requests.length) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Access request not found.",
+                },
+                { status: 404 }
+            );
+        }
+
+        await writeRequests(filteredRequests);
 
         return NextResponse.json({
             success: true,
-            requests: updatedRequests,
-            total: updatedRequests.length,
+            deletedId: id,
+            remaining: filteredRequests.length,
         });
     } catch (error) {
+        console.error("Admin DELETE access request error:", error);
+
         return NextResponse.json(
             {
                 success: false,
-                error: "Unable to delete request.",
+                error: "Failed to delete access request.",
             },
             { status: 500 }
         );
