@@ -239,6 +239,20 @@ export default function AdminAccessRequestsPage() {
                         </div>
 
                         <div className="flex flex-col gap-3 sm:flex-row">
+                            <a
+                                href="/"
+                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
+                            >
+                                Home
+                            </a>
+
+                            <a
+                                href="/admin"
+                                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
+                            >
+                                Admin Home
+                            </a>
+
                             <button
                                 onClick={loadRequests}
                                 disabled={loading}
