@@ -39,8 +39,8 @@ const clampBar = (num) => Math.max(0, Math.min(100, Number(num || 0)));
 const Button = ({ children, variant = "solid", onClick, href }) => {
   const className =
     variant === "outline"
-      ? "group rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
-      : "group rounded-2xl bg-emerald-400 px-6 py-4 font-semibold text-black shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300";
+      ? "group whitespace-nowrap rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white md:px-6 md:py-4 backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+      : "group whitespace-nowrap rounded-2xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-black md:px-6 md:py-4 shadow-lg shadow-emerald-400/25 transition hover:bg-emerald-300";
 
   if (href) {
     return (
@@ -60,7 +60,7 @@ const Button = ({ children, variant = "solid", onClick, href }) => {
 const NavLink = ({ href, children }) => (
   <a
     href={href}
-    className="rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-sm text-white backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+    className="whitespace-nowrap rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-xs text-white md:px-5 md:py-4 md:text-sm backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
   >
     {children}
   </a>
@@ -581,7 +581,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:items-center md:gap-3">
+          <div className="flex w-full gap-2 overflow-x-auto pb-1 md:w-auto md:overflow-visible md:pb-0 md:items-center md:gap-3">
             <Badge>Signal.Observed()</Badge>
             <NavLink href="/">Home</NavLink>
             <NavLink href="/trending">Trending</NavLink>

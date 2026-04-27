@@ -341,7 +341,7 @@ export default function TrendingPage() {
 
                 <section className="pt-7 md:pt-10">
                     <Card className="border-emerald-400/20 bg-emerald-400/10">
-                        <div className="grid gap-3 p-4 md:p-5 lg:grid-cols-[1fr_220px_140px]">
+                        <div className="grid gap-3 p-4 md:p-5 lg:grid-cols-[1fr_240px_140px]">
                             <div className="relative">
                                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
                                 <input
@@ -355,7 +355,7 @@ export default function TrendingPage() {
                             <select
                                 value={minLiquidity}
                                 onChange={(e) => setMinLiquidity(e.target.value)}
-                                className="rounded-2xl border border-white/10 bg-black/40 px-4 py-4 text-sm font-bold outline-none"
+                                className="appearance-none rounded-2xl border border-white/10 bg-black/40 px-4 py-4 pr-10 text-sm font-bold outline-none"
                             >
                                 <option value="0">Min Liquidity: Any</option>
                                 <option value="5000">$5K+</option>
