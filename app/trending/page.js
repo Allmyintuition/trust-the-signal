@@ -265,8 +265,8 @@ export default function TrendingPage() {
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
             <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-            <div className="relative mx-auto max-w-7xl px-6 py-8">
-                <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
+            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-5 md:py-8">
+                <header className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between rounded-3xl border border-white/10 bg-black/50 px-4 sm:px-5 py-3 md:py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
                     <div className="flex items-center gap-3">
                         <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
                             <Eye className="relative h-5 w-5 text-emerald-300" />
@@ -281,7 +281,7 @@ export default function TrendingPage() {
                         </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:gap-3">
                         <a
                             href="/tools"
                             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30 hover:text-white"
@@ -312,9 +312,9 @@ export default function TrendingPage() {
                     initial={{ opacity: 0, y: 26 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="pt-16"
+                    className="pt-8 md:pt-12 lg:pt-16"
                 >
-                    <div className="mb-5 flex flex-wrap gap-3">
+                    <div className="mb-4 flex flex-wrap gap-2">
                         <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
                             📡 Live DexScreener Feed
                         </span>
@@ -326,7 +326,7 @@ export default function TrendingPage() {
                         </span>
                     </div>
 
-                    <h2 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
+                    <h2 className="max-w-4xl text-4xl font-semibold leading-[0.98] tracking-tight md:text-7xl">
                         Live token discovery.
                         <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
                             Filter what is moving now.
@@ -339,9 +339,9 @@ export default function TrendingPage() {
                     </p>
                 </motion.section>
 
-                <section className="pt-10">
+                <section className="pt-7 md:pt-10">
                     <Card className="border-emerald-400/20 bg-emerald-400/10">
-                        <div className="grid gap-4 p-5 lg:grid-cols-[1fr_220px_140px]">
+                        <div className="grid gap-3 p-4 md:p-5 lg:grid-cols-[1fr_220px_140px]">
                             <div className="relative">
                                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
                                 <input
@@ -372,7 +372,7 @@ export default function TrendingPage() {
                     </Card>
                 </section>
 
-                <section className="pt-10">
+                <section className="pt-7 md:pt-10">
                     <Card className="border-emerald-400/20 bg-emerald-400/10">
                         <div className="grid gap-4 p-5 md:grid-cols-3">
                             {[

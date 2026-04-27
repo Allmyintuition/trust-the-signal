@@ -565,8 +565,8 @@ export default function Home() {
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.18),transparent_34%),radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.08),transparent_17%),radial-gradient(circle_at_12%_78%,rgba(0,180,140,0.14),transparent_25%)]" />
       <div className="fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-8">
-        <header className="sticky top-4 z-40 flex items-center justify-between rounded-3xl border border-white/10 bg-black/50 px-4 sm:px-5 py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-5 md:py-8">
+        <header className="sticky top-2 md:top-4 z-40 flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between rounded-3xl border border-white/10 bg-black/50 px-4 sm:px-5 py-3 md:py-4 shadow-2xl shadow-emerald-500/10 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
               <Eye className="relative h-5 w-5 text-emerald-300" />
@@ -581,7 +581,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="grid w-full grid-cols-2 gap-2 md:flex md:w-auto md:items-center md:gap-3">
             <Badge>Signal.Observed()</Badge>
             <NavLink href="/">Home</NavLink>
             <NavLink href="/trending">Trending</NavLink>
@@ -592,16 +592,16 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="grid gap-10 pt-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+        <section className="grid gap-8 pt-8 md:pt-12 lg:pt-16 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} transition={{ duration: 0.6 }}>
-            <div className="mb-5 flex flex-wrap gap-3">
+            <div className="mb-4 flex flex-wrap gap-2">
               <Badge>👁️ Signal.Detected()</Badge>
               <Badge>📡 System.Listening</Badge>
               <Badge>🔒 Protected.Channel</Badge>
               <Badge>🧠 Platform.Memory.Live</Badge>
             </div>
 
-            <h2 className="max-w-4xl text-5xl font-semibold leading-[0.92] tracking-tight md:text-7xl">
+            <h2 className="max-w-4xl text-4xl font-semibold leading-[0.95] tracking-tight md:text-7xl">
               Premium Solana intelligence,
               <span className="block bg-gradient-to-r from-emerald-200 via-emerald-400 to-white bg-clip-text text-transparent">
                 structured beyond basic scanners.
@@ -612,7 +612,7 @@ export default function Home() {
               Analyze live contracts, observe active demand, open dedicated token dossiers, and secure protected access into the wider Trust The Signal ecosystem.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
               <Button onClick={runLiveSignalCheck}>
                 Run Signal Check <ArrowRight className="h-4 w-4" />
               </Button>
