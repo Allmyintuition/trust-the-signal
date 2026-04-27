@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
     ShieldAlert,
@@ -27,6 +27,45 @@ export default function RugRiskToolPage() {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
+
+    const rugData = useMemo(() => {
+        if (!result) return null;
+
+        const liquidity = Number(result.liquidity || 0);
+        const marketCap = Number(result.marketCap || 0);
+        const volume = Number(result.volume24h || 0);
+        const socialCount = Number(result.socialPresence?.socialCount || 0);
+
+        const liqRatio = marketCap > 0 ? ((liquidity / marketCap) * 100) : 0;
+        const volRatio = liquidity > 0 ? (volume / liquidity) : 0;
+
+        let danger = 0;
+
+        if (liqRatio < 8) danger += 30;
+        else if (liqRatio < 15) danger += 18;
+
+        if (volRatio > 12) danger += 20;
+        else if (volRatio > 6) danger += 10;
+
+        if (socialCount === 0) danger += 15;
+        if ((result.riskFlags || []).length >= 3) danger += 20;
+        if (String(result.risk || "").toUpperCase().includes("HIGH")) danger += 20;
+        if (String(result.risk || "").toUpperCase().includes("MEDIUM")) danger += 10;
+
+        const finalDanger = Math.min(100, Math.round(danger));
+
+        let verdict = "SAFE";
+        if (finalDanger >= 65) verdict = "DANGER";
+        else if (finalDanger >= 35) verdict = "CAUTION";
+
+        return {
+            liqRatio: liqRatio.toFixed(2),
+            volRatio: volRatio.toFixed(2),
+            socialCount,
+            finalDanger,
+            verdict,
+        };
+    }, [result]);
 
     async function runCheck() {
         if (!contract.trim()) return;
@@ -152,11 +191,15 @@ export default function RugRiskToolPage() {
                             <p className="text-xs uppercase tracking-[0.22em] text-emerald-300">
                                 Risk Result
                             </p>
-                            <h3 className="mt-3 text-3xl font-black">{result.risk}</h3>
-                            <p className="mt-3 text-white/65">Verdict: {result.verdict}</p>
+                            <h3 className="mt-3 text-3xl font-black">{rugData?.verdict}</h3>
+                            <p className="mt-3 text-white/65">Signal Engine Verdict: {result.verdict}</p>
                             <p className="mt-2 text-white/65">Score: {result.score}</p>
                             <p className="mt-2 text-white/65">Liquidity: ${Number(result.liquidity || 0).toLocaleString()}</p>
                             <p className="mt-2 text-white/65">24H Volume: ${Number(result.volume24h || 0).toLocaleString()}</p>
+                            <p className="mt-2 text-white/65">Liquidity/MC Ratio: {rugData?.liqRatio}%</p>
+                            <p className="mt-2 text-white/65">Volume/Liquidity Ratio: {rugData?.volRatio}x</p>
+                            <p className="mt-2 text-white/65">Source Presence Count: {rugData?.socialCount}</p>
+                            <p className="mt-4 text-emerald-300 font-bold">Weighted Rug Probability: {rugData?.finalDanger}/100</p>
                         </div>
 
                         <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">

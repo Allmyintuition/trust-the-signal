@@ -167,6 +167,14 @@ export default function TokenPage() {
 
         if (receiptsJson.success && Array.isArray(receiptsJson.receipts)) {
           setRelatedReceipts(
+            receiptsJson.receipts
+              .filter((r) => r.contract !== contract)
+              .slice(0, 3)
+          );
+        }
+
+        if (receiptsJson.success && Array.isArray(receiptsJson.receipts)) {
+          setRelatedReceipts(
             receiptsJson.receipts.filter((r) => r.contract !== contract).slice(0, 3)
           );
         }
@@ -491,6 +499,58 @@ export default function TokenPage() {
                   <ActionLink href="/" variant="solid"><FileSearch className="h-4 w-4" />Analyze Another Contract</ActionLink>
                 </div>
               </Card>
+            </section>
+
+
+            <section className="pt-10">
+              <div className="mb-5 flex items-center gap-2 text-emerald-300">
+                <Database className="h-5 w-5" />
+                <p className="text-sm uppercase tracking-[0.24em]">
+                  Related Signal Receipts
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {relatedReceipts.map((receipt) => (
+                  <Card key={receipt.id} className="h-full">
+                    <div className="p-5">
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                          {receipt.receiptType}
+                        </span>
+
+                        <span className="text-xs text-white/35">
+                          {receipt.checkCount || 0} checks
+                        </span>
+                      </div>
+
+                      <h3 className="text-lg font-semibold">
+                        {receipt.tokenName} ({receipt.tokenSymbol})
+                      </h3>
+
+                      <p className="mt-2 text-xs text-white/45">
+                        Score: {receipt.score ?? "--"} • {receipt.risk || "--"}
+                      </p>
+
+                      <div className="mt-4 flex gap-2">
+                        <a
+                          href={`/token/${receipt.contract}`}
+                          className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[11px] font-black text-emerald-200"
+                        >
+                          Open
+                        </a>
+
+                        <a
+                          href={`/tools/token-memory?q=${receipt.contract}`}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/70"
+                        >
+                          Memory
+                        </a>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </section>
 
             <section className="pt-10">
