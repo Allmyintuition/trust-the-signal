@@ -149,6 +149,9 @@ export default function TokenLogsPage() {
   );
 
   const strongCount = filteredLogs.filter((l) => receiptType(l) === "STRONG").length;
+  const operatorCount = filteredLogs.filter((l) => String(l.operator_label || "").toLowerCase() === "high_interest").length;
+  const premiumCount = filteredLogs.filter((l) => String(l.operator_label || "").toLowerCase() === "premium_candidate").length;
+  const blockedCount = filteredLogs.filter((l) => receiptType(l) === "BLOCKED").length;
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -178,7 +181,7 @@ export default function TokenLogsPage() {
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-5">
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
             <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Visible Tokens</div>
             <div className="mt-3 text-5xl font-black">{filteredLogs.length}</div>
@@ -192,6 +195,15 @@ export default function TokenLogsPage() {
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
             <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Strong Receipts</div>
             <div className="mt-3 text-5xl font-black text-emerald-300">{strongCount}</div>
+          </div>
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">High Interest</div>
+            <div className="mt-3 text-5xl font-black text-emerald-300">{operatorCount}</div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="text-xs font-black uppercase tracking-[0.3em] text-white/35">Premium Candidates</div>
+            <div className="mt-3 text-5xl font-black text-purple-300">{premiumCount}</div>
           </div>
         </div>
 
@@ -287,6 +299,21 @@ export default function TokenLogsPage() {
                   <div>Market Cap: <span className="font-black">{formatNumber(log.market_cap)}</span></div>
                   <div>Liquidity: <span className="font-black">{formatNumber(log.liquidity)}</span></div>
                   <div>24H Volume: <span className="font-black">{formatNumber(log.volume_24h)}</span></div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <button onClick={() => updateLocal(log.id, "operator_label", "high_interest")} className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-black text-emerald-200">
+                    Mark High Interest
+                  </button>
+                  <button onClick={() => updateLocal(log.id, "operator_label", "premium_candidate")} className="rounded-full border border-purple-300/25 bg-purple-300/10 px-3 py-1 text-xs font-black text-purple-200">
+                    Mark Premium
+                  </button>
+                  <button onClick={() => updateLocal(log.id, "operator_label", "revisit")} className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-200">
+                    Mark Revisit
+                  </button>
+                  <button onClick={() => updateLocal(log.id, "operator_label", "dead")} className="rounded-full border border-red-300/25 bg-red-300/10 px-3 py-1 text-xs font-black text-red-200">
+                    Mark Dead
+                  </button>
                 </div>
 
                 <div className="mt-6 grid gap-4 lg:grid-cols-[220px_1fr_150px]">
