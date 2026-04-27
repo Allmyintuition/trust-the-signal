@@ -123,6 +123,7 @@ export default function TokenPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [memoryData, setMemoryData] = useState(null);
+  const [relatedReceipts, setRelatedReceipts] = useState([]);
   const [error, setError] = useState("");
   const [accessEmail, setAccessEmail] = useState("");
   const [accessSubmitted, setAccessSubmitted] = useState(false);
@@ -136,7 +137,7 @@ export default function TokenPage() {
       setError("");
 
       try {
-        const [signalResponse, memoryResponse] = await Promise.all([
+        const [signalResponse, memoryResponse, receiptsResponse] = await Promise.all([
           fetch("/api/signal-check", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -145,10 +146,14 @@ export default function TokenPage() {
           fetch(`/api/token-memory?q=${encodeURIComponent(contract)}`, {
             cache: "no-store",
           }),
+          fetch("/api/signal-receipts", {
+            cache: "no-store",
+          }),
         ]);
 
         const signalJson = await signalResponse.json();
         const memoryJson = await memoryResponse.json();
+        const receiptsJson = await receiptsResponse.json();
 
         if (!signalJson.success) {
           setError(signalJson.error || "Unable to analyze token.");
@@ -158,6 +163,12 @@ export default function TokenPage() {
 
         if (memoryJson.success && memoryJson.logs?.length > 0) {
           setMemoryData(memoryJson.logs[0]);
+        }
+
+        if (receiptsJson.success && Array.isArray(receiptsJson.receipts)) {
+          setRelatedReceipts(
+            receiptsJson.receipts.filter((r) => r.contract !== contract).slice(0, 3)
+          );
         }
       } catch (err) {
         setError("Token intelligence route failed.");
@@ -218,7 +229,7 @@ export default function TokenPage() {
                 TRUST THE SIGNAL
               </p>
               <h1 className="text-sm sm:text-lg font-semibold tracking-[0.2em]">
-                TOKEN DOSSIER V6
+                TOKEN DOSSIER V7
               </h1>
             </div>
           </div>
@@ -236,18 +247,10 @@ export default function TokenPage() {
         <section className="grid gap-8 pt-16 lg:grid-cols-[1fr_0.9fr] lg:items-start">
           <div>
             <div className="mb-5 flex flex-wrap gap-3">
-              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                👁️ Token.Dossier.Live
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                📡 Signal.Engine
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">
-                🧠 Hybrid.Memory
-              </span>
-              <span className={`rounded-full border px-4 py-1.5 text-sm ${labelTone(operatorLabel)}`}>
-                {currentReceiptType}
-              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">👁️ Token.Dossier.Live</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">📡 Signal.Engine</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/75">🧠 Hybrid.Memory</span>
+              <span className={`rounded-full border px-4 py-1.5 text-sm ${labelTone(operatorLabel)}`}>{currentReceiptType}</span>
             </div>
 
             <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">
@@ -259,7 +262,7 @@ export default function TokenPage() {
             </h2>
 
             <p className="mt-5 max-w-3xl text-lg leading-8 text-white/65">
-              Dedicated live dossier generated through the Trust The Signal weighted authority layer, now synced with archived platform memory and operator intelligence.
+              Dedicated live dossier generated through the Trust The Signal weighted authority layer, now synced with archived platform memory, related receipts, and operator intelligence.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -288,52 +291,34 @@ export default function TokenPage() {
           <Card className="p-6">
             <div className="mb-3 flex items-center gap-2 text-emerald-300">
               <Brain className="h-5 w-5" />
-              <p className="text-sm uppercase tracking-[0.24em]">
-                Intelligence Memory Sync
-              </p>
+              <p className="text-sm uppercase tracking-[0.24em]">Intelligence Memory Sync</p>
             </div>
 
             <div className="grid gap-3">
               <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                  Archived Checks
-                </p>
-                <p className="mt-2 text-2xl font-black text-emerald-200">
-                  {archivedChecks}
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/35">Archived Checks</p>
+                <p className="mt-2 text-2xl font-black text-emerald-200">{archivedChecks}</p>
               </div>
 
               <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">
-                  Memory Confidence
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Memory Confidence</p>
                 <p className="mt-2 text-xl font-black">{currentMemoryConfidence}</p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/35">
-                  Receipt Type
-                </p>
-                <p className="mt-2 text-xl font-black text-emerald-200">
-                  {currentReceiptType}
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/35">Receipt Type</p>
+                <p className="mt-2 text-xl font-black text-emerald-200">{currentReceiptType}</p>
               </div>
 
               <div className={`rounded-2xl border p-4 ${labelTone(operatorLabel)}`}>
-                <p className="text-xs uppercase tracking-[0.2em]">
-                  Operator Label
-                </p>
+                <p className="text-xs uppercase tracking-[0.2em]">Operator Label</p>
                 <p className="mt-2 text-xl font-black">{operatorLabel}</p>
               </div>
 
               {operatorNote ? (
                 <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">
-                    Operator Note
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-white/70">
-                    {operatorNote}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">Operator Note</p>
+                  <p className="mt-2 text-sm leading-7 text-white/70">{operatorNote}</p>
                 </div>
               ) : (
                 <div className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/45">
@@ -390,9 +375,7 @@ export default function TokenPage() {
                 ["Quote", data.quoteToken || "--"],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">
-                    {label}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-white/40">{label}</p>
                   <p className={`mt-2 break-words text-base font-medium ${label === "Risk" ? riskTone(value) : "text-emerald-200 border-0 bg-transparent p-0"}`}>
                     {value || "--"}
                   </p>
@@ -413,35 +396,26 @@ export default function TokenPage() {
               <Card className="p-6">
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Activity className="h-5 w-5" />
-                  <p className="text-sm uppercase tracking-[0.24em]">
-                    Risk Flag Layer
-                  </p>
+                  <p className="text-sm uppercase tracking-[0.24em]">Risk Flag Layer</p>
                 </div>
 
                 {data.riskFlags?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {data.riskFlags.map((flag) => (
-                      <span
-                        key={flag}
-                        className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-bold text-yellow-100"
-                      >
+                      <span key={flag} className="rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-bold text-yellow-100">
                         {flag}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-emerald-200">
-                    No major automated structural risk flags detected.
-                  </p>
+                  <p className="text-sm text-emerald-200">No major automated structural risk flags detected.</p>
                 )}
               </Card>
 
               <Card className="p-6">
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Radar className="h-5 w-5" />
-                  <p className="text-sm uppercase tracking-[0.24em]">
-                    Source Presence
-                  </p>
+                  <p className="text-sm uppercase tracking-[0.24em]">Source Presence</p>
                 </div>
 
                 <div className="grid gap-3">
@@ -451,16 +425,51 @@ export default function TokenPage() {
                     ["Source Health", data.sourceHealth || "limited_presence"],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-                        {label}
-                      </p>
-                      <p className="mt-2 font-medium text-emerald-200">
-                        {value}
-                      </p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/40">{label}</p>
+                      <p className="mt-2 font-medium text-emerald-200">{value}</p>
                     </div>
                   ))}
                 </div>
               </Card>
+            </section>
+
+            <section className="pt-10">
+              <div className="mb-5 flex items-center gap-2 text-emerald-300">
+                <Database className="h-5 w-5" />
+                <p className="text-sm uppercase tracking-[0.24em]">Related Signal Receipts</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {relatedReceipts.map((receipt) => (
+                  <Card key={receipt.id}>
+                    <div className="p-5">
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-200">
+                          {receipt.receiptType}
+                        </span>
+                        <span className="text-xs text-white/35">{receipt.checkCount || 0} checks</span>
+                      </div>
+
+                      <h3 className="text-lg font-semibold">
+                        {receipt.tokenName} ({receipt.tokenSymbol})
+                      </h3>
+
+                      <p className="mt-2 text-xs text-white/45">
+                        Score: {receipt.score ?? "--"} • {receipt.risk || "--"}
+                      </p>
+
+                      <div className="mt-4 flex gap-2">
+                        <a href={`/token/${receipt.contract}`} className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-[11px] font-black text-emerald-200">
+                          Open
+                        </a>
+                        <a href={`/tools/token-memory?q=${receipt.contract}`} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black text-white/70">
+                          Memory
+                        </a>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </section>
 
             <section className="pt-10">
@@ -472,27 +481,14 @@ export default function TokenPage() {
                   </div>
 
                   <p className="max-w-3xl text-sm leading-7 text-white/65">
-                    This report combines live signal scoring, archived memory,
-                    repeated check behavior, operator labeling, and protected
-                    continuation routing into one token intelligence page.
+                    This report combines live signal scoring, archived memory, repeated check behavior, related archived receipts, operator labeling, and protected continuation routing into one token intelligence page.
                   </p>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-3">
-                  <ActionLink href="/trending" variant="outline">
-                    <TrendingUp className="h-4 w-4" />
-                    Trending Board
-                  </ActionLink>
-
-                  <ActionLink href="/tools/token-memory" variant="outline">
-                    <Database className="h-4 w-4" />
-                    Token Memory
-                  </ActionLink>
-
-                  <ActionLink href="/" variant="solid">
-                    <FileSearch className="h-4 w-4" />
-                    Analyze Another Contract
-                  </ActionLink>
+                  <ActionLink href="/trending" variant="outline"><TrendingUp className="h-4 w-4" />Trending Board</ActionLink>
+                  <ActionLink href="/tools/token-memory" variant="outline"><Database className="h-4 w-4" />Token Memory</ActionLink>
+                  <ActionLink href="/" variant="solid"><FileSearch className="h-4 w-4" />Analyze Another Contract</ActionLink>
                 </div>
               </Card>
             </section>
@@ -503,9 +499,7 @@ export default function TokenPage() {
                   <div>
                     <div className="mb-3 flex items-center gap-2 text-emerald-300">
                       <Lock className="h-5 w-5" />
-                      <p className="text-sm uppercase tracking-[0.24em]">
-                        Protected Continuation
-                      </p>
+                      <p className="text-sm uppercase tracking-[0.24em]">Protected Continuation</p>
                     </div>
 
                     <h2 className="text-3xl font-semibold">
