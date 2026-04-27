@@ -1,3 +1,4 @@
+cat > app / products / page.js << 'EOF'
 import Link from "next/link";
 import {
     BookOpen,
@@ -7,6 +8,8 @@ import {
     Eye,
     Lock,
     Sparkles,
+    Crown,
+    ShieldCheck,
 } from "lucide-react";
 
 const products = [
@@ -14,28 +17,28 @@ const products = [
         title: "Signal Operator Guide",
         price: "$19",
         description:
-            "Beginner-to-operator guide for reading token structure, risk, entries, exits, and disciplined execution.",
+            "Beginner-to-operator guide for reading token structure, conviction, entries, exits, protected execution, and disciplined market survival.",
         href: "/products/signal-operator-guide",
         icon: BookOpen,
-        status: "Preview Live",
+        status: "Digital Guide",
     },
     {
         title: "Wallet Intelligence Notes",
         price: "$29",
         description:
-            "Prepared product route for smart wallet recurrence, cluster behavior, and early wallet interpretation.",
+            "Prepared premium notes for wallet recurrence, smart wallet behavior, early cluster interpretation, and follow-the-money observation.",
         href: "/protected",
         icon: Wallet,
-        status: "Protected Prep",
+        status: "Premium Intel",
     },
     {
         title: "Protected Signal Framework",
         price: "Soon",
         description:
-            "Future member route for private alerts, protected rooms, premium scanner logic, and operator infrastructure.",
+            "Future member infrastructure for private alerts, scanner upgrades, premium frameworks, protected rooms, and deeper operator tools.",
         href: "/protected",
         icon: KeyRound,
-        status: "Access Queue",
+        status: "Protected Access",
     },
 ];
 
@@ -55,23 +58,20 @@ export default function ProductsPage() {
                                 TRUST THE SIGNAL
                             </p>
                             <h1 className="text-lg font-semibold tracking-[0.2em]">
-                                PRODUCT LAYER
+                                PRODUCT VAULT
                             </h1>
                         </div>
                     </div>
 
                     <div className="hidden gap-3 sm:flex">
-                        <Link
-                            href="/"
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-                        >
+                        <Link href="/" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
                             Home
                         </Link>
-                        <Link
-                            href="/tools"
-                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-                        >
+                        <Link href="/tools" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
                             Tools
+                        </Link>
+                        <Link href="/protected" className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-3 text-sm font-bold text-emerald-100">
+                            Protected
                         </Link>
                     </div>
                 </header>
@@ -80,19 +80,36 @@ export default function ProductsPage() {
                     <div className="mb-4 flex items-center gap-2 text-emerald-300">
                         <Sparkles className="h-5 w-5" />
                         <p className="text-sm uppercase tracking-[0.28em]">
-                            Monetization Foundation
+                            Premium Monetization Layer
                         </p>
                     </div>
 
                     <h2 className="max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
-                        Turn signal trust into premium products.
+                        Operator-grade digital intelligence products.
                     </h2>
 
                     <p className="mt-5 max-w-3xl text-base leading-8 text-white/65">
-                        This product layer prepares Trust The Signal for guides, premium
-                        notes, protected frameworks, member products, checkout integration,
-                        and future digital delivery.
+                        This vault converts Trust The Signal platform authority into premium
+                        educational guides, intelligence notes, protected member frameworks,
+                        and future digital operator assets.
                     </p>
+                </div>
+
+                <div className="mt-8 grid gap-4 md:grid-cols-3">
+                    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
+                        <Crown className="h-5 w-5 text-emerald-300" />
+                        <p className="mt-4 text-lg font-black">Authority Based Products</p>
+                    </div>
+
+                    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
+                        <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                        <p className="mt-4 text-lg font-black">Protected Member Routes</p>
+                    </div>
+
+                    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
+                        <Lock className="h-5 w-5 text-emerald-300" />
+                        <p className="mt-4 text-lg font-black">Future Instant Delivery</p>
+                    </div>
                 </div>
 
                 <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -125,7 +142,7 @@ export default function ProductsPage() {
                                     </span>
 
                                     <span className="inline-flex items-center gap-2 text-sm font-black text-emerald-200">
-                                        Open <ArrowRight className="h-4 w-4" />
+                                        Open Vault <ArrowRight className="h-4 w-4" />
                                     </span>
                                 </div>
                             </Link>
@@ -138,12 +155,12 @@ export default function ProductsPage() {
                         <Lock className="mt-1 h-5 w-5 text-emerald-300" />
                         <div>
                             <h3 className="text-xl font-black">
-                                Checkout and delivery can be connected later.
+                                This vault becomes the revenue branch of platform trust.
                             </h3>
                             <p className="mt-2 text-sm leading-7 text-white/65">
-                                This phase gives products real routes and positioning. Next
-                                monetization phases can add Stripe, Gumroad, Lemon Squeezy,
-                                instant downloads, gated member files, or protected guide access.
+                                Stripe checkout, instant downloads, premium guide fulfillment,
+                                gated files, and protected member digital delivery can be connected
+                                directly into this monetization layer.
                             </p>
                         </div>
                     </div>
@@ -152,3 +169,4 @@ export default function ProductsPage() {
         </main>
     );
 }
+EOF
