@@ -141,6 +141,8 @@ export default function ContractMetadataToolPage() {
                             <p className="mt-2 text-emerald-300">{result.symbol}</p>
                             <p className="mt-3 break-all text-xs text-white/55">{result.address}</p>
                             <p className="mt-3 text-white/65">Source Health: {result.sourceHealth}</p>
+                            <p className="mt-2 text-white/65">Market Cap: ${Number(result.marketCap || 0).toLocaleString()}</p>
+                            <p className="mt-2 text-white/65">Social Presence: {Number(result.socialPresence?.socialCount || 0)}</p>
                             <p className="mt-2 text-white/65">Dex: {result.dex}</p>
                         </div>
 
@@ -156,6 +158,7 @@ export default function ContractMetadataToolPage() {
                             <p className="mt-2 text-white/65">24H Volume: ${Number(result.volume24h || 0).toLocaleString()}</p>
                             <p className="mt-2 text-white/65">Score: {result.score}</p>
                             <p className="mt-2 text-white/65">Risk: {result.risk}</p>
+                            <p className="mt-2 text-white/65">Receipt Type: {result.receiptType || "standard"}</p>
 
                             {result.pairUrl && (
                                 <a
@@ -168,6 +171,29 @@ export default function ContractMetadataToolPage() {
                                     Open DexScreener
                                 </a>
                             )}
+                        </div>
+
+                        <div className="lg:col-span-2 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
+                            <div className="mb-4 flex items-center gap-2 text-emerald-300">
+                                <FileSearch className="h-5 w-5" />
+                                <p className="text-sm uppercase tracking-[0.24em]">
+                                    Continuation Routes
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-3">
+                                <Link href={`/token/${encodeURIComponent(contract.trim())}`} className="rounded-2xl border border-emerald-300/25 bg-black/30 px-5 py-3 text-sm font-bold text-emerald-200">
+                                    Open Full Dossier
+                                </Link>
+
+                                <Link href={`/tools/rug-risk`} className="rounded-2xl border border-white/10 bg-black/30 px-5 py-3 text-sm font-bold text-white/70">
+                                    Run Rug Risk
+                                </Link>
+
+                                <Link href={`/?contract=${encodeURIComponent(contract.trim())}`} className="rounded-2xl border border-white/10 bg-black/30 px-5 py-3 text-sm font-bold text-white/70">
+                                    Run Homepage Check
+                                </Link>
+                            </div>
                         </div>
 
                         {Array.isArray(result.riskFlags) && result.riskFlags.length > 0 && (
