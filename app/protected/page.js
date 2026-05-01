@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   Lock,
@@ -29,6 +32,64 @@ const qualificationSignals = [
 ];
 
 export default function ProtectedPage() {
+  const [form, setForm] = useState({
+    contact: "",
+    email: "",
+    telegram: "",
+    wallet: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  function updateField(key, value) {
+    setForm((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch("/api/access-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...form,
+          source: "protected_access_page",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Submission failed.");
+      }
+
+      setSuccess(true);
+      setForm({
+        contact: "",
+        email: "",
+        telegram: "",
+        wallet: "",
+        message: "",
+      });
+    } catch (err) {
+      setError(err.message || "Submission failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.16),transparent_34%),radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.07),transparent_18%)]" />
@@ -50,16 +111,10 @@ export default function ProtectedPage() {
           </div>
 
           <div className="hidden gap-3 sm:flex">
-            <Link
-              href="/"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-            >
+            <Link href="/" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
               Home
             </Link>
-            <Link
-              href="/products"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
-            >
+            <Link href="/products" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
               Products
             </Link>
           </div>
@@ -73,7 +128,7 @@ export default function ProtectedPage() {
             </span>
 
             <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-white/55">
-              Early Queue Open
+              Intake Queue Open
             </span>
           </div>
 
@@ -82,56 +137,11 @@ export default function ProtectedPage() {
           </h2>
 
           <p className="mt-5 max-w-3xl text-base leading-8 text-white/65">
-            Trust The Signal is moving beyond public contract tools into a
-            protected member ecosystem built for operator alerts, scanner
-            upgrades, private notes, gated dashboards, and premium intelligence
-            continuation.
+            Submit your operator details below for premium route placement, future private alerts, gated product releases, and member intelligence access.
           </p>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/access-pending"
-              className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
-            >
-              Secure Queue Placement <ArrowRight className="h-4 w-4" />
-            </Link>
-
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-black text-white/75 hover:border-emerald-300/30"
-            >
-              View Product Vault <Sparkles className="h-4 w-4" />
-            </Link>
-          </div>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <Crown className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Premium Member Routing</p>
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Early access route for future premium alerts, private guides, and member-only drops.
-            </p>
-          </div>
-
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <RadioTower className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Private Signal Delivery</p>
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Built to support future Telegram, Discord, dashboard, and scanner feed routing.
-            </p>
-          </div>
-
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <ShieldCheck className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Gated Intelligence Access</p>
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Public tools stay open while deeper intelligence becomes reserved for qualified operators.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
             <div className="mb-5 flex items-center gap-3 text-emerald-300">
               <KeyRound className="h-5 w-5" />
@@ -151,36 +161,95 @@ export default function ProtectedPage() {
                 </div>
               ))}
             </div>
+
+            <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
+              <div className="mb-5 flex items-center gap-3 text-emerald-300">
+                <Wallet className="h-5 w-5" />
+                <p className="text-xs font-black uppercase tracking-[0.25em]">
+                  Operator Fit
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {qualificationSignals.map((signal) => (
+                  <div key={signal} className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-300" />
+                    <p className="text-sm leading-7 text-white/70">{signal}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6"
+          >
             <div className="mb-5 flex items-center gap-3 text-emerald-300">
-              <Wallet className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
               <p className="text-xs font-black uppercase tracking-[0.25em]">
-                Operator Fit
+                Submit Operator Intake
               </p>
             </div>
 
-            <h3 className="text-2xl font-black">
-              Protected access is for users who want structure before noise.
-            </h3>
+            <div className="grid gap-4">
+              <input
+                value={form.contact}
+                onChange={(e) => updateField("contact", e.target.value)}
+                placeholder="Name / Username"
+                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+              />
 
-            <div className="mt-5 grid gap-3">
-              {qualificationSignals.map((signal) => (
-                <div key={signal} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-300" />
-                  <p className="text-sm leading-7 text-white/70">{signal}</p>
+              <input
+                value={form.email}
+                onChange={(e) => updateField("email", e.target.value)}
+                placeholder="Email"
+                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+              />
+
+              <input
+                value={form.telegram}
+                onChange={(e) => updateField("telegram", e.target.value)}
+                placeholder="Telegram @username"
+                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+              />
+
+              <input
+                value={form.wallet}
+                onChange={(e) => updateField("wallet", e.target.value)}
+                placeholder="Solana Wallet (optional)"
+                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+              />
+
+              <textarea
+                value={form.message}
+                onChange={(e) => updateField("message", e.target.value)}
+                placeholder="Tell us what protected access, alerts, or tools interest you..."
+                className="min-h-28 rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
+              />
+
+              {error && (
+                <div className="rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm font-bold text-red-200">
+                  {error}
                 </div>
-              ))}
-            </div>
+              )}
 
-            <Link
-              href="/access-pending"
-              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
-            >
-              Reserve Early Position <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+              {success && (
+                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-sm font-bold text-emerald-200">
+                  Intake submitted successfully. Your operator request has been queued.
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
+              >
+                {loading ? "Submitting..." : "Secure Queue Placement"}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </form>
         </div>
 
         <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
@@ -188,12 +257,10 @@ export default function ProtectedPage() {
             <ShieldCheck className="mt-1 h-5 w-5 text-emerald-300" />
             <div>
               <h3 className="text-xl font-black">
-                This route is the future private branch of the platform.
+                This route now feeds the protected lead intelligence engine.
               </h3>
               <p className="mt-2 text-sm leading-7 text-white/65">
-                Future Telegram verification, Discord role access, private
-                member dashboards, scanner premium feeds, and gated downloads can
-                all route through this protected ecosystem layer.
+                Qualified submissions are scored, prioritized, tagged, and routed into the internal Trust The Signal operator intake terminal.
               </p>
             </div>
           </div>
