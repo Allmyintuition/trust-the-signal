@@ -1,67 +1,146 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ShieldCheck,
-  Lock,
+  Activity,
   ArrowRight,
   BookOpen,
-  Wallet,
-  KeyRound,
-  X,
-  TrendingUp,
-  Mail,
-  CheckCircle2,
-  RadioTower,
-  Sparkles,
-  Database,
-  Network,
-  ScanSearch,
-  BrainCircuit,
-  Loader2,
-  Activity,
-  Orbit,
   Brain,
+  CheckCircle2,
   Cpu,
-  Satellite,
-  Star,
+  Database,
+  Eye,
+  KeyRound,
+  Loader2,
+  Lock,
+  Mail,
+  Network,
+  Orbit,
+  Radar,
+  RadioTower,
+  ScanSearch,
+  ShieldCheck,
+  Sparkles,
+  TerminalSquare,
+  TrendingUp,
+  Wallet,
+  X,
 } from "lucide-react";
 
-const Button = ({ children, variant = "solid", onClick, href, icon }) => {
-  const Icon = icon;
+const fallbackTicker = [
+  "SIGNAL DETECTED",
+  "DEX FEED ACTIVE",
+  "RISK LAYER ONLINE",
+  "TOKEN MEMORY UPDATED",
+  "PROTECTED QUEUE OPEN",
+  "OPERATOR NODE READY",
+];
+
+const fallbackMarketTicker = [
+  "$SOL • rotation strength",
+  "$NEWPAIR • launch watch",
+  "$FLOW • volume expanding",
+  "$RUNNER • momentum building",
+];
+
+const ecosystemBlocks = [
+  {
+    title: "Signal Reading",
+    desc: "Weighted setup interpretation, risk flags, liquidity awareness, and structure checks.",
+    icon: ScanSearch,
+  },
+  {
+    title: "Memory Core",
+    desc: "Token checks, repeated demand, receipts, notes, and contract intelligence continuation.",
+    icon: Database,
+  },
+  {
+    title: "Protected Access",
+    desc: "Operator intake, gated releases, private alerts, and future premium routes.",
+    icon: Lock,
+  },
+  {
+    title: "Knowledge Layer",
+    desc: "Guides, frameworks, wallet notes, and branded intelligence products.",
+    icon: Brain,
+  },
+];
+
+const trustFunnels = [
+  {
+    title: "Run Signal Check",
+    desc: "Paste a Solana contract and route into a dedicated intelligence report.",
+    href: "#signal-check",
+    icon: Radar,
+  },
+  {
+    title: "Open Product Vault",
+    desc: "Digital guides, wallet notes, and operator intelligence products.",
+    href: "/products",
+    icon: BookOpen,
+  },
+  {
+    title: "Request Protected Access",
+    desc: "Reserve placement for future gated intelligence routes.",
+    href: "/protected",
+    icon: KeyRound,
+  },
+];
+
+const products = [
+  {
+    title: "Signal Operator Guide",
+    price: "$19",
+    desc: "Entry logic, warning signs, structure reading, and operator survival framework.",
+    icon: BookOpen,
+    href: "/products/signal-operator-guide",
+  },
+  {
+    title: "Wallet Intelligence Notes",
+    price: "$29",
+    desc: "Smart wallet recurrence, flow behavior, and tracking interpretation.",
+    icon: Wallet,
+    href: "/products",
+  },
+  {
+    title: "Protected Signal Framework",
+    price: "Soon",
+    desc: "Private operator route, gated alerts, and premium access layer.",
+    icon: KeyRound,
+    href: "/protected",
+  },
+];
+
+const commandStats = [
+  ["DEX FEED", "ACTIVE"],
+  ["MEMORY", "LIVE"],
+  ["RISK", "ONLINE"],
+  ["QUEUE", "OPEN"],
+];
+
+function Button({ children, href, onClick, variant = "solid", icon: Icon }) {
   const className =
     variant === "outline"
-      ? "group whitespace-nowrap rounded-2xl border border-emerald-300/20 bg-white/[0.04] px-4 py-3 text-sm text-white md:px-6 backdrop-blur-xl transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
-      : "group whitespace-nowrap rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-4 py-3 text-sm font-semibold text-black md:px-6 shadow-lg shadow-emerald-400/25 transition hover:brightness-110";
+      ? "group rounded-2xl border border-emerald-300/20 bg-black/35 px-5 py-3 text-sm font-black text-white/80 backdrop-blur-xl transition hover:border-emerald-300/50 hover:bg-emerald-300/10"
+      : "group rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-5 py-3 text-sm font-black text-black shadow-[0_0_35px_rgba(52,211,153,0.25)] transition hover:brightness-110";
 
-  if (href) {
-    return (
-      <a href={href} className={className}>
-        <span className="inline-flex items-center gap-2">
-          {Icon && <Icon className="h-4 w-4" />}
-          {children}
-        </span>
-      </a>
-    );
-  }
-
-  return (
-    <button onClick={onClick} className={className}>
-      <span className="inline-flex items-center gap-2">
-        {Icon && <Icon className="h-4 w-4" />}
-        {children}
-      </span>
-    </button>
+  const inner = (
+    <span className="inline-flex items-center gap-2">
+      {Icon && <Icon className="h-4 w-4" />}
+      {children}
+    </span>
   );
-};
 
-const NavLink = ({ href, children, icon }) => {
-  const Icon = icon;
+  if (href) return <a href={href} className={className}>{inner}</a>;
+  return <button onClick={onClick} className={className}>{inner}</button>;
+}
+
+function NavLink({ href, children, icon: Icon }) {
   return (
     <a
       href={href}
-      className="whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white md:px-5 md:py-3 md:text-sm backdrop-blur-xl transition hover:border-emerald-300/40 hover:bg-white/10"
+      className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-white/65 backdrop-blur-xl transition hover:border-emerald-300/40 hover:text-emerald-200"
     >
       <span className="inline-flex items-center gap-2">
         {Icon && <Icon className="h-4 w-4 text-emerald-300" />}
@@ -69,18 +148,20 @@ const NavLink = ({ href, children, icon }) => {
       </span>
     </a>
   );
-};
+}
 
-const Card = ({ children, className = "", onClick }) => (
-  <div
-    onClick={onClick}
-    className={`rounded-[32px] border border-white/10 bg-white/[0.05] shadow-[0_0_50px_rgba(16,185,129,0.08)] backdrop-blur-xl ${className}`}
-  >
-    {children}
-  </div>
-);
+function TerminalCard({ children, className = "" }) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[2rem] border border-emerald-300/15 bg-black/45 shadow-[0_0_65px_rgba(16,185,129,0.08)] backdrop-blur-2xl ${className}`}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(52,211,153,0.035)_1px,transparent_1px)] bg-[length:100%_14px]" />
+      <div className="relative">{children}</div>
+    </div>
+  );
+}
 
-const Modal = ({ modal, closeModal }) => {
+function Modal({ modal, closeModal }) {
   if (!modal) return null;
 
   return (
@@ -97,45 +178,15 @@ const Modal = ({ modal, closeModal }) => {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="mb-4 flex items-center gap-3 text-emerald-300">
-          {modal.icon}
-          <span className="text-sm uppercase tracking-[0.24em]">{modal.label}</span>
-        </div>
-
-        <h3 className="text-4xl font-semibold">{modal.title}</h3>
+        <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-300">
+          Premium Layer
+        </p>
+        <h3 className="mt-3 text-4xl font-black">{modal.title}</h3>
         <p className="mt-5 leading-8 text-white/65">{modal.body}</p>
       </motion.div>
     </div>
   );
-};
-
-const fallbackTicker = [
-  "SIGNAL DETECTED",
-  "LIQUIDITY EVENT",
-  "TOKEN MEMORY UPDATED",
-  "EARLY POTENTIAL",
-  "PROTECTED QUEUE OPEN",
-  "SMART FLOW TRACKED",
-];
-
-const trustFunnels = [
-  { title: "Operator Product Vault", desc: "Premium digital intelligence, notes, frameworks, and operator tools.", href: "/products", icon: BookOpen },
-  { title: "Protected Access Queue", desc: "Reserve placement for private alerts, gated tools, and operator releases.", href: "/protected", icon: Lock },
-  { title: "Public Signal Receipts", desc: "Visible proof archive showing trust, continuation, and authority receipts.", href: "/receipts", icon: RadioTower },
-];
-
-const ecosystemBlocks = [
-  { title: "Signal Reading", desc: "Weighted setup interpretation beyond emotional entry.", icon: ScanSearch },
-  { title: "Memory Core", desc: "Persistent contract logging and demand intelligence.", icon: Database },
-  { title: "Protected Funnels", desc: "Guide buyers, queue leads, and premium intake capture.", icon: Network },
-  { title: "A.M.I. Brain Layer", desc: "ALL MY INTUITION mother intelligence feeding the operator stack.", icon: Brain },
-];
-
-const products = [
-  { title: "Signal Operator Guide", price: "$19", desc: "Entry logic, warning signs, structured survival framework.", icon: BookOpen, action: "Preview Guide" },
-  { title: "Wallet Intelligence Notes", price: "$29", desc: "Smart wallet recurrence, behavior tracking, flow logic.", icon: Wallet, action: "View Notes" },
-  { title: "Protected Signal Framework", price: "Soon", desc: "Private operator route, gated alerts, premium access.", icon: KeyRound, action: "Request Access" },
-];
+}
 
 export default function Home() {
   const [modal, setModal] = useState(null);
@@ -149,7 +200,7 @@ export default function Home() {
   useEffect(() => {
     async function loadRecent() {
       try {
-        const res = await fetch("/api/recent-token-checks");
+        const res = await fetch("/api/recent-token-checks", { cache: "no-store" });
         const data = await res.json();
         if (data.success) setRecentChecks(data.logs || []);
       } catch {
@@ -157,7 +208,7 @@ export default function Home() {
       }
     }
 
-    async function loadTrendingTokens() {
+    async function loadTrending() {
       try {
         const res = await fetch("/api/trending", { cache: "no-store" });
         const data = await res.json();
@@ -171,7 +222,7 @@ export default function Home() {
 
           const unique = Array.from(
             new Map(merged.map((token) => [token.address || token.symbol, token])).values()
-          ).slice(0, 10);
+          ).slice(0, 12);
 
           setTrendingTokens(unique);
         }
@@ -181,156 +232,191 @@ export default function Home() {
     }
 
     loadRecent();
-    loadTrendingTokens();
+    loadTrending();
   }, []);
 
-  const intelligenceTicker = recentChecks.length
-    ? [
-        ...recentChecks.slice(0, 5).map(
-          (token) => `$${token.token_symbol || "SOL"} ${token.latest_risk || "signal activity"}`
-        ),
-        ...fallbackTicker,
-      ]
-    : fallbackTicker;
+  const systemTicker = useMemo(() => {
+    const recent = recentChecks.slice(0, 5).map((token) => {
+      return `$${token.token_symbol || "TOKEN"} ${token.latest_risk || "signal activity"}`;
+    });
 
-  const closeModal = () => setModal(null);
+    return recent.length ? [...recent, ...fallbackTicker] : fallbackTicker;
+  }, [recentChecks]);
 
-  const runSignalCheck = async () => {
+  const marketTicker = useMemo(() => {
+    if (!trendingTokens.length) return fallbackMarketTicker;
+
+    return trendingTokens.map((token) => {
+      const change = Number(token.priceChange24h || 0);
+      const label =
+        change >= 50
+          ? "CONFIRMED RUNNER"
+          : change >= 15
+          ? "MOMENTUM WATCH"
+          : Number(token.volume24h || 0) > 50000
+          ? "VOLUME EXPANDING"
+          : Number(token.liquidity || 0) > 25000
+          ? "LIQUIDITY BUILDING"
+          : "NEW LAUNCH WATCH";
+
+      return `$${token.symbol || "TOKEN"} ${change ? `${change.toFixed(1)}%` : ""} • ${label}`;
+    });
+  }, [trendingTokens]);
+
+  async function submitAccessRequest() {
+    if (!accessEmail) return;
+
+    try {
+      await fetch("/api/access-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact: accessEmail,
+          email: accessEmail.includes("@") ? accessEmail : "",
+          telegram: accessEmail.startsWith("@") ? accessEmail : "",
+          source: "homepage_access_capture",
+          message: "Homepage protected access request",
+        }),
+      });
+    } catch {}
+
+    setAccessSubmitted(true);
+  }
+
+  function runSignalCheck() {
     if (!contract) return;
     setChecking(true);
     setTimeout(() => {
-      window.location.href = `/token/${contract}`;
-    }, 700);
-  };
-
-  const submitAccessRequest = () => {
-    if (!accessEmail) return;
-    setAccessSubmitted(true);
-  };
-
-  const openProductModal = (product) => {
-    if (product.title === "Signal Operator Guide") return (window.location.href = "/products/signal-operator-guide");
-    if (product.title === "Protected Signal Framework") return (window.location.href = "/protected");
-
-    setModal({
-      icon: <Sparkles className="h-5 w-5" />,
-      label: "Premium Product Layer",
-      title: product.title,
-      body: product.desc,
-    });
-  };
+      window.location.href = `/token/${encodeURIComponent(contract.trim())}`;
+    }, 600);
+  }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-black text-white">
-      <Modal modal={modal} closeModal={closeModal} />
+    <main className="min-h-screen overflow-x-hidden bg-[#02070b] text-white">
+      <Modal modal={modal} closeModal={() => setModal(null)} />
 
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.14),transparent_28%),radial-gradient(circle_at_20%_30%,rgba(70,130,255,0.08),transparent_18%),radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.05),transparent_14%)]" />
-
-      <section className="pointer-events-none absolute left-[-120px] top-[120px] h-[320px] w-[320px] rounded-full border border-emerald-300/10 opacity-30 blur-3xl" />
-      <section className="pointer-events-none absolute right-[-80px] top-[260px] h-[240px] w-[240px] rounded-full border border-blue-300/10 opacity-20 blur-3xl" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_top,rgba(0,255,170,0.16),transparent_28%),radial-gradient(circle_at_18%_30%,rgba(0,120,255,0.09),transparent_18%),radial-gradient(circle_at_82%_18%,rgba(255,0,170,0.05),transparent_14%)]" />
+      <div className="fixed inset-0 opacity-[0.08] bg-[linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:46px_46px]" />
 
       <section className="relative mx-auto max-w-7xl px-5 py-8 sm:px-8">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-black/45 px-5 py-4 backdrop-blur-2xl">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-white/10 bg-black/55 px-5 py-4 backdrop-blur-2xl">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-white/45">TRUST THE SIGNAL</p>
-            <h1 className="text-lg font-semibold tracking-[0.22em]">INTELLIGENCE TERMINAL</h1>
+            <p className="text-xs font-black uppercase tracking-[0.38em] text-emerald-300">
+              TRUST THE SIGNAL
+            </p>
+            <h1 className="mt-1 text-lg font-black tracking-[0.24em] text-white">
+              OPERATOR TERMINAL
+            </h1>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <NavLink href="/trending" icon={TrendingUp}>Trending</NavLink>
-            <NavLink href="/products" icon={BookOpen}>Products</NavLink>
-            <NavLink href="/protected" icon={Lock}>Protected</NavLink>
+            <NavLink href="/products" icon={BookOpen}>Vault</NavLink>
+            <NavLink href="/protected" icon={Lock}>Access</NavLink>
             <NavLink href="/receipts" icon={RadioTower}>Receipts</NavLink>
           </div>
         </header>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-emerald-300/15 bg-emerald-300/5 py-3">
+        <div className="mt-6 overflow-hidden rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.06] py-3">
           <motion.div
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-            className="flex gap-10 whitespace-nowrap text-sm font-semibold text-emerald-200"
+            className="flex gap-10 whitespace-nowrap text-sm font-black text-emerald-200"
           >
-            {[...intelligenceTicker, ...intelligenceTicker, ...intelligenceTicker].map((item, i) => (
+            {[...systemTicker, ...systemTicker, ...systemTicker].map((item, i) => (
               <span key={i}>◉ {item}</span>
             ))}
           </motion.div>
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-2xl border border-blue-300/10 bg-white/[0.03] py-3">
+        <div className="mt-3 overflow-hidden rounded-2xl border border-cyan-300/10 bg-white/[0.03] py-3">
           <motion.div
             animate={{ x: ["-50%", "0%"] }}
             transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-            className="flex gap-10 whitespace-nowrap text-xs uppercase tracking-[0.18em] text-white/60"
+            className="flex gap-10 whitespace-nowrap text-xs font-black uppercase tracking-[0.18em] text-white/60"
           >
-            {[
-              ...(trendingTokens.length
-                ? trendingTokens.map((token) => {
-                    const change = Number(token.priceChange24h || 0);
-                    const label =
-                      change >= 50
-                        ? "CONFIRMED RUNNER"
-                        : change >= 15
-                        ? "MOMENTUM WATCH"
-                        : Number(token.volume24h || 0) > 50000
-                        ? "VOLUME EXPANDING"
-                        : Number(token.liquidity || 0) > 25000
-                        ? "LIQUIDITY BUILDING"
-                        : "NEW LAUNCH WATCH";
-
-                    return `$${token.symbol || "TOKEN"} ${change ? `${change.toFixed(1)}%` : ""} • ${label}`;
-                  })
-                : [
-                    "$SOL • rotation strength",
-                    "$NEWPAIR • launch watch",
-                    "$FLOW • volume expanding",
-                    "$RUNNER • momentum building",
-                  ]),
-              ...(trendingTokens.length
-                ? trendingTokens.map((token) => {
-                    const change = Number(token.priceChange24h || 0);
-                    const label =
-                      change >= 50
-                        ? "CONFIRMED RUNNER"
-                        : change >= 15
-                        ? "MOMENTUM WATCH"
-                        : Number(token.volume24h || 0) > 50000
-                        ? "VOLUME EXPANDING"
-                        : Number(token.liquidity || 0) > 25000
-                        ? "LIQUIDITY BUILDING"
-                        : "NEW LAUNCH WATCH";
-
-                    return `$${token.symbol || "TOKEN"} ${change ? `${change.toFixed(1)}%` : ""} • ${label}`;
-                  })
-                : [
-                    "$SOL • rotation strength",
-                    "$NEWPAIR • launch watch",
-                    "$FLOW • volume expanding",
-                    "$RUNNER • momentum building",
-                  ]),
-            ].map((item, i) => (
+            {[...marketTicker, ...marketTicker, ...marketTicker].map((item, i) => (
               <span key={i}>✦ {item}</span>
             ))}
           </motion.div>
         </div>
 
-        <section className="pt-14 text-center">
-          <div className="mb-4 inline-flex items-center gap-3 rounded-full border border-emerald-300/20 bg-white/[0.04] px-5 py-2 text-sm text-emerald-200">
-            <Orbit className="h-4 w-4" />
-            Signal over noise.
+        <section className="grid gap-8 pt-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-3 rounded-full border border-emerald-300/20 bg-white/[0.04] px-5 py-2 text-sm font-black text-emerald-200">
+              <Orbit className="h-4 w-4" />
+              SIGNAL OVER NOISE
+            </div>
+
+            <h2 className="mt-7 max-w-4xl text-4xl font-black leading-tight md:text-7xl">
+              A live crypto intelligence command center for Solana operators.
+            </h2>
+
+            <p className="mt-6 max-w-3xl text-base leading-8 text-white/65">
+              Built to help traders detect stronger setups, inspect risk, watch momentum,
+              archive token memory, and route deeper into protected intelligence layers.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href="#signal-check" icon={Radar}>[ RUN SIGNAL ]</Button>
+              <Button href="/products" variant="outline" icon={Brain}>[ KNOWLEDGE VAULT ]</Button>
+              <Button href="/protected" variant="outline" icon={KeyRound}>[ ACCESS NODE ]</Button>
+            </div>
           </div>
 
-          <h2 className="mx-auto mt-6 max-w-5xl text-4xl font-semibold md:text-7xl leading-tight">
-            Solana intelligence built to filter what blind traders miss.
-          </h2>
+          <TerminalCard className="p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-3 text-emerald-300">
+                <TerminalSquare className="h-5 w-5" />
+                <p className="text-xs font-black uppercase tracking-[0.24em]">
+                  System Boot
+                </p>
+              </div>
+              <span className="h-3 w-3 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.8)]" />
+            </div>
 
-          <p className="mx-auto mt-6 max-w-3xl leading-8 text-white/65">
-            A premium operator ecosystem blending signal reading, memory logging, protected funnels, and ALL MY INTUITION intelligence infrastructure.
-          </p>
+            <div className="space-y-3 font-mono text-sm">
+              {[
+                ["scanner.py", "ready"],
+                ["risk_filter", "online"],
+                ["memory_core", "synced"],
+                ["protected_queue", "open"],
+                ["operator_layer", "forming"],
+              ].map(([left, right]) => (
+                <div
+                  key={left}
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/45 px-4 py-3"
+                >
+                  <span className="text-white/55">{left}</span>
+                  <span className="text-emerald-300">{right}</span>
+                </div>
+              ))}
+            </div>
+          </TerminalCard>
+        </section>
 
-          <div className="mx-auto mt-10 max-w-4xl rounded-[34px] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-white/[0.03] to-black p-6 shadow-[0_0_100px_rgba(16,185,129,0.12)]">
-            <div className="mb-4 flex items-center justify-center gap-2 text-emerald-300">
-              <ShieldCheck className="h-5 w-5" />
-              <span className="text-sm uppercase tracking-[0.24em]">Live Signal Check Pro</span>
+        <section id="signal-check" className="pt-12">
+          <TerminalCard className="p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-emerald-300">
+                  SIGNAL CHECK PRO
+                </p>
+                <h3 className="mt-2 text-3xl font-black">
+                  Paste contract. Run intelligence.
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {commandStats.map(([label, value]) => (
+                  <span
+                    key={label}
+                    className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 font-mono text-xs text-white/60"
+                  >
+                    {label}: <span className="text-emerald-300">{value}</span>
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 md:flex-row">
@@ -338,52 +424,67 @@ export default function Home() {
                 value={contract}
                 onChange={(e) => setContract(e.target.value)}
                 placeholder="Paste Solana contract address..."
-                className="h-14 flex-1 rounded-2xl border border-white/10 bg-black/30 px-5 text-white outline-none"
+                className="h-14 flex-1 rounded-2xl border border-white/10 bg-black/50 px-5 font-mono text-white outline-none placeholder:text-white/30"
               />
 
               <button
                 onClick={runSignalCheck}
-                className="h-14 rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-8 font-semibold text-black hover:brightness-110"
+                className="h-14 rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-8 font-black text-black hover:brightness-110"
               >
-                {checking ? <Loader2 className="h-5 w-5 animate-spin" /> : "Run Check"}
+                {checking ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <Radar className="h-5 w-5" /> RUN
+                  </span>
+                )}
               </button>
             </div>
-
-            <div className="mt-5 flex flex-wrap justify-center gap-3">
-              <Button href="/products" variant="outline" icon={Brain}>Knowledge Vault</Button>
-              <Button href="/protected" variant="outline" icon={Satellite}>Protected Access</Button>
-              <Button href="/trending" variant="outline" icon={Cpu}>Live Market Feed</Button>
-            </div>
-          </div>
+          </TerminalCard>
         </section>
 
         <section className="pt-12">
           <div className="mb-4 flex items-center gap-2 text-emerald-300">
             <Activity className="h-5 w-5" />
-            <span className="text-sm uppercase tracking-[0.24em]">Recent Intelligence Activity</span>
+            <span className="text-sm font-black uppercase tracking-[0.24em]">
+              Recent Intelligence Activity
+            </span>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {recentChecks.slice(0, 3).map((token, i) => (
-              <Card key={i} className="p-5">
-                <p className="text-xl font-semibold">{token.token_name || "Unknown"} ({token.token_symbol || "?"})</p>
-                <p className="mt-2 text-sm text-white/55">{token.latest_risk || "Awaiting classification"}</p>
-                <p className="mt-4 text-sm text-emerald-300">Score: {token.latest_score ?? "--"}</p>
-              </Card>
+            {(recentChecks.length ? recentChecks.slice(0, 3) : [
+              { token_name: "Awaiting Feed", token_symbol: "LIVE", latest_risk: "Recent checks load here", latest_score: "--" },
+              { token_name: "Token Memory", token_symbol: "CORE", latest_risk: "Archive ready", latest_score: "--" },
+              { token_name: "Signal Layer", token_symbol: "RUN", latest_risk: "Scanner online", latest_score: "--" },
+            ]).map((token, i) => (
+              <TerminalCard key={i} className="p-5">
+                <p className="text-xl font-black">
+                  {token.token_name || "Unknown"} ({token.token_symbol || "?"})
+                </p>
+                <p className="mt-2 text-sm text-white/55">
+                  {token.latest_risk || "Awaiting classification"}
+                </p>
+                <p className="mt-4 font-mono text-sm text-emerald-300">
+                  SCORE: {token.latest_score ?? "--"}
+                </p>
+              </TerminalCard>
             ))}
           </div>
         </section>
 
-        <section className="pt-20 grid gap-5 md:grid-cols-3">
+        <section className="grid gap-5 pt-20 md:grid-cols-3">
           {trustFunnels.map((item) => {
             const Icon = item.icon;
             return (
               <a key={item.title} href={item.href}>
-                <Card className="h-full p-7 transition hover:-translate-y-1 hover:border-emerald-300/25">
+                <TerminalCard className="h-full p-7 transition hover:-translate-y-1 hover:border-emerald-300/30">
                   <Icon className="h-6 w-6 text-emerald-300" />
-                  <h3 className="mt-5 text-2xl font-semibold">{item.title}</h3>
+                  <h3 className="mt-5 text-2xl font-black">{item.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-white/65">{item.desc}</p>
-                </Card>
+                  <span className="mt-6 inline-flex items-center gap-2 font-mono text-sm text-emerald-300">
+                    OPEN NODE <ArrowRight className="h-4 w-4" />
+                  </span>
+                </TerminalCard>
               </a>
             );
           })}
@@ -391,34 +492,40 @@ export default function Home() {
 
         <section className="pt-20">
           <div className="mb-6">
-            <p className="text-sm uppercase tracking-[0.24em] text-emerald-300">Why Trust The Signal</p>
-            <h2 className="mt-2 text-3xl font-semibold md:text-5xl">Professional structure. Cosmic operator identity.</h2>
+            <p className="font-mono text-sm uppercase tracking-[0.24em] text-emerald-300">
+              ══════ TRUST LAYER ══════
+            </p>
+            <h2 className="mt-2 text-3xl font-black md:text-5xl">
+              Custom intelligence infrastructure with a signature operator identity.
+            </h2>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {ecosystemBlocks.map((block) => {
               const Icon = block.icon;
               return (
-                <Card key={block.title} className="p-7">
+                <TerminalCard key={block.title} className="p-7">
                   <Icon className="h-6 w-6 text-emerald-300" />
-                  <h3 className="mt-5 text-2xl font-semibold">{block.title}</h3>
+                  <h3 className="mt-5 text-2xl font-black">{block.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-white/65">{block.desc}</p>
-                </Card>
+                </TerminalCard>
               );
             })}
           </div>
         </section>
 
         <section className="pt-20">
-          <Card className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/12 via-white/[0.03] to-black">
+          <TerminalCard className="border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-white/[0.03] to-black">
             <div className="grid gap-8 p-8 md:p-10 lg:grid-cols-2">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-emerald-300">
                   <Mail className="h-5 w-5" />
-                  <span className="text-sm uppercase tracking-[0.24em]">Protected Access Queue</span>
+                  <span className="text-sm font-black uppercase tracking-[0.24em]">
+                    Protected Access Queue
+                  </span>
                 </div>
 
-                <h2 className="text-3xl font-semibold md:text-5xl">
+                <h2 className="text-3xl font-black md:text-5xl">
                   Secure early placement before operator access expands.
                 </h2>
 
@@ -426,14 +533,14 @@ export default function Home() {
                   <input
                     value={accessEmail}
                     onChange={(e) => setAccessEmail(e.target.value)}
-                    placeholder="Email or preferred contact..."
-                    className="h-12 flex-1 rounded-2xl border border-white/10 bg-black/30 px-4 text-white outline-none"
+                    placeholder="Email / Telegram / preferred contact..."
+                    className="h-12 flex-1 rounded-2xl border border-white/10 bg-black/40 px-4 font-mono text-white outline-none placeholder:text-white/30"
                   />
                   <button
                     onClick={submitAccessRequest}
-                    className="h-12 rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-6 font-semibold text-black hover:brightness-110"
+                    className="h-12 rounded-2xl bg-gradient-to-r from-emerald-300 to-emerald-400 px-6 font-black text-black hover:brightness-110"
                   >
-                    {accessSubmitted ? "Request Captured" : "Request Access"}
+                    {accessSubmitted ? "CAPTURED" : "REQUEST ACCESS"}
                   </button>
                 </div>
               </div>
@@ -445,36 +552,41 @@ export default function Home() {
                   "Future member intelligence access",
                   "Signal route continuation eligibility",
                 ].map((benefit) => (
-                  <div key={benefit} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div
+                    key={benefit}
+                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4"
+                  >
                     <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
                     <p className="text-sm leading-7 text-white/70">{benefit}</p>
                   </div>
                 ))}
               </div>
             </div>
-          </Card>
+          </TerminalCard>
         </section>
 
-        <section className="pt-20 grid gap-5 md:grid-cols-3">
+        <section className="grid gap-5 pt-20 md:grid-cols-3">
           {products.map((product) => {
             const Icon = product.icon;
             return (
-              <Card key={product.title} onClick={() => openProductModal(product)} className="cursor-pointer p-7 transition hover:-translate-y-1 hover:border-emerald-300/25">
-                <Icon className="h-6 w-6 text-emerald-300" />
-                <h3 className="mt-5 text-2xl font-semibold">{product.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-2xl font-semibold text-emerald-300">{product.price}</span>
-                  <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
-                    {product.action}
-                  </button>
-                </div>
-              </Card>
+              <a key={product.title} href={product.href}>
+                <TerminalCard className="h-full p-7 transition hover:-translate-y-1 hover:border-emerald-300/30">
+                  <Icon className="h-6 w-6 text-emerald-300" />
+                  <h3 className="mt-5 text-2xl font-black">{product.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-white/65">{product.desc}</p>
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-2xl font-black text-emerald-300">{product.price}</span>
+                    <span className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75">
+                      {product.action}
+                    </span>
+                  </div>
+                </TerminalCard>
+              </a>
             );
           })}
         </section>
 
-        <footer className="pb-10 pt-20 text-center text-sm text-white/40">
+        <footer className="pb-10 pt-20 text-center font-mono text-sm text-white/40">
           TRUST THE SIGNAL — Intelligence first. Execution second. Survival always.
         </footer>
       </section>
