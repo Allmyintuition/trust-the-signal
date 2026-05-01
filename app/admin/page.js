@@ -16,13 +16,15 @@ import {
   DollarSign,
   KeyRound,
   BookOpen,
+  TrendingUp,
+  Mail,
 } from "lucide-react";
 
 const ADMIN_MODULES = [
   {
     title: "Access Requests",
     description:
-      "Review protected access leads, update statuses, export contacts, and manage operator intake.",
+      "Review protected access leads, guide buyers, statuses, tags, notes, and monetization intake.",
     href: "/admin/access-requests",
     status: "Live",
   },
@@ -62,6 +64,13 @@ function shortContract(contract) {
   return `${contract.slice(0, 6)}...${contract.slice(-6)}`;
 }
 
+function sourceLabel(source) {
+  if (source === "protected_access_page") return "Protected Access";
+  if (source === "signal_operator_guide_order") return "Guide Orders";
+  if (!source || source === "none") return "No source yet";
+  return source.replaceAll("_", " ");
+}
+
 export default function AdminGatewayPage() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -97,56 +106,56 @@ export default function AdminGatewayPage() {
       icon: Database,
     },
     {
-      label: "Access Requests",
+      label: "Total Leads",
       value: summary?.accessCount ?? 0,
       icon: Users,
     },
     {
-      label: "Recent Visible Checks",
-      value: summary?.recentVisibleChecks ?? 0,
-      icon: Activity,
+      label: "7 Day Intake",
+      value: summary?.sevenDayLeadCount ?? 0,
+      icon: TrendingUp,
     },
     {
-      label: "Strong Receipts",
-      value: summary?.strongReceiptCount ?? 0,
-      icon: ShieldCheck,
+      label: "Guide Buyers",
+      value: summary?.guideOrderCount ?? 0,
+      icon: BookOpen,
     },
     {
-      label: "Caution Receipts",
-      value: summary?.cautionReceiptCount ?? 0,
-      icon: RadioTower,
+      label: "Protected Leads",
+      value: summary?.protectedLeadCount ?? 0,
+      icon: KeyRound,
     },
     {
-      label: "Operator Marked",
-      value: summary?.operatorMarked ?? 0,
+      label: "High Priority",
+      value: summary?.highPriorityLeadCount ?? 0,
       icon: Crown,
     },
   ];
 
-  const monetizationSignals = [
+  const executiveSignals = [
     {
-      label: "Protected Queue",
+      label: "Top Lead Source",
+      value: sourceLabel(summary?.topLeadSource),
+      icon: BarChart3,
+      note: "Strongest current conversion route feeding the platform.",
+    },
+    {
+      label: "Pending Queue",
       value: `${summary?.newAccessCount || 0} pending`,
-      icon: KeyRound,
-      note: "Highest-intent leads for future private access.",
-    },
-    {
-      label: "Access Leads",
-      value: summary?.accessCount ?? 0,
-      icon: Users,
-      note: "Total captured demand for gated products and memberships.",
-    },
-    {
-      label: "Product Vault",
-      value: "Live",
-      icon: BookOpen,
-      note: "Digital guide funnel and premium note routing are active.",
+      icon: Mail,
+      note: "New leads waiting for review, contact, or fulfillment.",
     },
     {
       label: "Revenue Layer",
-      value: "Ready",
+      value: summary?.guideOrderCount > 0 ? "Active" : "Ready",
       icon: DollarSign,
-      note: "Prepared for Stripe, downloads, gated files, and fulfillment.",
+      note: "Guide order capture and manual fulfillment are operational.",
+    },
+    {
+      label: "Public Proof",
+      value: `${summary?.strongReceiptCount || 0} strong`,
+      icon: ShieldCheck,
+      note: "Visible signal receipts supporting platform authority.",
     },
   ];
 
@@ -164,13 +173,12 @@ export default function AdminGatewayPage() {
               </div>
 
               <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
-                Operator Intelligence Command Center
+                Executive Platform Metrics
               </h1>
 
               <p className="mt-4 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
-                Protected command layer controlling token memory, visible proof,
-                public receipts, homepage authority, access queue, monetization
-                routing, and platform intelligence narrative.
+                Command center for token memory, public proof, protected access,
+                guide orders, source conversion, lead priority, and monetization intake.
               </p>
             </div>
 
@@ -219,12 +227,12 @@ export default function AdminGatewayPage() {
           <div className="mb-5 flex items-center gap-3 text-emerald-300">
             <DollarSign className="h-5 w-5" />
             <p className="text-xs font-black uppercase tracking-[0.25em]">
-              Monetization Snapshot
+              Executive Conversion Snapshot
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {monetizationSignals.map((signal) => {
+            {executiveSignals.map((signal) => {
               const Icon = signal.icon;
 
               return (
@@ -236,7 +244,7 @@ export default function AdminGatewayPage() {
                   <p className="mt-4 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
                     {signal.label}
                   </p>
-                  <p className="mt-2 text-2xl font-black text-white">
+                  <p className="mt-2 break-words text-2xl font-black text-white">
                     {signal.value}
                   </p>
                   <p className="mt-3 text-xs leading-6 text-white/50">
@@ -249,10 +257,17 @@ export default function AdminGatewayPage() {
 
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
-              href="/products"
+              href="/admin/access-requests"
               className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-100 hover:bg-emerald-300/20"
             >
-              Open Product Vault <ArrowRight className="h-4 w-4" />
+              Open Lead Terminal <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/products/signal-operator-guide"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 hover:border-emerald-300/30"
+            >
+              Open Guide Funnel <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
@@ -334,8 +349,8 @@ export default function AdminGatewayPage() {
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                <p className="text-white/45">Protected Queue</p>
-                <p className="mt-2 font-black">{summary?.newAccessCount || 0} pending leads</p>
+                <p className="text-white/45">Top Lead Source</p>
+                <p className="mt-2 font-black">{sourceLabel(summary?.topLeadSource)}</p>
               </div>
 
               <Link
@@ -357,10 +372,11 @@ export default function AdminGatewayPage() {
 
             const card = (
               <div
-                className={`h-full rounded-[1.75rem] border p-6 transition ${isLive
-                  ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
-                  : "border-white/10 bg-white/[0.04] opacity-70"
-                  }`}
+                className={`h-full rounded-[1.75rem] border p-6 transition ${
+                  isLive
+                    ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
+                    : "border-white/10 bg-white/[0.04] opacity-70"
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-2xl font-black tracking-tight">
@@ -368,10 +384,11 @@ export default function AdminGatewayPage() {
                   </h2>
 
                   <span
-                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${isLive
-                      ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
-                      : "border-white/15 bg-white/5 text-white/40"
-                      }`}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
+                      isLive
+                        ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
+                        : "border-white/15 bg-white/5 text-white/40"
+                    }`}
                   >
                     {module.status}
                   </span>
