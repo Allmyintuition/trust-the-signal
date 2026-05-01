@@ -4,6 +4,10 @@ import {
     Eye,
     CheckCircle2,
     ArrowRight,
+    ShieldCheck,
+    BookOpen,
+    Wrench,
+    RadioTower,
 } from "lucide-react";
 
 const pendingNotes = [
@@ -11,6 +15,27 @@ const pendingNotes = [
     "Priority notice goes to early registrants",
     "Future product releases route here first",
     "Private signal access invitations route here first",
+];
+
+const nextMoves = [
+    {
+        title: "Study the product vault",
+        body: "Review current digital guides and future premium intelligence products.",
+        href: "/products",
+        icon: BookOpen,
+    },
+    {
+        title: "Run the public tools",
+        body: "Use Rug Risk, Metadata, Token Memory, Wallet Snapshot, and live token checks.",
+        href: "/tools",
+        icon: Wrench,
+    },
+    {
+        title: "Watch public receipts",
+        body: "Review visible platform checks and public proof routes while access is staged.",
+        href: "/receipts",
+        icon: RadioTower,
+    },
 ];
 
 export default function AccessPendingPage() {
@@ -60,12 +85,21 @@ export default function AccessPendingPage() {
                         finalized.
                     </p>
 
-                    <Link
-                        href="/"
-                        className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
-                    >
-                        Return Home <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    <div className="mt-8 flex flex-wrap justify-center gap-3">
+                        <Link
+                            href="/products"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
+                        >
+                            View Product Vault <ArrowRight className="h-4 w-4" />
+                        </Link>
+
+                        <Link
+                            href="/tools"
+                            className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-black text-white/75 hover:border-emerald-300/30"
+                        >
+                            Use Public Tools <ShieldCheck className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="mt-8 grid gap-4">
@@ -79,6 +113,36 @@ export default function AccessPendingPage() {
                         </div>
                     ))}
                 </div>
+
+                <div className="mt-8 grid gap-5 md:grid-cols-3">
+                    {nextMoves.map((move) => {
+                        const Icon = move.icon;
+
+                        return (
+                            <Link
+                                key={move.title}
+                                href={move.href}
+                                className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6 transition hover:-translate-y-1 hover:border-emerald-300/30 hover:bg-emerald-300/[0.08]"
+                            >
+                                <Icon className="h-6 w-6 text-emerald-300" />
+                                <h3 className="mt-5 text-xl font-black">{move.title}</h3>
+                                <p className="mt-3 text-sm leading-7 text-white/60">
+                                    {move.body}
+                                </p>
+                                <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-emerald-200">
+                                    Continue <ArrowRight className="h-4 w-4" />
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                <Link
+                    href="/"
+                    className="mt-8 inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-black text-white/70 hover:border-emerald-300/30"
+                >
+                    Return Home <ArrowRight className="h-4 w-4" />
+                </Link>
             </section>
         </main>
     );

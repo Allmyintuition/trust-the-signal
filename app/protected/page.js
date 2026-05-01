@@ -7,6 +7,9 @@ import {
   CheckCircle2,
   Crown,
   RadioTower,
+  KeyRound,
+  Sparkles,
+  Wallet,
 } from "lucide-react";
 
 const accessLayers = [
@@ -16,6 +19,13 @@ const accessLayers = [
   "Premium product drops",
   "Operator-only alerts",
   "Future gated dashboards",
+];
+
+const qualificationSignals = [
+  "You actively check tokens before entering",
+  "You care about avoiding low-quality noise",
+  "You want tools, receipts, and structure in one place",
+  "You are interested in premium guides, alerts, or private intelligence",
 ];
 
 export default function ProtectedPage() {
@@ -42,13 +52,13 @@ export default function ProtectedPage() {
           <div className="hidden gap-3 sm:flex">
             <Link
               href="/"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
             >
               Home
             </Link>
             <Link
               href="/products"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30"
             >
               Products
             </Link>
@@ -56,11 +66,15 @@ export default function ProtectedPage() {
         </header>
 
         <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-emerald-900/20 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
-          <div className="mb-4 flex items-center gap-2 text-emerald-300">
-            <Lock className="h-5 w-5" />
-            <p className="text-sm uppercase tracking-[0.28em]">
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-emerald-300">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em]">
+              <Lock className="h-4 w-4" />
               Protected Operator Gateway
-            </p>
+            </span>
+
+            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-white/55">
+              Early Queue Open
+            </span>
           </div>
 
           <h2 className="max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
@@ -74,41 +88,99 @@ export default function ProtectedPage() {
             continuation.
           </p>
 
-          <Link
-            href="/access-pending"
-            className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
-          >
-            Secure Queue Placement <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link
+              href="/access-pending"
+              className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
+            >
+              Secure Queue Placement <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-black text-white/75 hover:border-emerald-300/30"
+            >
+              View Product Vault <Sparkles className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
             <Crown className="h-5 w-5 text-emerald-300" />
             <p className="mt-4 text-lg font-black">Premium Member Routing</p>
+            <p className="mt-2 text-sm leading-6 text-white/55">
+              Early access route for future premium alerts, private guides, and member-only drops.
+            </p>
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
             <RadioTower className="h-5 w-5 text-emerald-300" />
             <p className="mt-4 text-lg font-black">Private Signal Delivery</p>
+            <p className="mt-2 text-sm leading-6 text-white/55">
+              Built to support future Telegram, Discord, dashboard, and scanner feed routing.
+            </p>
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
             <ShieldCheck className="h-5 w-5 text-emerald-300" />
             <p className="mt-4 text-lg font-black">Gated Intelligence Access</p>
+            <p className="mt-2 text-sm leading-6 text-white/55">
+              Public tools stay open while deeper intelligence becomes reserved for qualified operators.
+            </p>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {accessLayers.map((layer) => (
-            <div
-              key={layer}
-              className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5"
-            >
-              <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-              <p className="mt-4 text-base font-bold">{layer}</p>
+        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="mb-5 flex items-center gap-3 text-emerald-300">
+              <KeyRound className="h-5 w-5" />
+              <p className="text-xs font-black uppercase tracking-[0.25em]">
+                Access Layers
+              </p>
             </div>
-          ))}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {accessLayers.map((layer) => (
+                <div
+                  key={layer}
+                  className="rounded-[1.5rem] border border-white/10 bg-black/30 p-5"
+                >
+                  <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                  <p className="mt-4 text-base font-bold">{layer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
+            <div className="mb-5 flex items-center gap-3 text-emerald-300">
+              <Wallet className="h-5 w-5" />
+              <p className="text-xs font-black uppercase tracking-[0.25em]">
+                Operator Fit
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-black">
+              Protected access is for users who want structure before noise.
+            </h3>
+
+            <div className="mt-5 grid gap-3">
+              {qualificationSignals.map((signal) => (
+                <div key={signal} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-300" />
+                  <p className="text-sm leading-7 text-white/70">{signal}</p>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/access-pending"
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
+            >
+              Reserve Early Position <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">

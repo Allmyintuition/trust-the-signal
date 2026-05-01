@@ -9,6 +9,10 @@ import {
   Sparkles,
   Crown,
   ShieldCheck,
+  CheckCircle2,
+  RadioTower,
+  FileText,
+  Zap,
 } from "lucide-react";
 
 const products = [
@@ -20,6 +24,8 @@ const products = [
     href: "/products/signal-operator-guide",
     icon: BookOpen,
     status: "Digital Guide",
+    cta: "Open Guide",
+    fit: "Best first product for new operators.",
   },
   {
     title: "Wallet Intelligence Notes",
@@ -29,6 +35,8 @@ const products = [
     href: "/protected",
     icon: Wallet,
     status: "Premium Intel",
+    cta: "Request Access",
+    fit: "For traders tracking repeat wallet behavior.",
   },
   {
     title: "Protected Signal Framework",
@@ -38,6 +46,33 @@ const products = [
     href: "/protected",
     icon: KeyRound,
     status: "Protected Access",
+    cta: "Join Queue",
+    fit: "For early members who want private routing.",
+  },
+];
+
+const trustPoints = [
+  "Built from live platform scanner logic",
+  "Designed for Solana meme coin operators",
+  "Connected to public tools, receipts, and token memory",
+  "Expands into protected access, premium notes, and private infrastructure",
+];
+
+const vaultLayers = [
+  {
+    title: "Learn the structure",
+    body: "Understand why liquidity, volume, risk flags, token age, and momentum matter before entering.",
+    icon: FileText,
+  },
+  {
+    title: "Use the tools",
+    body: "Run public checks through Signal Check, Rug Risk, Metadata, Token Memory, and Wallet Snapshot tools.",
+    icon: Zap,
+  },
+  {
+    title: "Move protected",
+    body: "Route into premium access when the public layer is no longer enough for your operator workflow.",
+    icon: ShieldCheck,
   },
 ];
 
@@ -76,11 +111,14 @@ export default function ProductsPage() {
         </header>
 
         <div className="rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-black to-emerald-900/20 p-6 shadow-[0_0_80px_rgba(16,185,129,0.12)] sm:p-8">
-          <div className="mb-4 flex items-center gap-2 text-emerald-300">
-            <Sparkles className="h-5 w-5" />
-            <p className="text-sm uppercase tracking-[0.28em]">
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-emerald-300">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-emerald-300/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em]">
+              <Sparkles className="h-4 w-4" />
               Premium Monetization Layer
-            </p>
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-white/55">
+              Beta Vault Live
+            </span>
           </div>
 
           <h2 className="max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
@@ -92,23 +130,41 @@ export default function ProductsPage() {
             educational guides, intelligence notes, protected member frameworks,
             and future digital operator assets.
           </p>
+
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link
+              href="/products/signal-operator-guide"
+              className="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
+            >
+              Start With The Guide <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/protected"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-sm font-black text-white/75 hover:border-emerald-300/30"
+            >
+              Request Protected Access <Lock className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <Crown className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Authority Based Products</p>
-          </div>
+          {vaultLayers.map((layer) => {
+            const Icon = layer.icon;
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <ShieldCheck className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Protected Member Routes</p>
-          </div>
-
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-            <Lock className="h-5 w-5 text-emerald-300" />
-            <p className="mt-4 text-lg font-black">Future Instant Delivery</p>
-          </div>
+            return (
+              <div
+                key={layer.title}
+                className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5"
+              >
+                <Icon className="h-5 w-5 text-emerald-300" />
+                <p className="mt-4 text-lg font-black">{layer.title}</p>
+                <p className="mt-2 text-sm leading-6 text-white/55">
+                  {layer.body}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mt-8 grid gap-5 md:grid-cols-3">
@@ -135,13 +191,22 @@ export default function ProductsPage() {
                   {product.description}
                 </p>
 
+                <div className="mt-4 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.06] p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200/80">
+                    Best Fit
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/65">
+                    {product.fit}
+                  </p>
+                </div>
+
                 <div className="mt-6 flex items-center justify-between">
                   <span className="text-2xl font-black text-emerald-300">
                     {product.price}
                   </span>
 
                   <span className="inline-flex items-center gap-2 text-sm font-black text-emerald-200">
-                    Open Vault <ArrowRight className="h-4 w-4" />
+                    {product.cta} <ArrowRight className="h-4 w-4" />
                   </span>
                 </div>
               </Link>
@@ -149,18 +214,45 @@ export default function ProductsPage() {
           })}
         </div>
 
-        <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
-          <div className="flex items-start gap-3">
-            <Lock className="mt-1 h-5 w-5 text-emerald-300" />
-            <div>
-              <h3 className="text-xl font-black">
-                This vault becomes the revenue branch of platform trust.
-              </h3>
-              <p className="mt-2 text-sm leading-7 text-white/65">
-                Stripe checkout, instant downloads, premium guide fulfillment,
-                gated files, and protected member digital delivery can be connected
-                directly into this monetization layer.
+        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
+            <div className="mb-5 flex items-center gap-3 text-emerald-300">
+              <Crown className="h-5 w-5" />
+              <p className="text-xs font-black uppercase tracking-[0.25em]">
+                Why Operators Buy
               </p>
+            </div>
+
+            <div className="grid gap-3">
+              {trustPoints.map((point) => (
+                <div key={point} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-emerald-300" />
+                  <p className="text-sm leading-7 text-white/65">{point}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
+            <div className="flex items-start gap-3">
+              <Lock className="mt-1 h-5 w-5 text-emerald-300" />
+              <div>
+                <h3 className="text-xl font-black">
+                  This vault becomes the revenue branch of platform trust.
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-white/65">
+                  Stripe checkout, instant downloads, premium guide fulfillment,
+                  gated files, and protected member digital delivery can be connected
+                  directly into this monetization layer.
+                </p>
+
+                <Link
+                  href="/protected"
+                  className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-emerald-300/25 bg-black/30 px-5 py-3 text-sm font-black text-emerald-100 hover:bg-black/50"
+                >
+                  Enter Protected Funnel <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>

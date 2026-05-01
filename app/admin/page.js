@@ -13,6 +13,9 @@ import {
   BarChart3,
   ExternalLink,
   RadioTower,
+  DollarSign,
+  KeyRound,
+  BookOpen,
 } from "lucide-react";
 
 const ADMIN_MODULES = [
@@ -120,6 +123,33 @@ export default function AdminGatewayPage() {
     },
   ];
 
+  const monetizationSignals = [
+    {
+      label: "Protected Queue",
+      value: `${summary?.newAccessCount || 0} pending`,
+      icon: KeyRound,
+      note: "Highest-intent leads for future private access.",
+    },
+    {
+      label: "Access Leads",
+      value: summary?.accessCount ?? 0,
+      icon: Users,
+      note: "Total captured demand for gated products and memberships.",
+    },
+    {
+      label: "Product Vault",
+      value: "Live",
+      icon: BookOpen,
+      note: "Digital guide funnel and premium note routing are active.",
+    },
+    {
+      label: "Revenue Layer",
+      value: "Ready",
+      icon: DollarSign,
+      note: "Prepared for Stripe, downloads, gated files, and fulfillment.",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
@@ -139,8 +169,8 @@ export default function AdminGatewayPage() {
 
               <p className="mt-4 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
                 Protected command layer controlling token memory, visible proof,
-                public receipts, homepage authority, access queue, and platform
-                intelligence narrative.
+                public receipts, homepage authority, access queue, monetization
+                routing, and platform intelligence narrative.
               </p>
             </div>
 
@@ -183,6 +213,55 @@ export default function AdminGatewayPage() {
               </div>
             );
           })}
+        </div>
+
+        <div className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/[0.06] p-6">
+          <div className="mb-5 flex items-center gap-3 text-emerald-300">
+            <DollarSign className="h-5 w-5" />
+            <p className="text-xs font-black uppercase tracking-[0.25em]">
+              Monetization Snapshot
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {monetizationSignals.map((signal) => {
+              const Icon = signal.icon;
+
+              return (
+                <div
+                  key={signal.label}
+                  className="rounded-[1.5rem] border border-white/10 bg-black/35 p-5"
+                >
+                  <Icon className="h-5 w-5 text-emerald-300" />
+                  <p className="mt-4 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
+                    {signal.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-white">
+                    {signal.value}
+                  </p>
+                  <p className="mt-3 text-xs leading-6 text-white/50">
+                    {signal.note}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-5 py-3 text-sm font-black text-emerald-100 hover:bg-emerald-300/20"
+            >
+              Open Product Vault <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/protected"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-black text-white/70 hover:border-emerald-300/30"
+            >
+              Open Protected Funnel <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
@@ -278,11 +357,10 @@ export default function AdminGatewayPage() {
 
             const card = (
               <div
-                className={`h-full rounded-[1.75rem] border p-6 transition ${
-                  isLive
-                    ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
-                    : "border-white/10 bg-white/[0.04] opacity-70"
-                }`}
+                className={`h-full rounded-[1.75rem] border p-6 transition ${isLive
+                  ? "border-emerald-300/25 bg-emerald-300/[0.06] hover:border-emerald-300/50 hover:bg-emerald-300/[0.1]"
+                  : "border-white/10 bg-white/[0.04] opacity-70"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <h2 className="text-2xl font-black tracking-tight">
@@ -290,11 +368,10 @@ export default function AdminGatewayPage() {
                   </h2>
 
                   <span
-                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
-                      isLive
-                        ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
-                        : "border-white/15 bg-white/5 text-white/40"
-                    }`}
+                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${isLive
+                      ? "border-emerald-300/35 bg-emerald-300/10 text-emerald-200"
+                      : "border-white/15 bg-white/5 text-white/40"
+                      }`}
                   >
                     {module.status}
                   </span>
