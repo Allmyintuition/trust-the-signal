@@ -244,6 +244,27 @@ const Modal = ({ modal, closeModal, routeToTokenPage }) => {
   },
 ];
 
+const trustFunnels = [
+  {
+    title: "Operator Product Vault",
+    desc: "Move beyond public checks with digital guides, wallet notes, and future premium intelligence products.",
+    href: "/products",
+    icon: BookOpen,
+  },
+  {
+    title: "Protected Access Queue",
+    desc: "Reserve early placement for private alerts, premium routes, gated downloads, and future operator infrastructure.",
+    href: "/protected",
+    icon: Lock,
+  },
+  {
+    title: "Public Signal Receipts",
+    desc: "Review visible authority proof, tracked token checks, and ongoing Trust The Signal intelligence continuation.",
+    href: "/receipts",
+    icon: RadioTower,
+  },
+];
+
 const tools = [
   {
     title: "Signal Check Pro",

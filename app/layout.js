@@ -12,23 +12,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Trust The Signal | Solana Token Intelligence",
+  metadataBase: new URL("https://trust-the-signal-gamma.vercel.app"),
+  title: "Trust The Signal | Solana Token Intelligence Platform",
   description:
-    "Trust The Signal is a premium Solana intelligence ecosystem for token checks, risk review, signal receipts, token memory, protected access, and operator-level crypto research.",
+    "Trust The Signal is a premium Solana token intelligence platform for contract checks, rug risk review, token memory, wallet snapshots, signal receipts, protected access, and operator-level crypto research.",
   keywords: [
     "Trust The Signal",
     "Solana token checker",
-    "crypto intelligence",
+    "Solana rug risk checker",
+    "crypto intelligence platform",
     "meme coin scanner",
-    "token risk checker",
+    "wallet snapshot Solana",
+    "token metadata checker",
     "Solana trading tools",
     "ALL MY INTUITION",
   ],
   openGraph: {
-    title: "Trust The Signal | Solana Token Intelligence",
+    title: "Trust The Signal | Solana Token Intelligence Platform",
     description:
-      "Analyze contracts, review token memory, inspect signal receipts, and enter the protected operator access layer.",
+      "Analyze Solana contracts, inspect wallet behavior, review token memory, verify risk, study receipts, and enter the protected operator access layer.",
+    url: "https://trust-the-signal-gamma.vercel.app",
+    siteName: "Trust The Signal",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trust The Signal | Solana Token Intelligence Platform",
+    description:
+      "Premium Solana contract intelligence, risk review, wallet snapshots, token memory, receipts, and protected operator access.",
   },
 };
 
