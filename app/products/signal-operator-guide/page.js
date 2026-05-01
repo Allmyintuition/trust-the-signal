@@ -9,6 +9,8 @@ import {
   Lock,
   Sparkles,
   ArrowRight,
+  Clock3,
+  Mail,
 } from "lucide-react";
 
 const included = [
@@ -18,6 +20,13 @@ const included = [
   "How to structure entries and avoid emotional chasing",
   "When to scale, when to trim, when to fully avoid",
   "Operator survival rules and execution discipline",
+];
+
+const fulfillmentSteps = [
+  "Your guide request enters the fulfillment queue",
+  "Delivery contact is verified from email or Telegram",
+  "Manual delivery can be completed before Stripe automation is connected",
+  "Future product updates route through this same buyer signal",
 ];
 
 export default function SignalOperatorGuidePage() {
@@ -159,7 +168,7 @@ export default function SignalOperatorGuidePage() {
                 <Lock className="mt-1 h-5 w-5 text-emerald-300" />
                 <div>
                   <h3 className="text-xl font-black">
-                    Buyer requests now route into admin fulfillment.
+                    Buyer requests route into admin fulfillment.
                   </h3>
                   <p className="mt-2 text-sm leading-7 text-white/65">
                     Guide orders are captured, prioritized, and manually deliverable immediately while Stripe and automatic PDF delivery are staged later.
@@ -216,8 +225,26 @@ export default function SignalOperatorGuidePage() {
               )}
 
               {success && (
-                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-sm font-bold text-emerald-200">
-                  Guide request submitted. Delivery request is now in fulfillment queue.
+                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5">
+                  <p className="text-sm font-black text-emerald-200">
+                    Guide request secured. Delivery request is now in fulfillment queue.
+                  </p>
+
+                  <div className="mt-4 grid gap-3">
+                    {fulfillmentSteps.map((step) => (
+                      <div key={step} className="flex items-start gap-3">
+                        <Clock3 className="mt-1 h-4 w-4 text-emerald-300" />
+                        <p className="text-xs leading-6 text-white/70">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/products"
+                    className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-black/35 px-5 py-3 text-xs font-black text-white/80"
+                  >
+                    Continue To Product Vault <Mail className="h-4 w-4" />
+                  </Link>
                 </div>
               )}
 

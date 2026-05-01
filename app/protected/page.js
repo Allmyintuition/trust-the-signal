@@ -8,11 +8,11 @@ import {
   Eye,
   ArrowRight,
   CheckCircle2,
-  Crown,
-  RadioTower,
   KeyRound,
   Sparkles,
   Wallet,
+  Clock3,
+  RadioTower,
 } from "lucide-react";
 
 const accessLayers = [
@@ -29,6 +29,13 @@ const qualificationSignals = [
   "You care about avoiding low-quality noise",
   "You want tools, receipts, and structure in one place",
   "You are interested in premium guides, alerts, or private intelligence",
+];
+
+const nextSteps = [
+  "Submission enters the internal operator intake queue",
+  "Lead score and priority are assigned automatically",
+  "Qualified operators receive first outreach preference",
+  "Future protected product drops route here first",
 ];
 
 export default function ProtectedPage() {
@@ -101,22 +108,14 @@ export default function ProtectedPage() {
               <Eye className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-white/45">
-                TRUST THE SIGNAL
-              </p>
-              <h1 className="text-lg font-semibold tracking-[0.2em]">
-                PROTECTED ACCESS
-              </h1>
+              <p className="text-xs uppercase tracking-[0.35em] text-white/45">TRUST THE SIGNAL</p>
+              <h1 className="text-lg font-semibold tracking-[0.2em]">PROTECTED ACCESS</h1>
             </div>
           </div>
 
           <div className="hidden gap-3 sm:flex">
-            <Link href="/" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
-              Home
-            </Link>
-            <Link href="/products" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 hover:border-emerald-300/30">
-              Products
-            </Link>
+            <Link href="/" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">Home</Link>
+            <Link href="/products" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">Products</Link>
           </div>
         </header>
 
@@ -145,17 +144,12 @@ export default function ProtectedPage() {
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-6">
             <div className="mb-5 flex items-center gap-3 text-emerald-300">
               <KeyRound className="h-5 w-5" />
-              <p className="text-xs font-black uppercase tracking-[0.25em]">
-                Access Layers
-              </p>
+              <p className="text-xs font-black uppercase tracking-[0.25em]">Access Layers</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               {accessLayers.map((layer) => (
-                <div
-                  key={layer}
-                  className="rounded-[1.5rem] border border-white/10 bg-black/30 p-5"
-                >
+                <div key={layer} className="rounded-[1.5rem] border border-white/10 bg-black/30 p-5">
                   <CheckCircle2 className="h-5 w-5 text-emerald-300" />
                   <p className="mt-4 text-base font-bold">{layer}</p>
                 </div>
@@ -165,9 +159,7 @@ export default function ProtectedPage() {
             <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
               <div className="mb-5 flex items-center gap-3 text-emerald-300">
                 <Wallet className="h-5 w-5" />
-                <p className="text-xs font-black uppercase tracking-[0.25em]">
-                  Operator Fit
-                </p>
+                <p className="text-xs font-black uppercase tracking-[0.25em]">Operator Fit</p>
               </div>
 
               <div className="grid gap-3">
@@ -181,70 +173,39 @@ export default function ProtectedPage() {
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6"
-          >
+          <form onSubmit={handleSubmit} className="rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
             <div className="mb-5 flex items-center gap-3 text-emerald-300">
               <Sparkles className="h-5 w-5" />
-              <p className="text-xs font-black uppercase tracking-[0.25em]">
-                Submit Operator Intake
-              </p>
+              <p className="text-xs font-black uppercase tracking-[0.25em]">Submit Operator Intake</p>
             </div>
 
             <div className="grid gap-4">
-              <input
-                value={form.contact}
-                onChange={(e) => updateField("contact", e.target.value)}
-                placeholder="Name / Username"
-                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
-              />
+              <input value={form.contact} onChange={(e) => updateField("contact", e.target.value)} placeholder="Name / Username" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30" />
+              <input value={form.email} onChange={(e) => updateField("email", e.target.value)} placeholder="Email" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30" />
+              <input value={form.telegram} onChange={(e) => updateField("telegram", e.target.value)} placeholder="Telegram @username" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30" />
+              <input value={form.wallet} onChange={(e) => updateField("wallet", e.target.value)} placeholder="Solana Wallet (optional)" className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30" />
+              <textarea value={form.message} onChange={(e) => updateField("message", e.target.value)} placeholder="Tell us what protected access, alerts, or tools interest you..." className="min-h-28 rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30" />
 
-              <input
-                value={form.email}
-                onChange={(e) => updateField("email", e.target.value)}
-                placeholder="Email"
-                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
-              />
-
-              <input
-                value={form.telegram}
-                onChange={(e) => updateField("telegram", e.target.value)}
-                placeholder="Telegram @username"
-                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
-              />
-
-              <input
-                value={form.wallet}
-                onChange={(e) => updateField("wallet", e.target.value)}
-                placeholder="Solana Wallet (optional)"
-                className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
-              />
-
-              <textarea
-                value={form.message}
-                onChange={(e) => updateField("message", e.target.value)}
-                placeholder="Tell us what protected access, alerts, or tools interest you..."
-                className="min-h-28 rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-sm outline-none placeholder:text-white/30"
-              />
-
-              {error && (
-                <div className="rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm font-bold text-red-200">
-                  {error}
-                </div>
-              )}
+              {error && <div className="rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm font-bold text-red-200">{error}</div>}
 
               {success && (
-                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-4 text-sm font-bold text-emerald-200">
-                  Intake submitted successfully. Your operator request has been queued.
+                <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5">
+                  <p className="text-sm font-black text-emerald-200">Operator intake secured successfully.</p>
+                  <div className="mt-4 grid gap-3">
+                    {nextSteps.map((step) => (
+                      <div key={step} className="flex items-start gap-3">
+                        <Clock3 className="mt-1 h-4 w-4 text-emerald-300" />
+                        <p className="text-xs leading-6 text-white/70">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/access-pending" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-5 py-3 text-xs font-black text-black">
+                    View Queue Status <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300"
-              >
+              <button type="submit" disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-black text-black hover:bg-emerald-300">
                 {loading ? "Submitting..." : "Secure Queue Placement"}
                 <ArrowRight className="h-4 w-4" />
               </button>
@@ -254,11 +215,9 @@ export default function ProtectedPage() {
 
         <div className="mt-8 rounded-[1.75rem] border border-emerald-300/20 bg-emerald-300/10 p-6">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-1 h-5 w-5 text-emerald-300" />
+            <RadioTower className="mt-1 h-5 w-5 text-emerald-300" />
             <div>
-              <h3 className="text-xl font-black">
-                This route now feeds the protected lead intelligence engine.
-              </h3>
+              <h3 className="text-xl font-black">This route now feeds the protected lead intelligence engine.</h3>
               <p className="mt-2 text-sm leading-7 text-white/65">
                 Qualified submissions are scored, prioritized, tagged, and routed into the internal Trust The Signal operator intake terminal.
               </p>
